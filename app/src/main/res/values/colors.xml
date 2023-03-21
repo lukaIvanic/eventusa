@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00FFFFFF</color>
+
+
+    <color name="app_background">#FFFBF8</color>
+
+<!--    <color name="events_section_background">#FFFFFF</color>-->
+    <color name="events_section_background">#3E3E3E</color>
+<!--    <color name="events_section_text">#ffffff</color>-->
+    <color name="events_section_text">#3E3E3E</color>
+
+<!--    <color name="event_background">#67ade9</color>-->
+    <color name="rinet_color">#15A5D3</color>
+    <color name="rinet_color_ripple">#0C8AB3</color>
+<!--    <color name="event_text">#353535</color>-->
+    <color name="event_text">#e1f4f9</color>
+<!--    <color name="event_time_text">#333333</color>-->
+    <color name="event_time_text">#e1f4f9</color>
+
+    <color name="divider">#1E036787</color>
+    <color name="icon_tint">#505050</color>
+    <color name="text_dark_settings">#363636</color>
+    <color name="row_background_settings">#EAEAEA</color>
+    <color name="text_hint">#686868</color>
+    <color name="text_edit">#4E4E4E</color>
+
+    <color name="red_danger">#b00020</color>
+    <color name="red_danger_light">#ea959b</color>
+
+    <color name="ripple_color">#11000000</color>
+
+    <color name="button_color">#d34515</color>
+    <color name="button_stroke">#ba380d</color>
+
+    <color name="chip_highlight">#227CB1</color>
+<!--    <color name="chip_primary">#E87400</color>-->
+    <color name="chip_background">#E2F6FC</color>
+<!--    <color name="chip_backgroun">#FFF9E7</color>-->
+
+    <color name="chip_text_default">#A0B5B4</color>
+    <color name="chip_gray_background">#F4F4F4</color>
+
+
+</resources>

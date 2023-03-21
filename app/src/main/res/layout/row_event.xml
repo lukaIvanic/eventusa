@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginTop="8dp"
+    >
+
+
+    <TextView
+        android:id="@+id/dayInWeekTextView"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-2dp"
+        android:fontFamily="sans-serif"
+
+        tools:text="Mon"
+        android:textAlignment="center"
+        android:textColor="#404040"
+        android:textSize="13sp"
+
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/dayInMonthTextView"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        tools:text="12"
+        android:textAlignment="center"
+        android:textColor="#252525"
+
+
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="@+id/dayInWeekTextView"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/dayInWeekTextView"
+        app:layout_constraintTop_toBottomOf="@+id/dayInWeekTextView" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="32dp"
+        app:cardCornerRadius="10dp"
+
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dayInMonthTextView"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rinet_color_ripple"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/eventTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Uvid u gradsko oko aplikaciju"
+                android:textColor="@color/event_text"
+                android:textSize="@dimen/row_event_text"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/eventPeriodTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="-8dp"
+                android:layout_marginBottom="6dp"
+                android:text="15:30–16:30"
+
+                android:textColor="@color/event_time_text"
+                android:textSize="@dimen/row_event_text" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

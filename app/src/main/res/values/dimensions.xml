@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="row_events_section_text">12sp</dimen>
+<!--    <dimen name="row_events_section_text">11sp</dimen>-->
+    <dimen name="row_event_text">14sp</dimen>
+
+
+
+
+    <dimen name="settings_font_size">16sp</dimen>
+    <dimen name="settings_title_font_size">24sp</dimen>
+
+    <dimen name="settings_divider_height">2dp</dimen>
+    <dimen name="settings_row_height">60dp</dimen>
+
+</resources>
