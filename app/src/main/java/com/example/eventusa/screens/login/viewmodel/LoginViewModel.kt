@@ -22,17 +22,16 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
 
 
         viewModelScope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
 
                 _loginStateFlow.emit(ResultOf.Loading)
 
                 val loginRequest = LoginRequest(username, password)
                 val resultLogin: ResultOf<LoginResponse> = userRepository.attemptLogin(loginRequest)
-                var uiResultLogin: ResultOf<LoginResponse>
-                when (resultLogin){
-                    is ResultOf.Error, is ResultOf.Loading -> uiResultLogin = resultLogin
+                val uiResultLogin: ResultOf<LoginResponse> = when (resultLogin) {
+                    is ResultOf.Error, is ResultOf.Loading -> resultLogin
                     is ResultOf.Success -> {
-                        uiResultLogin = when(resultLogin.data.Item1){
+                        when (resultLogin.data.Item1) {
                             0 -> {
 
                                 resultLogin
@@ -47,7 +46,6 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
                 _loginStateFlow.emit(uiResultLogin)
             }
         }
-
 
 
     }

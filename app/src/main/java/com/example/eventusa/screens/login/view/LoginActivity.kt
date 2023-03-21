@@ -1,27 +1,34 @@
 package com.example.eventusa.screens.login.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
+import com.example.eventusa.extensions.doIfFailure
+import com.example.eventusa.extensions.doIfSucces
+import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.viewmodel.LoginViewModel
 import com.example.eventusa.screens.login.viewmodel.LoginViewModelFactory
+import com.example.eventusa.utils.LocalStorageManager
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
 
-    lateinit var loginButton: Button
     lateinit var usernameEditText: EditText
     lateinit var passwordEditText: EditText
+
+    lateinit var rememberMeCheckBox: CheckBox
+
+    lateinit var loginButton: Button
     lateinit var progressIndicator: ProgressBar
 
 
@@ -34,51 +41,100 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        loginButton = findViewById(R.id.loginButton)
         usernameEditText = findViewById(R.id.usernameEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
+
+        rememberMeCheckBox = findViewById(R.id.rememberMeCheckBox)
+
+        loginButton = findViewById(R.id.loginButton)
         progressIndicator = findViewById(R.id.progressIndicator)
 
         loginButton.setOnClickListener {
             handleLogin()
         }
 
-        val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        val rememberMeEnabled = LocalStorageManager.readRememberMe(this)
+        rememberMeCheckBox.isChecked = rememberMeEnabled
+
+        automaticLogin()
 
 
-//
-//
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                viewmodel.loginState.collect { loginResult ->
-//
-//                    if (loginResult is ResultOf.Loading) {
-//                        hideLoginText()
-//                        showProgressBar()
-//                        disableLoginButton()
-//                    } else {
-//                        showLoginText()
-//                        hideProgressBar()
-//                        enableLoginButton()
-//                    }
-//
-//                    loginResult.doIfFailure {
-//                        showError(it.localizedMessage)
-//                    }
-//
-//                    loginResult.doIfSucces {
-//
-//                        gotoEventsScreen()
-//                        // TODO: I DONT THINK THIS FINISHES THEA CTIVITY, RESEARCH THIS
-//                        finish()
-//
-//                    }
-//
-//
-//                }
-//            }
-//        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewmodel.loginState.collect { loginResult ->
 
+                    if (loginResult is ResultOf.Loading) {
+                        hideLoginText()
+                        showProgressBar()
+                        disableLoginButton()
+                    }
+
+                    if(loginResult is ResultOf.Error){
+                        showLoginText()
+                        hideProgressBar()
+                        enableLoginButton()
+                    }
+
+                    loginResult.doIfFailure {
+                        showError(it.localizedMessage)
+                    }
+
+                    loginResult.doIfSucces {
+
+
+                        LocalStorageManager.saveUserAndPass(
+                            this@LoginActivity,
+                            usernameEditText.text.toString(),
+                            passwordEditText.text.toString()
+                        )
+
+                        gotoEventsScreen()
+                        // TODO: I DONT THINK THIS FINISHES THEA CTIVITY, RESEARCH THIS
+                        finish()
+
+                    }
+
+
+                }
+            }
+        }
+
+
+    }
+
+    private fun handleLogin() {
+
+        val username = usernameEditText.text.toString()
+        val password = passwordEditText.text.toString()
+
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(
+                this@LoginActivity,
+                "Username and password are required.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        if (rememberMeCheckBox.isChecked) {
+            LocalStorageManager.turnOnRememberMe(this)
+        } else {
+            LocalStorageManager.turnOffRememberMe(this)
+        }
+
+        viewmodel.login(username, password)
+    }
+
+    private fun automaticLogin() {
+        if (!LocalStorageManager.readRememberMe(this)) return
+
+        val user = LocalStorageManager.readUsername(this)
+        val pass = LocalStorageManager.readPassword(this)
+
+        usernameEditText.setText(user)
+        passwordEditText.setText(pass)
+
+        loginButton.callOnClick()
 
     }
 
@@ -114,27 +170,6 @@ class LoginActivity : AppCompatActivity() {
         loginButton.isEnabled = false
     }
 
-
-    private fun handleLogin() {
-
-        gotoEventsScreen()
-        return
-
-        val username = usernameEditText.text.toString()
-        val password = passwordEditText.text.toString()
-
-        if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(
-                this@LoginActivity,
-                "Username and password are required.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
-
-
-        viewmodel.login(username, password)
-    }
 
     private fun gotoEventsScreen() {
         val intent = Intent(this@LoginActivity, EventsActivity::class.java)

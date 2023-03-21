@@ -24,6 +24,7 @@ import com.example.eventusa.screens.events.EventsViewModelFactory
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.events.view.recycler_utils.EventsAdapter
 import com.example.eventusa.screens.login.view.LoginActivity
+import com.example.eventusa.utils.LocalStorageManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -147,12 +148,15 @@ class EventsActivity : AppCompatActivity() {
 
     private fun doLogout() {
 
+
         MaterialAlertDialogBuilder(this)
             .setTitle("Logout")
             .setMessage("Your login info will be lost if you logout.")
             .setNegativeButton("Cancel") { _, _ ->
             }
             .setPositiveButton("Logout") { _, _ ->
+
+                LocalStorageManager.turnOffRememberMe(this@EventsActivity)
 
                 val intent = Intent(this@EventsActivity, LoginActivity::class.java)
                 startActivity(intent)
