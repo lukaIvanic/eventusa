@@ -20,14 +20,12 @@ import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.extensions.*
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
-import com.example.eventusa.utils.adaptStyleToTag
-import com.example.eventusa.utils.animateChange
-import com.example.eventusa.utils.setChipDefault
-import com.example.eventusa.utils.setTextAnimated
+import com.example.eventusa.utils.*
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 
 class AddEventActivity : AppCompatActivity() {
@@ -99,22 +97,17 @@ class AddEventActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewmodel.uiState
-                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            viewmodel.uiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { result ->
                     result.doIfLoading {
                         Toast.makeText(
-                            this@AddEventActivity,
-                            "Loading event..",
-                            Toast.LENGTH_LONG
+                            this@AddEventActivity, "Loading event..", Toast.LENGTH_LONG
                         ).show()
                     }
 
                     result.doIfFailure {
                         Toast.makeText(
-                            this@AddEventActivity,
-                            it.localizedMessage,
-                            Toast.LENGTH_LONG
+                            this@AddEventActivity, it.localizedMessage, Toast.LENGTH_LONG
                         ).show()
                     }
 
@@ -140,11 +133,9 @@ class AddEventActivity : AppCompatActivity() {
                                 endDateTime.toLocalTime().toParsedString()
                             )
 
-                            if (locationEditText.text.isEmpty())
-                                locationEditText.setText(location)
+                            if (locationEditText.text.isEmpty()) locationEditText.setText(location)
 
-                            if (summaryEditText.text.isEmpty())
-                                summaryEditText.setText(description)
+                            if (summaryEditText.text.isEmpty()) summaryEditText.setText(description)
 
                         }
                     }
@@ -244,11 +235,7 @@ class AddEventActivity : AppCompatActivity() {
 
         saveEventButton.setOnClickListener {
             saveEventButton.animateChange(
-                200,
-                fromScaleX = 1F,
-                toScaleX = 1.2F,
-                fromScaleY = 1F,
-                toScaleY = 0.7F
+                200, fromScaleX = 1F, toScaleX = 1.2F, fromScaleY = 1F, toScaleY = 0.7F
             )
             handleSaveEvent()
         }
@@ -275,14 +262,11 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun cancelDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Cancel")
+        MaterialAlertDialogBuilder(this).setTitle("Cancel")
             .setMessage("Do you want to cancel your draft?\nThe information will be lost.")
-            .setNegativeButton("Keep editing") { _, _ -> }
-            .setPositiveButton("OK") { _, _ ->
+            .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("OK") { _, _ ->
                 finish()
-            }
-            .show()
+            }.show()
     }
 
     private fun handleChooseAllSwitch() {
@@ -301,17 +285,25 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun setupStartDatePicker() {
 
-        val onDateSetListener =
-            OnDateSetListener {
-                    datePicker: DatePicker?,
-                    year: Int,
-                    month: Int,
-                    day: Int,
-                ->
+        val onDateSetListener = OnDateSetListener {
+                datePicker: DatePicker?,
+                year: Int,
+                month: Int,
+                day: Int,
+            ->
 
-                viewmodel.startDateSet(year, month, day)
+            val startDate = LocalDate.now().withYear(year)
+                .withMonth(month + 1) // Calendar month starts from 0, Local date month starts from 1, we need to adjust
+                .withDayOfMonth(day)
 
+            if (LocalStorageManager.readAskConfirmDateBefore(this@AddEventActivity) && startDate < LocalDate.now()) {
+                confirmDateBeforeTodayDialog(year, month, day)
+            } else {
+                handleSetStartDate(year, month, day)
             }
+
+
+        }
 
         val startDate = viewmodel.getCurrStartDateTime()
         startDate.month
@@ -328,17 +320,47 @@ class AddEventActivity : AppCompatActivity() {
         }
     }
 
+    private fun confirmDateBeforeTodayDialog(year: Int, month: Int, day: Int) {
+
+        // initialise the alert dialog builder
+        AlertDialog.Builder(this)
+            .setTitle("Date before today")
+            .setMessage("The starting date is before today's date. Are you sure you want to proceed?")
+//            .setMultiChoiceItems(
+//                arrayOf("Don't check again"),
+//                booleanArrayOf(false)
+//            ) { _, _, checked ->
+//                if (checked) {
+//                    LocalStorageManager.setCheckedDontAskAgainDateBefore(this@AddEventActivity)
+//                } else {
+//                    LocalStorageManager.setUncheckedDontAskAgainDateBefore(this@AddEventActivity)
+//                }
+//            }
+            .setPositiveButton("Yes") { _, _ ->
+                handleSetStartDate(year, month, day)
+            }.setNegativeButton("No") { _, _ -> }
+            .setNeutralButton("Don't ask again") { _, _ ->
+                LocalStorageManager.setUncheckedAskConfirmDateBefore(this@AddEventActivity)
+                handleSetStartDate(year, month, day)
+            }
+            .create()
+            .show()
+    }
+
+    private fun handleSetStartDate(year: Int, month: Int, day: Int) {
+        viewmodel.startDateSet(year, month, day)
+    }
+
     private fun setupEndDatePicker() {
 
-        val onDateSetListener =
-            OnDateSetListener {
-                    datePicker: DatePicker?,
-                    year: Int,
-                    month: Int,
-                    day: Int,
-                ->
-                viewmodel.endDateSet(year, month, day)
-            }
+        val onDateSetListener = OnDateSetListener {
+                datePicker: DatePicker?,
+                year: Int,
+                month: Int,
+                day: Int,
+            ->
+            viewmodel.endDateSet(year, month, day)
+        }
 
         val endDate = viewmodel.getCurrEndDateTime()
 
@@ -355,23 +377,18 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun setupStartTimePicker() {
-        val onTimeSetListener =
-            OnTimeSetListener {
-                    timePicker: TimePicker?,
-                    hour: Int,
-                    minute: Int,
-                ->
-                viewmodel.startTimeSet(hour, minute)
-            }
+        val onTimeSetListener = OnTimeSetListener {
+                timePicker: TimePicker?,
+                hour: Int,
+                minute: Int,
+            ->
+            viewmodel.startTimeSet(hour, minute)
+        }
 
         val startTime = viewmodel.getCurrStartDateTime()
 
         TimePickerDialog(
-            this@AddEventActivity,
-            onTimeSetListener,
-            startTime.hour,
-            startTime.minute,
-            true
+            this@AddEventActivity, onTimeSetListener, startTime.hour, startTime.minute, true
         ).apply {
             setCanceledOnTouchOutside(false)
             show()
@@ -379,25 +396,20 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun setupEndTimePicker() {
-        val onTimeSetListener =
-            OnTimeSetListener {
-                    timePicker: TimePicker?,
-                    hour: Int,
-                    minute: Int,
-                ->
+        val onTimeSetListener = OnTimeSetListener {
+                timePicker: TimePicker?,
+                hour: Int,
+                minute: Int,
+            ->
 
-                viewmodel.endTimeSet(hour, minute)
+            viewmodel.endTimeSet(hour, minute)
 
-            }
+        }
 
         val endTime = viewmodel.getCurrEndDateTime()
 
         TimePickerDialog(
-            this@AddEventActivity,
-            onTimeSetListener,
-            endTime.hour,
-            endTime.minute,
-            true
+            this@AddEventActivity, onTimeSetListener, endTime.hour, endTime.minute, true
         ).apply {
             setCanceledOnTouchOutside(false)
             show()
@@ -421,24 +433,23 @@ class AddEventActivity : AppCompatActivity() {
             viewmodel.updateOrInsertEvent()
 
 
-            viewmodel.postEventState
-                .collect {
+            viewmodel.postEventState.collect {
 
-                    progressDialog.dismiss()
+                progressDialog.dismiss()
 
-                    it.doIfFailure {
-                        Toast.makeText(
-                            this@AddEventActivity,
-                            "Error, ${it.localizedMessage}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    it.doIfSucces {
-                        Toast.makeText(this@AddEventActivity, "Event added!", Toast.LENGTH_SHORT)
-                            .show()
-                        finish()
-                    }
+                it.doIfFailure {
+                    Toast.makeText(
+                        this@AddEventActivity,
+                        "Error, ${it.localizedMessage}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+                it.doIfSucces {
+                    Toast.makeText(this@AddEventActivity, "Event added!", Toast.LENGTH_SHORT)
+                        .show()
+                    finish()
+                }
+            }
         }
 
 

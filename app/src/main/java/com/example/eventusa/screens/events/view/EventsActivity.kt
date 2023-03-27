@@ -24,6 +24,7 @@ import com.example.eventusa.screens.events.EventsViewModelFactory
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.events.view.recycler_utils.EventsAdapter
 import com.example.eventusa.screens.login.view.LoginActivity
+import com.example.eventusa.screens.settings.view.SettingsActivity
 import com.example.eventusa.utils.LocalStorageManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -45,6 +46,7 @@ class EventsActivity : AppCompatActivity() {
 
     lateinit var nameTextView: TextView
     lateinit var logoutButton: ImageView
+    lateinit var settingsButton: ImageView
 
     lateinit var progressBar: LinearProgressIndicator
 
@@ -65,6 +67,7 @@ class EventsActivity : AppCompatActivity() {
         nameTextView.text = "Welcome, ${viewModel.getUsername()}"
 
         logoutButton = findViewById(R.id.logoutButton)
+        settingsButton = findViewById(R.id.settingsButton)
 
         progressBar = findViewById(R.id.progressBar)
 
@@ -77,6 +80,10 @@ class EventsActivity : AppCompatActivity() {
 
         logoutButton.setOnClickListener {
             doLogout()
+        }
+
+        settingsButton.setOnClickListener {
+            gotoSettings()
         }
 
         newEventButton.setOnClickListener {
@@ -165,4 +172,11 @@ class EventsActivity : AppCompatActivity() {
             .show()
 
     }
+
+    private fun gotoSettings(){
+        Intent(this@EventsActivity, SettingsActivity::class.java).apply {
+            startActivity(this)
+        }
+    }
+
 }

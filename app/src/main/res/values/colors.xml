@@ -32,10 +32,11 @@
     <color name="text_hint">#686868</color>
     <color name="text_edit">#4E4E4E</color>
 
+
     <color name="red_danger">#b00020</color>
     <color name="red_danger_light">#ea959b</color>
 
-    <color name="ripple_color">#11000000</color>
+    <color name="ripple_color">#3715A5D3</color>
 
     <color name="button_color">#d34515</color>
     <color name="button_stroke">#ba380d</color>

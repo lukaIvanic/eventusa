@@ -2,9 +2,9 @@ package com.example.eventusa.network
 
 import com.example.eventusa.network.RequestType.GET
 import com.example.eventusa.network.RequestType.POST
+import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.LoginRequest
 import com.example.eventusa.screens.login.model.LoginResponse
-import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.jsonutils.JsonUtils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -54,9 +54,14 @@ object Network {
     }
 
 
-    fun getEvents(): MutableList<RINetEvent> {
+    fun getEvents(): MutableList<RINetEvent>  {
 
         val eventsJson = NetworkCore.sendRequest(READ_EVENTS)
+
+        // Check for raw json error message.
+        if(eventsJson.first() != '[' && eventsJson.first() != '{'){
+            throw Exception(eventsJson)
+        }
 
         return JsonUtils.fromJsonToList(eventsJson)
 

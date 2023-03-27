@@ -60,4 +60,26 @@ object LocalStorageManager {
 
 
 
+//TODO: RENAME
+    // Returns true if user checked "Dont ask me again" for "date before today" alert
+    fun readAskConfirmDateBefore(context: Context): Boolean {
+        return sharedPreferences(context).getBoolean("askAgainDateBefore", true)
+    }
+    fun setCheckedAskConfirmDateBefore(context: Context){
+        val myEdit = sharedPreferences(context).edit()
+
+        myEdit.putBoolean("askAgainDateBefore", true)
+
+        myEdit.apply()
+    }
+
+    fun setUncheckedAskConfirmDateBefore(context: Context){
+        val myEdit = sharedPreferences(context).edit()
+
+        myEdit.putBoolean("askAgainDateBefore", false)
+
+        myEdit.apply()
+    }
+
+
 }

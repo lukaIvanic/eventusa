@@ -31,6 +31,8 @@ class LoginActivity : AppCompatActivity() {
     lateinit var loginButton: Button
     lateinit var progressIndicator: ProgressBar
 
+    lateinit var guestLoginButton: Button
+
 
     val viewmodel: LoginViewModel by viewModels {
         LoginViewModelFactory((application as EventusaApplication).userRepository)
@@ -49,8 +51,15 @@ class LoginActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.loginButton)
         progressIndicator = findViewById(R.id.progressIndicator)
 
+        guestLoginButton = findViewById(R.id.guestLoginButton)
+
         loginButton.setOnClickListener {
             handleLogin()
+        }
+
+        guestLoginButton.setOnClickListener {
+            gotoEventsScreen()
+            finish()
         }
 
         val rememberMeEnabled = LocalStorageManager.readRememberMe(this)
@@ -89,7 +98,6 @@ class LoginActivity : AppCompatActivity() {
                         )
 
                         gotoEventsScreen()
-                        // TODO: I DONT THINK THIS FINISHES THEA CTIVITY, RESEARCH THIS
                         finish()
 
                     }
