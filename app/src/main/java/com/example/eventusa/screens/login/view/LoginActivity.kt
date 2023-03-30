@@ -62,10 +62,8 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
-        val rememberMeEnabled = LocalStorageManager.readRememberMe(this)
+        val rememberMeEnabled = LocalStorageManager.readRememberMe()
         rememberMeCheckBox.isChecked = rememberMeEnabled
-
-        automaticLogin()
 
 
         lifecycleScope.launch {
@@ -78,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
                         disableLoginButton()
                     }
 
-                    if(loginResult is ResultOf.Error){
+                    if (loginResult is ResultOf.Error) {
                         showLoginText()
                         hideProgressBar()
                         enableLoginButton()
@@ -92,7 +90,6 @@ class LoginActivity : AppCompatActivity() {
 
 
                         LocalStorageManager.saveUserAndPass(
-                            this@LoginActivity,
                             usernameEditText.text.toString(),
                             passwordEditText.text.toString()
                         )
@@ -107,6 +104,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
+        automaticLogin()
 
     }
 
@@ -125,25 +123,24 @@ class LoginActivity : AppCompatActivity() {
         }
 
         if (rememberMeCheckBox.isChecked) {
-            LocalStorageManager.turnOnRememberMe(this)
+            LocalStorageManager.turnOnRememberMe()
         } else {
-            LocalStorageManager.turnOffRememberMe(this)
+            LocalStorageManager.turnOffRememberMe()
         }
 
         viewmodel.login(username, password)
     }
 
     private fun automaticLogin() {
-        if (!LocalStorageManager.readRememberMe(this)) return
+        if (!LocalStorageManager.readRememberMe()) return
 
-        val user = LocalStorageManager.readUsername(this)
-        val pass = LocalStorageManager.readPassword(this)
+        val user = LocalStorageManager.readUsername()
+        val pass = LocalStorageManager.readPassword()
 
         usernameEditText.setText(user)
         passwordEditText.setText(pass)
 
         loginButton.callOnClick()
-
     }
 
     private fun showError(message: String?) {

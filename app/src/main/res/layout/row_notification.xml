@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center"
+    android:background="@color/app_background">
+
+    <TextView
+        android:id="@+id/notifRowDescTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingVertical="12dp"
+        android:textSize="@dimen/settings_text_size"
+        android:textColor="@color/text_dark_settings"
+        tools:text="15 minutes before"/>
+
+    <ImageView
+        android:id="@+id/cancelNotifRowButton"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginVertical="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/ripple_round"
+        android:padding="12dp"
+        android:src="@drawable/cancel_icon" />
+
+
+
+</LinearLayout>

@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 
 data class RINetEvent(
-    val eventId: Int? = 0,
+    val eventId: Int = 0,
     @JsonProperty("Name")
     var title: String?,
     @JsonProperty("From")

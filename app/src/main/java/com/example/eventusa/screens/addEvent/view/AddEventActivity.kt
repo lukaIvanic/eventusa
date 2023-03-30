@@ -15,9 +15,12 @@ import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.extensions.*
+import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
 import com.example.eventusa.utils.*
@@ -33,6 +36,7 @@ class AddEventActivity : AppCompatActivity() {
     val viewmodel: AddEventViewModel by viewModels { AddEventViewModelFactory((application as EventusaApplication).eventsRepository) }
 
     lateinit var progressDialog: AlertDialog
+    var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
 
     lateinit var saveEventButton: TextView
     lateinit var cancelButton: ImageView
@@ -47,6 +51,10 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var chooseAllSection: ConstraintLayout
     lateinit var chooseAllSwitch: Switch
     lateinit var peopleChipGroup: ChipGroup
+
+    lateinit var addNotificationButton: TextView
+    lateinit var notifsRecyclerView: RecyclerView
+    lateinit var notifsAdapter: NotificationsRecyclerAdapter
 
     lateinit var locationEditText: EditText
     lateinit var summaryEditText: EditText
@@ -64,7 +72,8 @@ class AddEventActivity : AppCompatActivity() {
         titleEditText = findViewById(R.id.addTitleEditText)
 
         saveEventButton = findViewById(R.id.saveEventButton)
-        cancelButton = findViewById(R.id.cancelEventButton)
+        saveEventButton = findViewById(R.id.saveEventButton)
+        cancelButton = findViewById(R.id.cancelNotifRowButton)
 
         startDateTextView = findViewById(R.id.dateStartTextView)
         startTimeTextView = findViewById(R.id.timeStartTextView)
@@ -78,6 +87,8 @@ class AddEventActivity : AppCompatActivity() {
 
         locationEditText = findViewById(R.id.locationEditText)
         summaryEditText = findViewById(R.id.summaryEditText)
+
+        setupNotificationSection()
 
         addToCalendarSection = findViewById(R.id.addToCalendarSection)
         addToCalendarCheckBox = findViewById(R.id.addToCalendarCheckBox)
@@ -138,6 +149,7 @@ class AddEventActivity : AppCompatActivity() {
                             if (summaryEditText.text.isEmpty()) summaryEditText.setText(description)
 
                         }
+                        notifsAdapter.updateData(state.notificationPresets)
                     }
 
                 }
@@ -150,6 +162,21 @@ class AddEventActivity : AppCompatActivity() {
         setupPeopleChips()
         setupProgressDialog()
         setupTouch()
+    }
+
+    private fun setupNotificationSection() {
+        addNotificationButton = findViewById(R.id.addNotificationButton)
+
+        notifsRecyclerView = findViewById(R.id.notificationsRecyclerView)
+        notifsAdapter = NotificationsRecyclerAdapter()
+        notifsRecyclerView.adapter = notifsAdapter
+
+        lifecycleScope.launchWhenStarted {
+            notifsAdapter.cancelNotifFlow.collect { notifIndex ->
+
+                deleteNotif(notifIndex)
+            }
+        }
     }
 
     private fun setupPeopleChips() {
@@ -230,7 +257,7 @@ class AddEventActivity : AppCompatActivity() {
     private fun setupTouch() {
 
         cancelButton.setOnClickListener {
-            cancelDialog()
+            showCancelEditDialog()
         }
 
         saveEventButton.setOnClickListener {
@@ -238,6 +265,10 @@ class AddEventActivity : AppCompatActivity() {
                 200, fromScaleX = 1F, toScaleX = 1.2F, fromScaleY = 1F, toScaleY = 0.7F
             )
             handleSaveEvent()
+        }
+
+        addToCalendarSection.setOnClickListener {
+            addToCalendarCheckBox.isChecked = !addToCalendarCheckBox.isChecked
         }
 
         startDateTextView.setOnClickListener { setupStartDatePicker() }
@@ -254,19 +285,39 @@ class AddEventActivity : AppCompatActivity() {
 
         chooseAllSwitch.setOnClickListener { handleChooseAllSwitch() }
 
-        addToCalendarSection.setOnClickListener {
-            addToCalendarCheckBox.isChecked = !addToCalendarCheckBox.isChecked
+        addNotificationButton.setOnClickListener {
+            showChooseNotificationDialog()
         }
 
         deleteEventSection.setOnClickListener { handleDeleteEvent() }
+
+
     }
 
-    private fun cancelDialog() {
+    private fun showCancelEditDialog() {
         MaterialAlertDialogBuilder(this).setTitle("Cancel")
             .setMessage("Do you want to cancel your draft?\nThe information will be lost.")
             .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("OK") { _, _ ->
                 finish()
             }.show()
+    }
+
+    private fun showChooseNotificationDialog() {
+        val notifDialogBuilder =
+            MaterialAlertDialogBuilder(this)
+                .setCancelable(true)
+                .setSingleChoiceItems(
+                    NotificationPreset.getPresetsDescs(),
+                    -1
+                ) { _, index ->
+
+                    addNotif(NotificationPreset.getPresetByIndex(index))
+
+                    chooseNotifDialog?.dismiss()
+                }
+
+
+        chooseNotifDialog = notifDialogBuilder.show()
     }
 
     private fun handleChooseAllSwitch() {
@@ -296,7 +347,7 @@ class AddEventActivity : AppCompatActivity() {
                 .withMonth(month + 1) // Calendar month starts from 0, Local date month starts from 1, we need to adjust
                 .withDayOfMonth(day)
 
-            if (LocalStorageManager.readAskConfirmDateBefore(this@AddEventActivity) && startDate < LocalDate.now()) {
+            if (LocalStorageManager.readAskConfirmDateBefore() && startDate < LocalDate.now()) {
                 confirmDateBeforeTodayDialog(year, month, day)
             } else {
                 handleSetStartDate(year, month, day)
@@ -326,21 +377,11 @@ class AddEventActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Date before today")
             .setMessage("The starting date is before today's date. Are you sure you want to proceed?")
-//            .setMultiChoiceItems(
-//                arrayOf("Don't check again"),
-//                booleanArrayOf(false)
-//            ) { _, _, checked ->
-//                if (checked) {
-//                    LocalStorageManager.setCheckedDontAskAgainDateBefore(this@AddEventActivity)
-//                } else {
-//                    LocalStorageManager.setUncheckedDontAskAgainDateBefore(this@AddEventActivity)
-//                }
-//            }
             .setPositiveButton("Yes") { _, _ ->
                 handleSetStartDate(year, month, day)
             }.setNegativeButton("No") { _, _ -> }
             .setNeutralButton("Don't ask again") { _, _ ->
-                LocalStorageManager.setUncheckedAskConfirmDateBefore(this@AddEventActivity)
+                LocalStorageManager.setUncheckedAskConfirmDateBefore()
                 handleSetStartDate(year, month, day)
             }
             .create()
@@ -444,9 +485,15 @@ class AddEventActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-                it.doIfSucces {
+                it.doIfSucces { rinetEvent ->
                     Toast.makeText(this@AddEventActivity, "Event added!", Toast.LENGTH_SHORT)
                         .show()
+
+                    //TODO: handle setting notifications
+                    notifsAdapter.getNotifs().forEach { notifTitle ->
+
+                    }
+
                     finish()
                 }
             }
@@ -473,6 +520,7 @@ class AddEventActivity : AppCompatActivity() {
                 result.doIfSucces {
                     Toast.makeText(this@AddEventActivity, "Event deleted!", Toast.LENGTH_LONG)
                         .show()
+                    //TODO: handle notification deletion
                     finish()
                 }
 
@@ -480,10 +528,30 @@ class AddEventActivity : AppCompatActivity() {
         }
     }
 
+    private fun addNotif(notifInfo: NotificationPreset) {
+        notifsAdapter.addNotif(notifInfo)
+        viewmodel.setNotification(
+            this@AddEventActivity,
+            notifInfo.notifTimeBeforeEventMins
+        )
+    }
+
+    private fun deleteNotif(notifIndex: Int){
+        val notifInfo = notifsAdapter.deleteNotif(notifIndex)
+        viewmodel.deleteNotification(
+            this@AddEventActivity,
+            notifInfo.notifTimeBeforeEventMins
+        )
+    }
+
 
     private fun getIntentEventId(): Int? {
         val eventId = intent.getIntExtra("eventId", -550)
         return if (eventId != -550) eventId else null
+    }
+
+    override fun onBackPressed() {
+        cancelButton.performClick()
     }
 
 }

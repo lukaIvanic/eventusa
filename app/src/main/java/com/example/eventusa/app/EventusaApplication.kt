@@ -4,10 +4,17 @@ import android.app.Application
 import com.example.eventusa.repository.EventsRepository
 import com.example.eventusa.repository.TickHandler
 import com.example.eventusa.repository.UserRepository
+import com.example.eventusa.utils.LocalStorageManager
 
 class EventusaApplication: Application() {
 
     val eventsRepository = EventsRepository(TickHandler())
+
     var userRepository = UserRepository()
+
+    override fun onCreate() {
+        LocalStorageManager.setupSharedPreferences(this)
+        super.onCreate()
+    }
 
 }

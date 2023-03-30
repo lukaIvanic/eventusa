@@ -1,20 +1,42 @@
 package com.example.eventusa.screens.addEvent.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.*
+import com.example.eventusa.extensions.PATTERN_UI_TIME
 import com.example.eventusa.extensions.adjustType
 import com.example.eventusa.extensions.map
+import com.example.eventusa.extensions.toParsedString
 import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.repository.EventsRepository
+import com.example.eventusa.screens.addEvent.data.NotificationPreset
 import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.utils.LocalStorageManager
+import com.example.eventusa.utils.notifications.MAX_MINS_UNTIL_EVENT
+import com.example.eventusa.utils.notifications.NotifManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-data class AddEventUiState(var eventId: Int, var riNetEvent: RINetEvent) {
+//TODO move to proper place
+data class AddEventUiState(
+    var eventId: Int,
+    var riNetEvent: RINetEvent,
+) {
+    val notificationPresets: List<NotificationPreset>
+        get() {
+            return LocalStorageManager.readNotifications(eventId)
+                .mapNotNull { notifTimeBeforeEventMins ->
+                    NotificationPreset.get(
+                        notifTimeBeforeEventMins
+                    )
+                }
+        }
+
     override fun equals(other: Any?): Boolean {
         return false
     }
@@ -28,7 +50,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
         AddEventUiState(
             -100,
             RINetEvent(
-                null,
+                -1,
                 null,
                 LocalDateTime.now().withMinute(0).plusHours(1),
                 LocalDateTime.now().withMinute(0).plusHours(2)
@@ -39,8 +61,8 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
         MutableStateFlow<ResultOf<AddEventUiState>>(ResultOf.Success(currUiState))
     val uiState = _uiState.asStateFlow()
 
-    private val _postEventState = MutableSharedFlow<ResultOf<Boolean>>()
-    val postEventState = _postEventState.asSharedFlow()
+    private val _postEventState = MutableSharedFlow<ResultOf<RINetEvent>>()
+    val postEventState: SharedFlow<ResultOf<RINetEvent>> = _postEventState.asSharedFlow()
 
     private val _deleteEventState = MutableSharedFlow<ResultOf<Boolean>>()
     val deleteEventState = _deleteEventState.asSharedFlow()
@@ -52,10 +74,10 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
                 if (currUiState.eventId > 0) {
                     val res = Network.updateEvent(currUiState.riNetEvent)
-                    _postEventState.emit(res)
+                    _postEventState.emit(res.map { currUiState.riNetEvent })
                 } else {
                     val res = Network.insertEvent(currUiState.riNetEvent)
-                    _postEventState.emit(res)
+                    _postEventState.emit(res.map { currUiState.riNetEvent })
                 }
 
                 eventsRepository.makeUpdateTick()
@@ -63,7 +85,6 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
             }
 
         }
-
 
     }
 
@@ -96,6 +117,83 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
                     }
                 }
             }
+
+        }
+    }
+
+    fun setNotification(context: Context, timeUntilEventMins: Long) {
+
+        if(timeUntilEventMins > MAX_MINS_UNTIL_EVENT || timeUntilEventMins < 0){
+            _uiState.value = ResultOf.Error(Exception("Invalid notification time."))
+            return
+        }
+
+        // notifsAdapter.addNotif(notificationInfo) // TODO: flow za notifikacije namjestit
+
+        // shared preferences -> readat za eventId sve notifikacije, read trenutno stanje, edit
+
+        // dodat u recycler, set notifikaciju s intentom, spremit u shared preferences
+
+        currUiState.riNetEvent.apply {
+
+            if (LocalDateTime.now() >= startDateTime) return@apply
+
+            val timePeriodDesc =
+                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
+                        endDateTime.toParsedString(PATTERN_UI_TIME)
+
+            val eventTimeEpochMillis = startDateTime.atZone(ZoneId.systemDefault()).minusMinutes(timeUntilEventMins).toEpochSecond()
+
+
+            NotifManager(context).scheduleExactAlarm(
+                eventId,
+                "$timeUntilEventMins minutes until $title",
+                timePeriodDesc,
+                eventTimeEpochMillis,
+                timeUntilEventMins.toInt()
+            )
+
+
+            LocalStorageManager.addNotification(eventId, timeUntilEventMins)
+
+            _uiState.value = ResultOf.Success(currUiState.copy())
+//                        NotifManager(this@AddEventActivity).scheduleExactAlarm(id, title, now.until(rinetEvent.startDateTime, ChronoUnit.SECONDS))
+
+        }
+    }
+
+    fun deleteNotification(context: Context, timeUntilEventMins: Long) {
+
+        // notifsAdapter.removeNotif(notificationInfo) // TODO: flow za notifikacije namjestit
+
+        // shared preferences -> readat za eventId sve notifikacije, read trenutno stanje, edit
+
+        // dodat u recycler, set notifikaciju s intentom, spremit u shared preferences
+
+        currUiState.riNetEvent.apply {
+
+            if (LocalDateTime.now() >= startDateTime) return@apply
+
+            val timePeriodDesc =
+                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
+                        endDateTime.toParsedString(PATTERN_UI_TIME)
+
+            val timeFromNowToNotifSeconds = LocalDateTime.now()
+                .until(startDateTime.minusMinutes(timeUntilEventMins), ChronoUnit.SECONDS)
+
+
+//            NotifManager(context).scheduleExactAlarm(
+//                eventId,
+//                "$timeUntilEventMins minutes until $title",
+//                timePeriodDesc,
+//                timeFromNowToNotifSeconds
+//            )
+
+
+            LocalStorageManager.deleteNotification(eventId, timeUntilEventMins)
+
+            _uiState.value = ResultOf.Success(currUiState.copy())
+//                        NotifManager(this@AddEventActivity).scheduleExactAlarm(id, title, now.until(rinetEvent.startDateTime, ChronoUnit.SECONDS))
 
         }
     }

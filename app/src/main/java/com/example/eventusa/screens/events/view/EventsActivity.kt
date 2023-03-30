@@ -163,7 +163,7 @@ class EventsActivity : AppCompatActivity() {
             }
             .setPositiveButton("Logout") { _, _ ->
 
-                LocalStorageManager.turnOffRememberMe(this@EventsActivity)
+                LocalStorageManager.turnOffRememberMe()
 
                 val intent = Intent(this@EventsActivity, LoginActivity::class.java)
                 startActivity(intent)
