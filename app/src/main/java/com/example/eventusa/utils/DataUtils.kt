@@ -11,7 +11,11 @@ import java.time.format.DateTimeFormatter
 
 object DataUtils {
 
-
+    /**
+     * Takes a list of sorted rinetEvents and returns a list in sections of events.
+     *
+     * Example => Input: ev1, ev2, ev3, ev4, ev5, ev6 -> Output: section1, ev1, ev2, ev3, section2, ev4, section5, ev6
+     */
     fun eventsDisplayItems(_rawEvents: MutableList<RINetEvent>): MutableList<EventItem> {
 
         val rawEvents: MutableList<RINetEvent> = ArrayList()

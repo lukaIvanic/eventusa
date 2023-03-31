@@ -6,6 +6,13 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * DateTime.kt
+ * Easier LocalDateTime manipulations.
+ * Includes interoperability with string because of the common use case in the project.
+ *
+ */
+
 const val PATTERN_UI_DATE_TIME = "d MMM yyyy HH:mm"
 const val PATTERN_UI_DATE = "EEE, d MMM yyyy"
 const val PATTERN_UI_DATE_SHORT = "d MMM"

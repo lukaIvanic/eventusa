@@ -7,6 +7,8 @@ import com.example.eventusa.network.ResultOf
 import com.example.eventusa.repository.UserRepository
 import com.example.eventusa.screens.login.model.LoginRequest
 import com.example.eventusa.screens.login.model.LoginResponse
+import com.example.eventusa.screens.login.model.ResponseCodes
+import com.example.eventusa.screens.login.model.ResponseCodes.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -31,14 +33,13 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
                 val uiResultLogin: ResultOf<LoginResponse> = when (resultLogin) {
                     is ResultOf.Error, is ResultOf.Loading -> resultLogin
                     is ResultOf.Success -> {
-                        when (resultLogin.data.Item1) {
-                            0 -> {
-
+                        when (ResponseCodes.get(resultLogin.data.Item1)) {
+                            SUCCESS -> {
                                 resultLogin
                             }
-                            -1 -> ResultOf.Error(Exception("Internal server error."))
-                            -2 -> ResultOf.Error(Exception("Wrong credentials"))
-                            else -> ResultOf.Error(Exception("Internal server error."))
+                            SERVER_ERROR -> ResultOf.Error(Exception("Internal server error."))
+                            WRONG_AUTHENTICATION -> ResultOf.Error(Exception("Wrong credentials"))
+                            else -> ResultOf.Error(Exception("An error occured. Check if response codes are in sync with the servers."))
                         }
                     }
                 }
@@ -46,16 +47,6 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
                 _loginStateFlow.emit(uiResultLogin)
             }
         }
-
-
-    }
-
-    fun autoLoginStart() {
-        viewModelScope.launch {
-            _loginStateFlow.emit(ResultOf.Loading)
-        }
-
-
     }
 
 }

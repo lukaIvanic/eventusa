@@ -24,9 +24,6 @@ class SettingsActivity : AppCompatActivity() {
 
     lateinit var alarmManager: AlarmManager
 
-    val notifDelaySeconds = 10L
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -63,22 +60,27 @@ class SettingsActivity : AppCompatActivity() {
 
 
         notifTest.setOnClickListener {
-            Toast.makeText(
-                this@SettingsActivity,
-                "Notification scheduled in 10 seconds",
-                Toast.LENGTH_LONG
-            ).show()
-
-            NotifManager(this@SettingsActivity).scheduleExactAlarm(
-                Random.nextInt(0, 99999),
-                "Test from settings",
-                "13:00-14:00",
-                LocalDateTime.now().plusSeconds(10L).atZone(
-                    ZoneId.systemDefault()
-                ).toEpochSecond() * 1000L,
-                1
-            )
+            handleNotifTestClick()
         }
+    }
+
+    fun handleNotifTestClick() {
+        Toast.makeText(
+            this@SettingsActivity,
+            "Notification scheduled in 10 seconds",
+            Toast.LENGTH_LONG
+        ).show()
+
+        NotifManager(this@SettingsActivity).scheduleExactAlarm(
+            Random.nextInt(0, 99999),
+            "Test from settings",
+            "13:00-14:00",
+            LocalDateTime.now().plusSeconds(10L).atZone(
+                ZoneId.systemDefault()
+            ).toEpochSecond() * 1000L,
+            1
+        )
+
     }
 
 

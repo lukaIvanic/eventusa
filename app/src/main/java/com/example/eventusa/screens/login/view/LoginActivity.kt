@@ -76,18 +76,14 @@ class LoginActivity : AppCompatActivity() {
                         disableLoginButton()
                     }
 
-                    if (loginResult is ResultOf.Error) {
+                    loginResult.doIfFailure {
                         showLoginText()
                         hideProgressBar()
                         enableLoginButton()
-                    }
-
-                    loginResult.doIfFailure {
                         showError(it.localizedMessage)
                     }
 
                     loginResult.doIfSucces {
-
 
                         LocalStorageManager.saveUserAndPass(
                             usernameEditText.text.toString(),

@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.extensions.*
-import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.screens.addEvent.model.NotificationPreset
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
@@ -217,7 +217,7 @@ class AddEventActivity : AppCompatActivity() {
 
                 tag = if (tag == "highlight") "default" else "highlight"
 
-                adaptStyleToTag(name)
+                adaptStyleToState(name)
 
                 val areDefaults = areAllChipsDefault()
                 chooseAllSwitch.isChecked = !(areDefaults == null || areDefaults == true)
@@ -307,7 +307,7 @@ class AddEventActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this)
                 .setCancelable(true)
                 .setSingleChoiceItems(
-                    NotificationPreset.getPresetsDescs(),
+                    NotificationPreset.getPresetsDescriptions(),
                     -1
                 ) { _, index ->
 
@@ -330,7 +330,7 @@ class AddEventActivity : AppCompatActivity() {
 
             tvIt.tag = newTag
 
-            tvIt.adaptStyleToTag(tvIt.text.toString())
+            tvIt.adaptStyleToState(tvIt.text.toString())
         }
     }
 
