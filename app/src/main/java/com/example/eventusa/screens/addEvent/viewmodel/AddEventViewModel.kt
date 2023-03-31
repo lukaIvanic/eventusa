@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 //TODO move to proper place
 data class AddEventUiState(
@@ -123,7 +124,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
     fun setNotification(context: Context, timeUntilEventMins: Long) {
 
-        if(timeUntilEventMins > MAX_MINS_UNTIL_EVENT || timeUntilEventMins < 0){
+        if (timeUntilEventMins > MAX_MINS_UNTIL_EVENT || timeUntilEventMins < 0) {
             _uiState.value = ResultOf.Error(Exception("Invalid notification time."))
             return
         }
@@ -142,12 +143,14 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
                 startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
                         endDateTime.toParsedString(PATTERN_UI_TIME)
 
-            val eventTimeEpochMillis = startDateTime.atZone(ZoneId.systemDefault()).minusMinutes(timeUntilEventMins).toEpochSecond()
+            val eventTimeEpochMillis =
+                startDateTime.atZone(ZoneId.systemDefault()).minusMinutes(timeUntilEventMins)
+                    .toEpochSecond()
 
 
             NotifManager(context).scheduleExactAlarm(
                 eventId,
-                "$timeUntilEventMins minutes until $title",
+                (title ?: "Event").replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                 timePeriodDesc,
                 eventTimeEpochMillis,
                 timeUntilEventMins.toInt()
@@ -174,20 +177,18 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
             if (LocalDateTime.now() >= startDateTime) return@apply
 
-            val timePeriodDesc =
-                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
-                        endDateTime.toParsedString(PATTERN_UI_TIME)
+//            val timePeriodDesc =
+//                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
+//                        endDateTime.toParsedString(PATTERN_UI_TIME)
+//
+//            val timeFromNowToNotifSeconds = LocalDateTime.now()
+//                .until(startDateTime.minusMinutes(timeUntilEventMins), ChronoUnit.SECONDS)
 
-            val timeFromNowToNotifSeconds = LocalDateTime.now()
-                .until(startDateTime.minusMinutes(timeUntilEventMins), ChronoUnit.SECONDS)
 
-
-//            NotifManager(context).scheduleExactAlarm(
-//                eventId,
-//                "$timeUntilEventMins minutes until $title",
-//                timePeriodDesc,
-//                timeFromNowToNotifSeconds
-//            )
+            NotifManager(context).deleteExactAlarm(
+                eventId,
+                timeUntilEventMins.toInt()
+            )
 
 
             LocalStorageManager.deleteNotification(eventId, timeUntilEventMins)

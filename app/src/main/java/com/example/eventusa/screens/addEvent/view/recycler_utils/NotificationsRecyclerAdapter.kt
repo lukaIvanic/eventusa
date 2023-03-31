@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
-import com.example.eventusa.extensions.equalsIgnoreOrder
 import com.example.eventusa.screens.addEvent.data.NotificationPreset
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -78,13 +77,9 @@ class NotificationsRecyclerAdapter(
     }
 
     fun updateData(newNotifInfos: List<NotificationPreset>) {
-        if (newNotifInfos.equalsIgnoreOrder(notificationInfos)) return
-        val size = notificationInfos.size
-        emptyList()
-        notifyItemRangeRemoved(0, size - 1)
-        newNotifInfos.forEach { notifInfo ->
-            addNotif(notifInfo)
-        }
+        notificationInfos.clear()
+        notificationInfos.addAll(newNotifInfos)
+        notifyDataSetChanged()
     }
 
     fun addNotif(notificationPreset: NotificationPreset) {
@@ -98,11 +93,8 @@ class NotificationsRecyclerAdapter(
     }
 
 
-    fun deleteNotif(notifIndex: Int): NotificationPreset {
-        val notifInfo = notificationInfos[notifIndex]
-        notificationInfos.removeAt(notifIndex)
-        notifyItemRemoved(notifIndex)
-        return notifInfo
+    fun getNotif(notifIndex: Int): NotificationPreset {
+        return notificationInfos[notifIndex]
     }
 
 

@@ -36,13 +36,19 @@ class NotifManager(
 
         val notificationId = generateNotificationId(eventId, minsUntilEvent)
         // 1
-        val pendingIntent = createExactAlarmIntent(notificationId, title, desc)
+        val pendingIntent =
+            createExactAlarmIntent(notificationId, title, desc, eventId, minsUntilEvent)
         // 2
         val alarmClockInfo =
             AlarmManager.AlarmClockInfo(eventTimeEpochSeconds * 1000L, pendingIntent)
         // 3
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+    }
 
+    fun deleteExactAlarm(eventId: Int, minsUntilEvent: Int) {
+        val notifId = generateNotificationId(eventId, minsUntilEvent)
+        val pendingIntent = createExactAlarmIntent(notifId)
+        alarmManager.cancel(pendingIntent)
     }
 
     fun canScheduleExactAlarms(): Boolean {
@@ -56,8 +62,10 @@ class NotifManager(
 
     private fun createExactAlarmIntent(
         notificationId: Int,
-        title: String,
-        desc: String,
+        title: String = "",
+        desc: String = "",
+        eventId: Int = -1,
+        minsUntilEvent: Int = -1,
     ): PendingIntent {
 
         // 1
@@ -65,14 +73,18 @@ class NotifManager(
         intent.putExtra("notification_id", notificationId)
         intent.putExtra("notification_title", title)
         intent.putExtra("notification_desc", desc)
+        intent.putExtra("event_id", eventId)
+        intent.putExtra("mins_until_event", minsUntilEvent)
+
 
         // 2
         return PendingIntent.getBroadcast(
             context,
             notificationId,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+
     }
 
 

@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.eventusa.R
 import com.example.eventusa.screens.addEvent.view.AddEventActivity
+import com.example.eventusa.utils.LocalStorageManager
 
 private const val NOTIFICATION_CHANNEL_ID = "event_alarms"
 private const val NOTIFICATION_CHANNEL_NAME = "Event Alarms"
@@ -20,7 +21,11 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
         val notificationId = intent.getIntExtra("notification_id", -1)
         val title = intent.getStringExtra("notification_title") ?: return
         val desc = intent.getStringExtra("notification_desc") ?: ""
+        val eventId = intent.getIntExtra("event_id", -1)
+        val minsUntilEvent = intent.getIntExtra("mins_until_event", -1)
 
+        LocalStorageManager.setupSharedPreferences(context)
+        LocalStorageManager.deleteNotification(eventId, minsUntilEvent.toLong())
         // 2
         showNotification(
             context,
@@ -28,7 +33,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
             NOTIFICATION_CHANNEL_NAME,
             notificationId,
             title,
-            desc
+            desc,
         )
     }
 
@@ -38,7 +43,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
         channelName: String,
         notificationId: Int,
         contentTitle: String,
-        contentDesc: String
+        contentDesc: String,
     ) {
         val startAppIntent = Intent(context, AddEventActivity::class.java)
         val startAppPendingIntent = PendingIntent.getActivity(
@@ -82,6 +87,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
         val notification = notificationBuilder.build()
 
         notificationManager.notify(notificationId, notification)
+
 
     }
 

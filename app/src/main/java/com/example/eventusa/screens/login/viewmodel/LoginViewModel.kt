@@ -50,6 +50,14 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
 
     }
 
+    fun autoLoginStart() {
+        viewModelScope.launch {
+            _loginStateFlow.emit(ResultOf.Loading)
+        }
+
+
+    }
+
 }
 
 class LoginViewModelFactory(val userRepository: UserRepository) : ViewModelProvider.Factory {

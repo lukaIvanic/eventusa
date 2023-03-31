@@ -537,7 +537,7 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun deleteNotif(notifIndex: Int){
-        val notifInfo = notifsAdapter.deleteNotif(notifIndex)
+        val notifInfo = notifsAdapter.getNotif(notifIndex)
         viewmodel.deleteNotification(
             this@AddEventActivity,
             notifInfo.notifTimeBeforeEventMins
