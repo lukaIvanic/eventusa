@@ -8,6 +8,7 @@ inline fun <reified T> ResultOf<T>.doIfFailure(callback: (error: Exception) -> U
     }
 }
 
+
 inline fun <reified T> ResultOf<T>.doIfSucces(callback: (value: T) -> Unit) {
     if (this is ResultOf.Success) {
         callback(this.data)
@@ -28,14 +29,5 @@ inline fun <reified T, reified R> ResultOf<T>.map(transform: (T) -> R): ResultOf
         }
         is ResultOf.Error -> this
         is ResultOf.Loading -> this
-    }
-}
-
-inline fun <reified T, reified R> ResultOf<T>.adjustType(): ResultOf<R> {
-    return when (this) {
-        is ResultOf.Success, is ResultOf.Loading -> {
-            ResultOf.Error(Exception("Not possible, ignore"))
-        }
-        is ResultOf.Error -> this
     }
 }

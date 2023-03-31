@@ -10,7 +10,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-
+/**
+ * Creates an observable tick in intervals.
+ * Observers request new data on every tick
+ * @param intervalMilis defines repeating interval length in milliseconds.
+ */
 class TickHandler(
     private val externalScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
     private val intervalMilis: Long = 5000,
@@ -30,6 +34,9 @@ class TickHandler(
         }
     }
 
+    /**
+     * Creates a new tick immediately.
+     */
     private suspend fun updateTick() {
         tickFlow.emit(Unit)
         delay(intervalMilis)
@@ -39,6 +46,9 @@ class TickHandler(
 
 }
 
+/**
+ * Repository for all events.
+ */
 class EventsRepository(
     private val tickHandler: TickHandler,
     private val externalScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
@@ -52,9 +62,15 @@ class EventsRepository(
         }
     }
 
+    /**
+     * Source events
+     */
     private val _events by lazy { MutableSharedFlow<ResultOf<MutableList<RINetEvent>>>() }
 
-    val cachedSuccessEvents =
+    /**
+     * Abstraction necessary for retrieving recent data
+     */
+    private val cachedSuccessEvents =
         _events
             .filter { it is ResultOf.Success }
             .map { it as ResultOf.Success }
@@ -64,7 +80,9 @@ class EventsRepository(
                 1
             )
 
-
+    /**
+     * Used as a constant stream of events data.
+     */
     val currentEventsResult =
         _events
             .shareIn(

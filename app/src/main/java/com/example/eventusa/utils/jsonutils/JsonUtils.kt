@@ -21,7 +21,7 @@ object JsonUtils {
         return mapper.readValue(jsonString, listType)
     }
 
-    inline fun <reified T> fromJsonToT(jsonString: String): T {
+    inline fun <reified T> fromJsonToObject(jsonString: String): T {
         return mapper.readValue(jsonString, T::class.java)
     }
 
