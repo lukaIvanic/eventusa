@@ -5,44 +5,42 @@ import android.content.SharedPreferences
 
 object LocalStorageManager {
 
-    private var savedSharedPreferences: SharedPreferences? = null
+    lateinit var sharedPreferences: SharedPreferences
 
-    private var sharedPreferences: (context: Context) -> SharedPreferences = { context ->
-        if (savedSharedPreferences == null) {
-            savedSharedPreferences =
+    // initialized in EventusaApplication class
+    fun setupSharedPreferences(context: Context) {
+        if (this::sharedPreferences.isInitialized.not()) {
+            sharedPreferences =
                 context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE)
         }
-        savedSharedPreferences!!
     }
 
-
-    fun readRememberMe(context: Context): Boolean {
-        return sharedPreferences(context).getBoolean("rememberMe", false)
+    fun readRememberMe(): Boolean {
+        return sharedPreferences.getBoolean("rememberMe", false)
     }
 
-    fun turnOnRememberMe(context: Context){
-        val myEdit = sharedPreferences(context).edit()
+    fun turnOnRememberMe() {
+        val myEdit = sharedPreferences.edit()
 
         myEdit.putBoolean("rememberMe", true)
 
         myEdit.apply()
     }
 
-    fun turnOffRememberMe(context: Context){
-        val myEdit = sharedPreferences(context).edit()
+    fun turnOffRememberMe() {
+        val myEdit = sharedPreferences.edit()
 
         myEdit.putBoolean("rememberMe", false)
 
         myEdit.apply()
 
-        saveUserAndPass(context, "", "")
+        saveUserAndPass("", "")
 
     }
 
 
-
-    fun saveUserAndPass(context: Context, user: String, pass: String) {
-        val myEdit = sharedPreferences(context).edit()
+    fun saveUserAndPass(user: String, pass: String) {
+        val myEdit = sharedPreferences.edit()
 
         myEdit.putString("user", user)
         myEdit.putString("pass", pass)
@@ -50,35 +48,85 @@ object LocalStorageManager {
         myEdit.apply()
     }
 
-    fun readUsername(context: Context): String? {
-        return sharedPreferences(context).getString("user", null)
+    fun readUsername(): String? {
+        return sharedPreferences.getString("user", null)
     }
 
-    fun readPassword(context: Context): String? {
-        return sharedPreferences(context).getString("pass", null)
+    fun readPassword(): String? {
+        return sharedPreferences.getString("pass", null)
     }
 
-
-
-//TODO: RENAME
-    // Returns true if user checked "Dont ask me again" for "date before today" alert
-    fun readAskConfirmDateBefore(context: Context): Boolean {
-        return sharedPreferences(context).getBoolean("askAgainDateBefore", true)
+    fun readAskConfirmDateBefore(): Boolean {
+        return sharedPreferences.getBoolean("askAgainDateBefore", true)
     }
-    fun setCheckedAskConfirmDateBefore(context: Context){
-        val myEdit = sharedPreferences(context).edit()
+
+    fun setCheckedAskConfirmDateBefore() {
+        val myEdit = sharedPreferences.edit()
 
         myEdit.putBoolean("askAgainDateBefore", true)
 
         myEdit.apply()
     }
 
-    fun setUncheckedAskConfirmDateBefore(context: Context){
-        val myEdit = sharedPreferences(context).edit()
+    fun setUncheckedAskConfirmDateBefore() {
+        val myEdit = sharedPreferences.edit()
 
         myEdit.putBoolean("askAgainDateBefore", false)
 
         myEdit.apply()
+    }
+
+    fun addNotification(eventId: Int, notifTimeUntilEventMins: Long): List<Long> {
+        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
+
+        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
+        notifsList.add(notifTimeUntilEventMins)
+
+        val newNotifsString = notifsList.savedNotifsToString()
+        saveNotifications(eventId, newNotifsString)
+        return notifsList
+    }
+
+    fun readNotifications(eventId: Int): List<Long> {
+        val notifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
+        return notifsString.savedNotifsToList()
+    }
+
+    fun deleteNotification(eventId: Int, notifTimeUntilEventMins: Long) {
+        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
+
+        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
+        notifsList.remove(notifTimeUntilEventMins)
+
+        val newNotifsString = notifsList.savedNotifsToString()
+        saveNotifications(eventId, newNotifsString)
+    }
+
+    fun saveNotifications(eventId: Int, notifsString: String) {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putString(eventId.toString(), notifsString)
+
+        myEdit.apply()
+
+
+    }
+
+    fun String.savedNotifsToList(): List<Long> {
+
+        if (this.trim().isEmpty()) return ArrayList()
+
+        return this.split(" ").map { it.toLong() }
+
+    }
+
+
+    fun List<Long>.savedNotifsToString(): String {
+        var string = ""
+        this.forEach {
+            string += "$it "
+        }
+        return string.trim()
     }
 
 
