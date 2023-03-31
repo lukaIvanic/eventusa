@@ -2,12 +2,21 @@ package com.example.eventusa.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.eventusa.utils.LocalStorageManager.sharedPreferences
 
+/** LocalStorageManager
+ *  API for interacting with shared preferences.
+ *  Provides precise methods for storage operations.
+ *  @property sharedPreferences gets initialized in EventusaApplication
+ *
+ */
 object LocalStorageManager {
 
     lateinit var sharedPreferences: SharedPreferences
 
-    // initialized in EventusaApplication class
+    /**
+     * Initialized in EventusaApplication class
+     */
     fun setupSharedPreferences(context: Context) {
         if (this::sharedPreferences.isInitialized.not()) {
             sharedPreferences =
@@ -57,13 +66,13 @@ object LocalStorageManager {
     }
 
     fun readAskConfirmDateBefore(): Boolean {
-        return sharedPreferences.getBoolean("askAgainDateBefore", true)
+        return sharedPreferences.getBoolean("askConfirmDateBefore", true)
     }
 
     fun setCheckedAskConfirmDateBefore() {
         val myEdit = sharedPreferences.edit()
 
-        myEdit.putBoolean("askAgainDateBefore", true)
+        myEdit.putBoolean("askConfirmDateBefore", true)
 
         myEdit.apply()
     }
@@ -71,38 +80,41 @@ object LocalStorageManager {
     fun setUncheckedAskConfirmDateBefore() {
         val myEdit = sharedPreferences.edit()
 
-        myEdit.putBoolean("askAgainDateBefore", false)
+        myEdit.putBoolean("askConfirmDateBefore", false)
 
         myEdit.apply()
     }
 
+    /**
+     * Reads current saved notifications and saves current plus new notification.
+     */
     fun addNotification(eventId: Int, notifTimeUntilEventMins: Long): List<Long> {
-        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
+        val notifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
 
-        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
+        var notifsList = notifsString.savedNotifsStringToList() as MutableList
         notifsList.add(notifTimeUntilEventMins)
 
-        val newNotifsString = notifsList.savedNotifsToString()
+        val newNotifsString = notifsList.savedNotifsListToString()
         saveNotifications(eventId, newNotifsString)
         return notifsList
     }
 
     fun readNotifications(eventId: Int): List<Long> {
         val notifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
-        return notifsString.savedNotifsToList()
+        return notifsString.savedNotifsStringToList()
     }
 
     fun deleteNotification(eventId: Int, notifTimeUntilEventMins: Long) {
-        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
+        val notifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
 
-        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
+        var notifsList = notifsString.savedNotifsStringToList() as MutableList
         notifsList.remove(notifTimeUntilEventMins)
 
-        val newNotifsString = notifsList.savedNotifsToString()
+        val newNotifsString = notifsList.savedNotifsListToString()
         saveNotifications(eventId, newNotifsString)
     }
 
-    fun saveNotifications(eventId: Int, notifsString: String) {
+    private fun saveNotifications(eventId: Int, notifsString: String) {
         val myEdit = sharedPreferences.edit()
 
         myEdit.putString(eventId.toString(), notifsString)
@@ -112,7 +124,12 @@ object LocalStorageManager {
 
     }
 
-    fun String.savedNotifsToList(): List<Long> {
+    /**
+     * savedNotifsStringToList and savedNotifsListToString.
+     * Custom serializer of events and notification for that event. One (event) to many (notifications) relation.
+     */
+
+    fun String.savedNotifsStringToList(): List<Long> {
 
         if (this.trim().isEmpty()) return ArrayList()
 
@@ -121,7 +138,7 @@ object LocalStorageManager {
     }
 
 
-    fun List<Long>.savedNotifsToString(): String {
+    fun List<Long>.savedNotifsListToString(): String {
         var string = ""
         this.forEach {
             string += "$it "

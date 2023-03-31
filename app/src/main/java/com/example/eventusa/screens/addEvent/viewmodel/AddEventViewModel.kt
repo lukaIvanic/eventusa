@@ -3,13 +3,12 @@ package com.example.eventusa.screens.addEvent.viewmodel
 import android.content.Context
 import androidx.lifecycle.*
 import com.example.eventusa.extensions.PATTERN_UI_TIME
-import com.example.eventusa.extensions.adjustType
 import com.example.eventusa.extensions.map
 import com.example.eventusa.extensions.toParsedString
 import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.repository.EventsRepository
-import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.screens.addEvent.model.NotificationPreset
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.LocalStorageManager
 import com.example.eventusa.utils.notifications.MAX_MINS_UNTIL_EVENT
@@ -23,7 +22,9 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-//TODO move to proper place
+/**
+ * UI state of AddEventActivity
+ */
 data class AddEventUiState(
     var eventId: Int,
     var riNetEvent: RINetEvent,
@@ -43,10 +44,19 @@ data class AddEventUiState(
     }
 }
 
+/**
+ * Defines the default event duration time in minutes.
+ * Example, 12:00-13:00 with value 60L.
+ * Example, 12:00-12:30 with value 30L.
+ */
 const val defaultEventDuration = 60L
 
 class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
+    /**
+     * Used for triggering new events with user inputs.
+     * Must be careful to update this value in sync with _uiState for data consistency.
+     */
     private var currUiState =
         AddEventUiState(
             -100,
@@ -109,7 +119,8 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
             withContext(Dispatchers.Default) {
                 val result = eventsRepository.getEventWithId(eventId)
                 when (result) {
-                    is ResultOf.Error, is ResultOf.Loading -> _uiState.value = result.adjustType()
+                    is ResultOf.Error -> result
+                    is ResultOf.Loading -> _uiState.value = result
                     is ResultOf.Success -> {
                         _uiState.value = result.map {
                             AddEventUiState(eventId, it)

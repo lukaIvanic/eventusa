@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
-import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.screens.addEvent.model.NotificationPreset
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -17,7 +17,9 @@ class NotificationsRecyclerAdapter(
     private val notificationInfos: MutableList<NotificationPreset> = ArrayList(),
 ) : RecyclerView.Adapter<NotificationsRecyclerAdapter.NotificationViewHolder>() {
 
-
+    /**
+     * Used for notifying activity of a cancel button click on notification row.
+     */
     private val _cancelNotifFlow: MutableSharedFlow<Int> =
         MutableSharedFlow(
             replay = 0,

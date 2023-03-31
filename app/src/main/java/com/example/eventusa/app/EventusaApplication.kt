@@ -6,6 +6,9 @@ import com.example.eventusa.repository.TickHandler
 import com.example.eventusa.repository.UserRepository
 import com.example.eventusa.utils.LocalStorageManager
 
+/**
+ * Application extension for dependency injection alternative
+ */
 class EventusaApplication: Application() {
 
     val eventsRepository = EventsRepository(TickHandler())
