@@ -2,24 +2,18 @@ package com.example.eventusa.screens.addEvent.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.*
-import com.example.eventusa.extensions.PATTERN_UI_TIME
-import com.example.eventusa.extensions.adjustType
-import com.example.eventusa.extensions.map
-import com.example.eventusa.extensions.toParsedString
-import com.example.eventusa.network.Network
+import com.example.eventusa.caching.room.Room
+import com.example.eventusa.caching.room.extraentities.EventNotification
 import com.example.eventusa.network.ResultOf
-import com.example.eventusa.repository.EventsRepository
-import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.notifications.NotifManager
+import com.example.eventusa.repositories.EventsRepositoryLocal
+import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.events.data.RINetEvent
-import com.example.eventusa.utils.LocalStorageManager
-import com.example.eventusa.utils.notifications.MAX_MINS_UNTIL_EVENT
-import com.example.eventusa.utils.notifications.NotifManager
-import kotlinx.coroutines.Dispatchers
+import com.example.eventusa.utils.extensions.adjustType
+import com.example.eventusa.utils.extensions.map
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -28,15 +22,6 @@ data class AddEventUiState(
     var eventId: Int,
     var riNetEvent: RINetEvent,
 ) {
-    val notificationPresets: List<NotificationPreset>
-        get() {
-            return LocalStorageManager.readNotifications(eventId)
-                .mapNotNull { notifTimeBeforeEventMins ->
-                    NotificationPreset.get(
-                        notifTimeBeforeEventMins
-                    )
-                }
-        }
 
     override fun equals(other: Any?): Boolean {
         return false
@@ -45,7 +30,7 @@ data class AddEventUiState(
 
 const val defaultEventDuration = 60L
 
-class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
+class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel() {
 
     private var currUiState =
         AddEventUiState(
@@ -68,17 +53,31 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
     private val _deleteEventState = MutableSharedFlow<ResultOf<Boolean>>()
     val deleteEventState = _deleteEventState.asSharedFlow()
 
-    suspend fun updateOrInsertEvent() {
+    private val _notificationsEventState = MutableSharedFlow<ResultOf<NotificationsAdapterEvents>>()
+    val notificationsEventState = _notificationsEventState.asSharedFlow()
+
+    suspend fun updateOrInsertEvent(context: Context) {
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
 
+//                if (currUiState.eventId > 0) {
+//                    val res = Network.updateEvent(currUiState.riNetEvent)
+//                    _postEventState.emit(res.map { currUiState.riNetEvent })
+//                } else {
+//                    val res = Network.insertEvent(currUiState.riNetEvent)
+//                    _postEventState.emit(res.map { currUiState.riNetEvent })
+//                }
+
                 if (currUiState.eventId > 0) {
-                    val res = Network.updateEvent(currUiState.riNetEvent)
-                    _postEventState.emit(res.map { currUiState.riNetEvent })
+
+                    eventsRepository.updateEvent(currUiState.riNetEvent)
+                    saveNotifications(context)
+                    _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
                 } else {
-                    val res = Network.insertEvent(currUiState.riNetEvent)
-                    _postEventState.emit(res.map { currUiState.riNetEvent })
+                    eventsRepository.addEvent(currUiState.riNetEvent)
+                    saveNotifications(context)
+                    _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
                 }
 
                 eventsRepository.makeUpdateTick()
@@ -94,10 +93,12 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
             withContext(Dispatchers.IO) {
 
                 _deleteEventState.emit(ResultOf.Loading)
+//
+//                val deleteResult = Network.deleteEvent(currUiState.eventId)
+//                _deleteEventState.emit(deleteResult)
 
-                val deleteResult = Network.deleteEvent(currUiState.eventId)
-                _deleteEventState.emit(deleteResult)
-
+                eventsRepository.deleteEvent(currUiState.eventId)
+                _deleteEventState.emit(ResultOf.Success(true))
                 eventsRepository.makeUpdateTick()
 
             }
@@ -119,84 +120,106 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
                 }
             }
 
+            _notificationsEventState.emit(
+                ResultOf.Success(
+                    NotificationsAdapterEvents.LOAD_EVENTS(
+                        Room.getEventNotifications(
+                            currUiState.riNetEvent.eventId
+                        )
+                    )
+                )
+            )
+        }
+
+
+    }
+
+    private val addedNotifications = mutableListOf<EventNotification>()
+    private val deletedNotifications = mutableListOf<EventNotification>()
+    private var changedStartDateTime: LocalDateTime? = null
+
+    suspend fun addNotification(minsUntilEvent: Int): Boolean =
+        withContext(NonCancellable) {
+
+            val eventNotification =
+                EventNotification(currUiState.riNetEvent.eventId, minsUntilEvent)
+
+
+            if (eventNotification.minutesBeforeEvent < 0) {
+                _notificationsEventState.emit(ResultOf.Error(Exception("Invalid notification time.")))
+                return@withContext false
+            }
+
+
+            if (LocalDateTime.now() >= currUiState.riNetEvent.startDateTime) {
+                _notificationsEventState.emit(ResultOf.Error(java.lang.Exception("Can't set notifications for an event that already started.")))
+                return@withContext false
+            }
+
+            addedNotifications.add(eventNotification)
+            return@withContext true
+        }
+
+    fun removeNotification(eventNotification: EventNotification) {
+
+        deletedNotifications.add(eventNotification)
+
+    }
+
+    fun saveNotifications(context: Context) {
+        CoroutineScope(NonCancellable).launch {
+
+            deletedNotifications.forEach { eventNotification ->
+                NotifManager(context).deleteEventNotification(
+                    eventNotification.notifId,
+                )
+
+                _notificationsEventState.emit(
+                    ResultOf.Success(
+                        NotificationsAdapterEvents.DELETE_EVENT(
+                            eventNotification
+                        )
+                    )
+                )
+            }
+
+            changedStartDateTime?.let {
+                updateNotifications(context)
+            }
+
+            addedNotifications.forEach { eventNotification ->
+                val success = NotifManager(context).createOrUpdateEventNotif(
+                    currUiState.riNetEvent,
+                    eventNotification.minutesBeforeEvent
+                )
+
+                if (!success) {
+                    _notificationsEventState.emit(ResultOf.Error(Exception("Couldn't create notification")))
+                    return@launch
+                }
+
+
+                _notificationsEventState.emit(
+                    ResultOf.Success(
+                        NotificationsAdapterEvents.ADD_EVENT(
+                            eventNotification
+                        )
+                    )
+                )
+            }
         }
     }
 
-    fun setNotification(context: Context, timeUntilEventMins: Long) {
-
-        if (timeUntilEventMins > MAX_MINS_UNTIL_EVENT || timeUntilEventMins < 0) {
-            _uiState.value = ResultOf.Error(Exception("Invalid notification time."))
-            return
-        }
-
-        // notifsAdapter.addNotif(notificationInfo) // TODO: flow za notifikacije namjestit
-
-        // shared preferences -> readat za eventId sve notifikacije, read trenutno stanje, edit
-
-        // dodat u recycler, set notifikaciju s intentom, spremit u shared preferences
-
-        currUiState.riNetEvent.apply {
-
-            if (LocalDateTime.now() >= startDateTime) return@apply
-
-            val timePeriodDesc =
-                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
-                        endDateTime.toParsedString(PATTERN_UI_TIME)
-
-            val eventTimeEpochMillis =
-                startDateTime.atZone(ZoneId.systemDefault()).minusMinutes(timeUntilEventMins)
-                    .toEpochSecond()
-
-
-            NotifManager(context).scheduleExactAlarm(
-                eventId,
-                (title ?: "Event").replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-                timePeriodDesc,
-                eventTimeEpochMillis,
-                timeUntilEventMins.toInt()
+    suspend fun updateNotifications(context: Context) {
+        val eventNotifications = Room.getEventNotifications(currUiState.riNetEvent.eventId)
+        eventNotifications.forEach {
+            NotifManager(context).createOrUpdateEventNotif(
+                currUiState.riNetEvent,
+                it.minutesBeforeEvent,
+                it.notifId
             )
-
-
-            LocalStorageManager.addNotification(eventId, timeUntilEventMins)
-
-            _uiState.value = ResultOf.Success(currUiState.copy())
-//                        NotifManager(this@AddEventActivity).scheduleExactAlarm(id, title, now.until(rinetEvent.startDateTime, ChronoUnit.SECONDS))
-
         }
-    }
 
-    fun deleteNotification(context: Context, timeUntilEventMins: Long) {
-
-        // notifsAdapter.removeNotif(notificationInfo) // TODO: flow za notifikacije namjestit
-
-        // shared preferences -> readat za eventId sve notifikacije, read trenutno stanje, edit
-
-        // dodat u recycler, set notifikaciju s intentom, spremit u shared preferences
-
-        currUiState.riNetEvent.apply {
-
-            if (LocalDateTime.now() >= startDateTime) return@apply
-
-//            val timePeriodDesc =
-//                startDateTime.toParsedString(PATTERN_UI_TIME) + "-" +
-//                        endDateTime.toParsedString(PATTERN_UI_TIME)
-//
-//            val timeFromNowToNotifSeconds = LocalDateTime.now()
-//                .until(startDateTime.minusMinutes(timeUntilEventMins), ChronoUnit.SECONDS)
-
-
-            NotifManager(context).deleteExactAlarm(
-                eventId,
-                timeUntilEventMins.toInt()
-            )
-
-
-            LocalStorageManager.deleteNotification(eventId, timeUntilEventMins)
-
-            _uiState.value = ResultOf.Success(currUiState.copy())
-//                        NotifManager(this@AddEventActivity).scheduleExactAlarm(id, title, now.until(rinetEvent.startDateTime, ChronoUnit.SECONDS))
-
-        }
     }
 
     fun setTitle(title: String) {
@@ -227,6 +250,9 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
 
         _uiState.value = ResultOf.Success(currUiState.copy())
+
+        changedStartDateTime = currUiState.riNetEvent.startDateTime
+
     }
 
     fun startTimeSet(hour: Int, minute: Int) {
@@ -242,6 +268,8 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
         _uiState.value = ResultOf.Success(currUiState.copy())
 
+
+        changedStartDateTime = currUiState.riNetEvent.startDateTime
     }
 
 
@@ -312,7 +340,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
 }
 
-class AddEventViewModelFactory(private val eventsRepository: EventsRepository) :
+class AddEventViewModelFactory(private val eventsRepository: EventsRepositoryLocal) :
     ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

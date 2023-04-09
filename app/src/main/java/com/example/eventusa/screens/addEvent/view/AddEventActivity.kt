@@ -15,15 +15,23 @@ import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
-import com.example.eventusa.extensions.*
+import com.example.eventusa.caching.room.extraentities.EventNotification
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
+import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
-import com.example.eventusa.utils.*
+import com.example.eventusa.utils.adaptStyleToTag
+import com.example.eventusa.utils.animateChange
+import com.example.eventusa.utils.extensions.*
+import com.example.eventusa.utils.setChipDefault
+import com.example.eventusa.utils.setTextAnimated
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collectLatest
@@ -108,6 +116,62 @@ class AddEventActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            viewmodel.postEventState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { result ->
+                    if (result is ResultOf.Loading) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
+                    }
+
+                    result.doIfFailure {
+                        Toast.makeText(
+                            this@AddEventActivity,
+                            it.localizedMessage,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    result.doIfSucces {
+                        finish()
+                    }
+                }
+        }
+
+        lifecycleScope.launch {
+            viewmodel.notificationsEventState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { result ->
+
+                    result.doIfFailure {
+                        Toast.makeText(
+                            this@AddEventActivity, it.localizedMessage, Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    result.doIfSucces {
+                        when (it) {
+
+                            is NotificationsAdapterEvents.LOAD_EVENTS -> {
+                                notifsAdapter.initialLoadEvents(it.eventNotificationsList)
+                            }
+
+                            is NotificationsAdapterEvents.ADD_EVENT -> {
+                                notifsAdapter.addNotif(it.eventNotification)
+                            }
+
+                            is NotificationsAdapterEvents.DELETE_EVENT -> {
+                                notifsAdapter.deleteNotif(it.eventNotification)
+                            }
+
+                        }
+                    }
+
+                }
+
+        }
+
+        lifecycleScope.launch {
+
             viewmodel.uiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { result ->
                     result.doIfLoading {
@@ -149,7 +213,6 @@ class AddEventActivity : AppCompatActivity() {
                             if (summaryEditText.text.isEmpty()) summaryEditText.setText(description)
 
                         }
-                        notifsAdapter.updateData(state.notificationPresets)
                     }
 
                 }
@@ -172,9 +235,9 @@ class AddEventActivity : AppCompatActivity() {
         notifsRecyclerView.adapter = notifsAdapter
 
         lifecycleScope.launchWhenStarted {
-            notifsAdapter.cancelNotifFlow.collect { notifIndex ->
-
-                deleteNotif(notifIndex)
+            notifsAdapter.cancelNotifFlow.collect { eventNotif ->
+                notifsAdapter.deleteNotif(eventNotif)
+                viewmodel.removeNotification(eventNotif)
             }
         }
     }
@@ -254,6 +317,10 @@ class AddEventActivity : AppCompatActivity() {
         progressDialog.show()
     }
 
+    private fun hideProgressDialog() {
+        progressDialog.hide()
+    }
+
     private fun setupTouch() {
 
         cancelButton.setOnClickListener {
@@ -311,7 +378,25 @@ class AddEventActivity : AppCompatActivity() {
                     -1
                 ) { _, index ->
 
-                    addNotif(NotificationPreset.getPresetByIndex(index))
+                    val minsBeforeEvent =
+                        NotificationPreset.getPresetByIndex(index).notifTimeBeforeEventMins
+
+
+
+                    lifecycleScope.launch {
+                        repeatOnLifecycle(Lifecycle.State.CREATED){
+                            val success = viewmodel.addNotification(minsBeforeEvent)
+                            if(!success) return@repeatOnLifecycle
+
+                            notifsAdapter.addNotif(
+                                EventNotification(
+                                    eventId = 0,
+                                    minutesBeforeEvent = minsBeforeEvent
+                                )
+                            )
+                        }
+                    }
+
 
                     chooseNotifDialog?.dismiss()
                 }
@@ -471,32 +556,8 @@ class AddEventActivity : AppCompatActivity() {
             viewmodel.setTitle(titleEditText.text.toString())
             viewmodel.setLocation(locationEditText.text.toString())
             viewmodel.setSummary(summaryEditText.text.toString())
-            viewmodel.updateOrInsertEvent()
+            viewmodel.updateOrInsertEvent(this@AddEventActivity)
 
-
-            viewmodel.postEventState.collect {
-
-                progressDialog.dismiss()
-
-                it.doIfFailure {
-                    Toast.makeText(
-                        this@AddEventActivity,
-                        "Error, ${it.localizedMessage}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                it.doIfSucces { rinetEvent ->
-                    Toast.makeText(this@AddEventActivity, "Event added!", Toast.LENGTH_SHORT)
-                        .show()
-
-                    //TODO: handle setting notifications
-                    notifsAdapter.getNotifs().forEach { notifTitle ->
-
-                    }
-
-                    finish()
-                }
-            }
         }
 
 
@@ -528,25 +589,9 @@ class AddEventActivity : AppCompatActivity() {
         }
     }
 
-    private fun addNotif(notifInfo: NotificationPreset) {
-        notifsAdapter.addNotif(notifInfo)
-        viewmodel.setNotification(
-            this@AddEventActivity,
-            notifInfo.notifTimeBeforeEventMins
-        )
-    }
-
-    private fun deleteNotif(notifIndex: Int){
-        val notifInfo = notifsAdapter.getNotif(notifIndex)
-        viewmodel.deleteNotification(
-            this@AddEventActivity,
-            notifInfo.notifTimeBeforeEventMins
-        )
-    }
-
 
     private fun getIntentEventId(): Int? {
-        val eventId = intent.getIntExtra("eventId", -550)
+        val eventId = intent.getIntExtra("event_id", -550)
         return if (eventId != -550) eventId else null
     }
 

@@ -6,11 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
-import com.example.eventusa.extensions.setCustomMargins
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventItemType
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.utils.extensions.getPeriod
+import com.example.eventusa.utils.extensions.setCustomMargins
 import java.time.format.DateTimeFormatter
 
 class EventsAdapter(
@@ -80,11 +81,7 @@ class EventsAdapter(
                 }
 
                 eventViewHolder.eventPeriodTextView.text =
-                    "${rinetEvent.startDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}–${
-                        rinetEvent.endDateTime.format(
-                            DateTimeFormatter.ofPattern("HH:mm")
-                        )
-                    }"
+                   rinetEvent.getPeriod()
 
             }
 
@@ -104,6 +101,9 @@ class EventsAdapter(
 
     fun updateEvents(eventItems: MutableList<EventItem>) {
 
+        eventItemList = eventItems
+        notifyDataSetChanged()
+        return
 
         val diffCallback = EventsDiffCallBack(this.eventItemList, eventItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)

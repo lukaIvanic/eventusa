@@ -3,16 +3,18 @@ package com.example.eventusa.screens.settings.view
 import android.app.AlarmManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.eventusa.R
-import com.example.eventusa.utils.LocalStorageManager
-import com.example.eventusa.utils.notifications.NotifManager
+import com.example.eventusa.caching.room.Room
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.google.android.material.switchmaterial.SwitchMaterial
-import java.time.LocalDateTime
-import java.time.ZoneId
-import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -21,6 +23,7 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var dateBeforeTodaySwitch: SwitchMaterial
 
     lateinit var notifTest: LinearLayout
+    lateinit var readDbTest: LinearLayout
 
     lateinit var alarmManager: AlarmManager
 
@@ -37,6 +40,7 @@ class SettingsActivity : AppCompatActivity() {
         dateBeforeTodaySwitch = findViewById(R.id.dateBeforeTodaySwitch)
 
         notifTest = findViewById(R.id.notifTestLayout)
+        readDbTest = findViewById(R.id.readDbTestLayout)
 
         loadSettings()
         handleClicks()
@@ -69,16 +73,33 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
 
-            NotifManager(this@SettingsActivity).scheduleExactAlarm(
-                Random.nextInt(0, 99999),
-                "Test from settings",
-                "13:00-14:00",
-                LocalDateTime.now().plusSeconds(10L).atZone(
-                    ZoneId.systemDefault()
-                ).toEpochSecond() * 1000L,
-                1
-            )
+//            NotifManager(this@SettingsActivity).scheduleExactAlarm(
+//                Random.nextInt(0, 99999),
+//                "Test from settings",
+//                "13:00-14:00",
+//                LocalDateTime.now().plusSeconds(10L).atZone(
+//                    ZoneId.systemDefault()
+//                ).toEpochSecond() * 1000L,
+//                1
+//            )
         }
+
+        readDbTest.setOnClickListener {
+            handleReadDbTest()
+        }
+    }
+
+    fun handleReadDbTest(){
+
+        lifecycleScope.launch{
+            repeatOnLifecycle(Lifecycle.State.CREATED){
+                val eventsList = Room.readAllEvents()
+                eventsList.forEach {
+                    Log.i("LUKA DB READ", "title: ${it.title}")
+                }
+            }
+        }
+
     }
 
 

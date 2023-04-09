@@ -1,4 +1,4 @@
-package com.example.eventusa.utils.notifications
+package com.example.eventusa.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context

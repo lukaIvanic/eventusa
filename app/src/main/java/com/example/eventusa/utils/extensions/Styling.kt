@@ -6,7 +6,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.ScaleAnimation
 import android.widget.TextView
 import com.example.eventusa.R
-import com.example.eventusa.extensions.dpToPx
+import com.example.eventusa.utils.extensions.dpToPx
 
 
 fun TextView.setTextAnimated(

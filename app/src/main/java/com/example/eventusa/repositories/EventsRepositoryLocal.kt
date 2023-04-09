@@ -1,19 +1,21 @@
-package com.example.eventusa.repository
+package com.example.eventusa.repositories
 
-import com.example.eventusa.extensions.doIfSucces
-import com.example.eventusa.network.Network
+import com.example.eventusa.caching.room.Room
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.data.RINetEvent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.example.eventusa.utils.extensions.doIfSucces
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 
-class TickHandler(
+/**
+ * Creates an observable tick in intervals.
+ * Observers request new data on every tick
+ * @param intervalMilis defines repeating interval length in milliseconds.
+ */
+class TickHandlerLocal(
     private val externalScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-    private val intervalMilis: Long = 5000,
+    private val intervalMilis: Long = 5000000,
 ) {
 
     val tickFlow: MutableSharedFlow<Unit> = MutableSharedFlow(replay = 1)
@@ -30,6 +32,9 @@ class TickHandler(
         }
     }
 
+    /**
+     * Creates a new tick immediately.
+     */
     private suspend fun updateTick() {
         tickFlow.emit(Unit)
         delay(intervalMilis)
@@ -39,8 +44,11 @@ class TickHandler(
 
 }
 
-class EventsRepository(
-    private val tickHandler: TickHandler,
+/**
+ * Repository for all events, but only connects with room db (local storage).
+ */
+class EventsRepositoryLocal(
+    private val tickHandler: TickHandlerLocal,
     private val externalScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
 
@@ -52,9 +60,16 @@ class EventsRepository(
         }
     }
 
-    private val _events by lazy { MutableSharedFlow<ResultOf<MutableList<RINetEvent>>>() }
+    /**
+     * Events source
+     */
+    private var _events: MutableSharedFlow<ResultOf<MutableList<RINetEvent>>> = MutableSharedFlow()
 
-    val cachedSuccessEvents =
+
+    /**
+     * Abstraction necessary for retrieving recent data
+     */
+    private val cachedSuccessEvents =
         _events
             .filter { it is ResultOf.Success }
             .map { it as ResultOf.Success }
@@ -64,7 +79,9 @@ class EventsRepository(
                 1
             )
 
-
+    /**
+     * Used as a constant stream of events data.
+     */
     val currentEventsResult =
         _events
             .shareIn(
@@ -73,18 +90,34 @@ class EventsRepository(
                 1
             )
 
+    public suspend fun makeEventsUpdate(){
+        refreshEvents()
+    }
 
     private suspend fun refreshEvents() {
         _events.emit(ResultOf.Loading)
         try {
-            val newEvents = Network.getEvents()
+            val newEvents: MutableList<RINetEvent> = Room.readAllEvents() as MutableList
             _events.emit(ResultOf.Success(newEvents))
         } catch (e: Exception) {
             _events.emit(ResultOf.Error(e))
         }
     }
 
+    // Create
+    suspend fun addEvent(rinetEvent: RINetEvent) {
+        Room.insertEvent(rinetEvent)
+    }
+
+    // Read
     fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
+
+        if(cachedSuccessEvents.replayCache.isEmpty()){
+            runBlocking {
+                refreshEvents()
+            }
+        }
+
 
         cachedSuccessEvents.replayCache
             .last()
@@ -97,6 +130,18 @@ class EventsRepository(
         return ResultOf.Error(Exception("Couldn't find event, was it deleted recently?"))
 
     }
+
+    // Update
+    suspend fun updateEvent(rinetEvent: RINetEvent){
+        Room.updateEvent(rinetEvent)
+    }
+
+    // Delete
+    suspend fun deleteEvent(eventId: Int){
+        Room.deleteEvent(eventId)
+    }
+
+
 
     fun makeUpdateTick() {
         tickHandler.makeTick()

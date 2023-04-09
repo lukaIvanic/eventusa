@@ -15,8 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
-import com.example.eventusa.extensions.doIfFailure
-import com.example.eventusa.extensions.doIfSucces
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.addEvent.view.AddEventActivity
 import com.example.eventusa.screens.events.EventsViewModel
@@ -25,7 +24,8 @@ import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.events.view.recycler_utils.EventsAdapter
 import com.example.eventusa.screens.login.view.LoginActivity
 import com.example.eventusa.screens.settings.view.SettingsActivity
-import com.example.eventusa.utils.LocalStorageManager
+import com.example.eventusa.utils.extensions.doIfFailure
+import com.example.eventusa.utils.extensions.doIfSucces
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -132,7 +132,7 @@ class EventsActivity : AppCompatActivity() {
     fun onEventClick(rinetEvent: RINetEvent? = null) {
         val intent = Intent(this@EventsActivity, AddEventActivity::class.java)
         rinetEvent?.eventId?.let {
-            intent.putExtra("eventId", it)
+            intent.putExtra("event_id", it)
         }
 
         startActivity(intent)

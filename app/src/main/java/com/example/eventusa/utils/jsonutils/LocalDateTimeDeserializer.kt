@@ -1,7 +1,7 @@
 package com.example.eventusa.utils.jsonutils
 
-import com.example.eventusa.extensions.PATTERN_SERVER
-import com.example.eventusa.extensions.toLocalDateTime
+import com.example.eventusa.utils.extensions.PATTERN_SERVER
+import com.example.eventusa.utils.extensions.toLocalDateTime
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer

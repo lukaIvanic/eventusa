@@ -8,17 +8,29 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
-import com.example.eventusa.screens.addEvent.data.NotificationPreset
+import com.example.eventusa.caching.room.extraentities.EventNotification
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
+
+sealed class NotificationsAdapterEvents {
+
+    class LOAD_EVENTS(val eventNotificationsList: List<EventNotification>) :
+        NotificationsAdapterEvents()
+
+    class ADD_EVENT(val eventNotification: EventNotification) : NotificationsAdapterEvents()
+
+    class DELETE_EVENT(val eventNotification: EventNotification) : NotificationsAdapterEvents()
+
+}
+
 class NotificationsRecyclerAdapter(
-    private val notificationInfos: MutableList<NotificationPreset> = ArrayList(),
+    private var eventNotifications: MutableList<EventNotification> = ArrayList(),
 ) : RecyclerView.Adapter<NotificationsRecyclerAdapter.NotificationViewHolder>() {
 
 
-    private val _cancelNotifFlow: MutableSharedFlow<Int> =
+    private val _cancelNotifFlow: MutableSharedFlow<EventNotification> =
         MutableSharedFlow(
             replay = 0,
             extraBufferCapacity = 1,
@@ -38,7 +50,8 @@ class NotificationsRecyclerAdapter(
             notifCancelButton = itemView.findViewById(R.id.cancelNotifRowButton)
 
             notifCancelButton.setOnClickListener {
-                val wasEmitSuccessful = _cancelNotifFlow.tryEmit(adapterPosition)
+                val wasEmitSuccessful =
+                    _cancelNotifFlow.tryEmit(eventNotifications[adapterPosition])
                 //TODO: try to do something with this emitted value?
             }
 
@@ -59,43 +72,38 @@ class NotificationsRecyclerAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
         val pos = position
-        notificationInfos[pos].apply {
-            holder.notifDescTextView.text = "$notifTimeBeforeEventMins minutes before"
+        eventNotifications[pos].apply {
+            holder.notifDescTextView.text = "${this.minutesBeforeEvent} minutes before"
         }
 
     }
 
 
     override fun getItemCount(): Int {
-        return notificationInfos.size
+        return eventNotifications.size
     }
 
-    fun emptyList() {
-        val size = notificationInfos.size
-        notificationInfos.clear()
-        notifyItemRangeRemoved(0, size - 1)
+    /**
+     * Only activates once, on initialization of the activity.
+     */
+    fun initialLoadEvents(eventNotifications: List<EventNotification>) {
+        if (this.eventNotifications.isNotEmpty()) return
+
+        this.eventNotifications.addAll(eventNotifications)
+        notifyItemRangeInserted(0, this.eventNotifications.size)
+
     }
 
-    fun updateData(newNotifInfos: List<NotificationPreset>) {
-        notificationInfos.clear()
-        notificationInfos.addAll(newNotifInfos)
-        notifyDataSetChanged()
+    fun addNotif(eventNotification: EventNotification) {
+        eventNotifications.add(eventNotification)
+        notifyItemInserted(eventNotifications.size - 1)
     }
 
-    fun addNotif(notificationPreset: NotificationPreset) {
-        notificationInfos.add(notificationPreset)
-        notifyItemInserted(notificationInfos.size - 1)
+    fun deleteNotif(eventNotification: EventNotification) {
+        val index = eventNotifications.indexOf(eventNotification)
+        if (index < 0) return
+        eventNotifications.removeAt(index)
+        notifyItemRemoved(index)
     }
-
-
-    fun getNotifs(): List<NotificationPreset> {
-        return notificationInfos
-    }
-
-
-    fun getNotif(notifIndex: Int): NotificationPreset {
-        return notificationInfos[notifIndex]
-    }
-
 
 }

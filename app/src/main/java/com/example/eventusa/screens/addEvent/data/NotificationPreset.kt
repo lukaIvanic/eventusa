@@ -1,6 +1,6 @@
 package com.example.eventusa.screens.addEvent.data
 
-enum class NotificationPreset(val notifTimeBeforeEventMins: Long, val notifDesc: String?) {
+enum class NotificationPreset(val notifTimeBeforeEventMins: Int, val notifDesc: String?) {
 
     //TODO STAVIT DA SEMOZE CUSTOM KURAC NAPRAVIT
     //TODO napravit zapravo notification info klasu i ove presete stavit u inner enum te klase
@@ -19,18 +19,18 @@ enum class NotificationPreset(val notifTimeBeforeEventMins: Long, val notifDesc:
             return values()[index]
         }
 
-        fun get(notifTimeBeforeEventMins: Long): NotificationPreset? {
+        fun get(notifTimeBeforeEventMins: Int): NotificationPreset? {
             return when (notifTimeBeforeEventMins) {
-                5L -> {
+                5 -> {
                     FIVE_MINUTES
                 }
-                15L -> {
+                15 -> {
                     FIFTEEN_MINUTES
                 }
-                30L -> {
+                30 -> {
                     THIRTY_MINUTES
                 }
-                60L -> {
+                60 -> {
                     SIXTY_MINUTES
                 }
                 else -> {

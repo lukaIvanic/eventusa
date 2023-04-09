@@ -1,4 +1,4 @@
-package com.example.eventusa.utils
+package com.example.eventusa.caching.sharedprefs
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -75,59 +75,5 @@ object LocalStorageManager {
 
         myEdit.apply()
     }
-
-    fun addNotification(eventId: Int, notifTimeUntilEventMins: Long): List<Long> {
-        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
-
-        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
-        notifsList.add(notifTimeUntilEventMins)
-
-        val newNotifsString = notifsList.savedNotifsToString()
-        saveNotifications(eventId, newNotifsString)
-        return notifsList
-    }
-
-    fun readNotifications(eventId: Int): List<Long> {
-        val notifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
-        return notifsString.savedNotifsToList()
-    }
-
-    fun deleteNotification(eventId: Int, notifTimeUntilEventMins: Long) {
-        val oldNotifsString = sharedPreferences.getString(eventId.toString(), "") ?: ""
-
-        var notifsList = oldNotifsString.savedNotifsToList() as MutableList
-        notifsList.remove(notifTimeUntilEventMins)
-
-        val newNotifsString = notifsList.savedNotifsToString()
-        saveNotifications(eventId, newNotifsString)
-    }
-
-    fun saveNotifications(eventId: Int, notifsString: String) {
-        val myEdit = sharedPreferences.edit()
-
-        myEdit.putString(eventId.toString(), notifsString)
-
-        myEdit.apply()
-
-
-    }
-
-    fun String.savedNotifsToList(): List<Long> {
-
-        if (this.trim().isEmpty()) return ArrayList()
-
-        return this.split(" ").map { it.toLong() }
-
-    }
-
-
-    fun List<Long>.savedNotifsToString(): String {
-        var string = ""
-        this.forEach {
-            string += "$it "
-        }
-        return string.trim()
-    }
-
 
 }
