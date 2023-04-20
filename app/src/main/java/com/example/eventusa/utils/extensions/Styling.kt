@@ -6,12 +6,9 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.ScaleAnimation
 import android.widget.TextView
 import com.example.eventusa.R
-import com.example.eventusa.extensions.dpToPx
+import com.example.eventusa.utils.extensions.dpToPx
 
-/**
-    * Default animation, used only in AddEventActivity
-    * @see com.example.eventusa.screens.addEvent.view.AddEventActivity
-*/
+
 fun TextView.setTextAnimated(
     newText: String,
     totalDuration: Long = 400,
@@ -39,7 +36,7 @@ fun TextView.setTextAnimated(
         .start()
 }
 
-fun TextView.adaptStyleToState(name: String) {
+fun TextView.adaptStyleToTag(name: String) {
 
     if (tag == "highlight") {
         setChipHighlighted(name)
@@ -95,10 +92,8 @@ fun TextView.setChipDefault(name: String, animate: Boolean = true) {
 }
 
 
-/**
- * Chip animation where the view shrinks to zero and reappears with a different style.
- * Also has bounce.
- */
+
+
 fun TextView.animateChange(totalDuration: Long = 200, fromScaleX: Float = 1F, fromScaleY: Float = 1F, toScaleX: Float = 0f, toScaleY: Float = 0f, applyChanges: () -> Unit = {}) {
 
 

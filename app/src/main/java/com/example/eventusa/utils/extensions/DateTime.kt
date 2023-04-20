@@ -1,6 +1,7 @@
-package com.example.eventusa.extensions
+package com.example.eventusa.utils.extensions
 
 import android.widget.TextView
+import com.example.eventusa.screens.events.data.RINetEvent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -18,6 +19,14 @@ const val PATTERN_UI_DATE = "EEE, d MMM yyyy"
 const val PATTERN_UI_DATE_SHORT = "d MMM"
 const val PATTERN_UI_TIME = "HH:mm"
 const val PATTERN_SERVER = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+
+fun RINetEvent.getPeriod(): String =
+    "${startDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}–${
+        endDateTime.format(
+            DateTimeFormatter.ofPattern("HH:mm")
+        )
+    }"
+
 
 fun LocalDateTime.toParsedString(
     pattern: String = PATTERN_UI_DATE_TIME,
@@ -65,9 +74,6 @@ fun String.plusTimeMinutes(minutes: Long = 1): String =
 
 fun String.plusTime(minutes: Long = 1): String =
     this.toLocalTime().plusHours((minutes / 60)).plusMinutes(minutes % 60).toParsedString()
-
-
-
 
 
 fun TextView.toLocalDate(): LocalDate = this.text.toString().toLocalDate()

@@ -1,4 +1,4 @@
-package com.example.eventusa.extensions
+package com.example.eventusa.utils.extensions
 
 import com.example.eventusa.network.ResultOf
 

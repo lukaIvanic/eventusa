@@ -1,7 +1,7 @@
 package com.example.eventusa.utils
 
-import com.example.eventusa.extensions.PATTERN_UI_DATE_SHORT
-import com.example.eventusa.extensions.toParsedString
+import com.example.eventusa.utils.extensions.PATTERN_UI_DATE_SHORT
+import com.example.eventusa.utils.extensions.toParsedString
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -19,7 +19,19 @@ object DataUtils {
     fun eventsDisplayItems(_rawEvents: MutableList<RINetEvent>): MutableList<EventItem> {
 
         val rawEvents: MutableList<RINetEvent> = ArrayList()
-        rawEvents.addAll(_rawEvents)
+        rawEvents.addAll(_rawEvents.sortedWith(object : Comparator<RINetEvent> {
+            override fun compare(event1: RINetEvent?, event2: RINetEvent?): Int {
+                val start1 = event1?.startDateTime
+                val start2 = event2?.startDateTime
+
+                if (start1 != null && start2 != null) {
+                    return if (start1 > start2) 1 else 0
+                }
+
+                return 0
+            }
+
+        }))
 
 
         val eventItems: MutableList<EventItem> = ArrayList()
@@ -51,7 +63,9 @@ object DataUtils {
         rawEvents.removeAll(eventsToday)
         if (eventsToday.isNotEmpty()) {
             eventItems.add(
-                EventSectionHeader("Today, " + LocalDate.now().toParsedString(PATTERN_UI_DATE_SHORT))
+                EventSectionHeader(
+                    "Today, " + LocalDate.now().toParsedString(PATTERN_UI_DATE_SHORT)
+                )
 
             )
         }
@@ -117,11 +131,12 @@ object DataUtils {
     }
 
     private fun generateEventsSectionHeader(currWeekMonDate: LocalDate): EventSectionHeader {
-        var startPattern = if(currWeekMonDate.month == currWeekMonDate.with(DayOfWeek.SUNDAY).month) "dd" else "dd MMM"
+        var startPattern =
+            if (currWeekMonDate.month == currWeekMonDate.with(DayOfWeek.SUNDAY).month) "dd" else "dd MMM"
 
         var endPattern = "dd MMM"
 
-        if(currWeekMonDate.year != LocalDate.now().year){
+        if (currWeekMonDate.year != LocalDate.now().year) {
             startPattern = "MMM dd, YYYY"
             endPattern = "MMM dd, YYYY"
         }

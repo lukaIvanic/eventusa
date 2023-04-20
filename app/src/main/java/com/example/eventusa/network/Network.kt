@@ -121,6 +121,8 @@ object Network {
     private object NetworkCore {
         fun sendRequest(urlPath: String, requestBodyString: String = ""): String {
 
+            throw Exception("You shouldn't make network requests, this version of the app only uses local storage.")
+
             val requestType: RequestType =
                 getRequestMethodForUrlPath(urlPath)
                     ?: throw Exception("Request method not set.")

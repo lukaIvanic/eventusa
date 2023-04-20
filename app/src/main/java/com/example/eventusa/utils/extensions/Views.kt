@@ -1,4 +1,4 @@
-package com.example.eventusa.extensions
+package com.example.eventusa.utils.extensions
 
 import android.content.Context
 import android.util.TypedValue

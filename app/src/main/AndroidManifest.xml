@@ -37,8 +37,8 @@
             android:name=".screens.events.view.EventsActivity"
             android:exported="false" />
 
-        <receiver android:name="com.example.eventusa.utils.notifications.ExactAlarmBroadcastReceiver" />
-        <receiver android:name="com.example.eventusa.utils.notifications.AlarmNotificationDismissedBroadcastReceiver" />
+        <receiver android:name="com.example.eventusa.notifications.ExactAlarmBroadcastReceiver" />
+        <receiver android:name="com.example.eventusa.notifications.AlarmNotificationDismissedBroadcastReceiver" />
 
     </application>
 

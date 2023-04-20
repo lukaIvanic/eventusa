@@ -11,13 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
-import com.example.eventusa.extensions.doIfFailure
-import com.example.eventusa.extensions.doIfSucces
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.viewmodel.LoginViewModel
 import com.example.eventusa.screens.login.viewmodel.LoginViewModelFactory
-import com.example.eventusa.utils.LocalStorageManager
+import com.example.eventusa.utils.extensions.doIfFailure
+import com.example.eventusa.utils.extensions.doIfSucces
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -129,6 +129,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun automaticLogin() {
         if (!LocalStorageManager.readRememberMe()) return
+
+        guestLoginButton.callOnClick()
+        return
 
         val user = LocalStorageManager.readUsername()
         val pass = LocalStorageManager.readPassword()
