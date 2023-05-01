@@ -14,15 +14,11 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 
-const val MAX_MINS_UNTIL_EVENT = 1000000 // 20 mjeseci
-
 class NotifManager(
     val context: Context,
 ) {
 
-
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
 
     suspend fun createOrUpdateEventNotif(
         event: RINetEvent,

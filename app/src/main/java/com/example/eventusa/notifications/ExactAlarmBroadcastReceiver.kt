@@ -87,7 +87,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
                 NotificationChannel(
                     REMINDER_NOTIFICATION_CHANNEL_ID,
                     REMINDER_NOTIFICATION_CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH
+                    NotificationManager.IMPORTANCE_DEFAULT
                 )
             )
         }
@@ -97,9 +97,9 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
                 .setSmallIcon(R.drawable.settings_icon)
                 .setContentTitle(contentTitle)
                 .setContentText(contentDesc)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
-                .setFullScreenIntent(startAppPendingIntent, true)
+                .setContentIntent(startAppPendingIntent)
                 .setDeleteIntent(deletePendingIntent)
 
         val notification = notificationBuilder.build()
