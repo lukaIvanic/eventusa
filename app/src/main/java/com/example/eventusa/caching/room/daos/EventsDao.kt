@@ -12,7 +12,7 @@ interface EventsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(rinetEvent: List<RINetEvent>)
 
-    @Query("SELECT * FROM rinetevents_table")
+    @Query("SELECT * FROM rinetevents_table ORDER BY startDateTime")
     suspend fun getAllEvents(): List<RINetEvent>
 
     @Update

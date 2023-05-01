@@ -3,6 +3,7 @@ package com.example.eventusa.caching.room
 import com.example.eventusa.caching.room.extraentities.EventNotification
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.room.RoomUser
+import kotlinx.coroutines.delay
 
 // Room helper class
 object Room {
@@ -20,6 +21,7 @@ object Room {
     }
 
     suspend fun readAllEvents(): List<RINetEvent> {
+        delay(500)
         return eventsDao.getAllEvents()
     }
 

@@ -175,6 +175,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
+//    private fun gotoEventsScreen() {
+//        val intent = Intent(this@LoginActivity, EventsActivity::class.java)
+//        startActivity(intent)
+//    }
+
     private fun gotoEventsScreen() {
         val intent = Intent(this@LoginActivity, EventsActivity::class.java)
         startActivity(intent)

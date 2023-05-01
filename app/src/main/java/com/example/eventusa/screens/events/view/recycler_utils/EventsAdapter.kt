@@ -59,6 +59,11 @@ class EventsAdapter(
 
                 eventViewHolder.eventTitleTextView.text = rinetEvent.title
 
+                // Check if event is first in a section for margin correction
+                val topMargin =
+                    if (eventItemList[position - 1] is EventSectionHeader) 16F else 8F
+                eventViewHolder.itemView.setCustomMargins(top = topMargin)
+
                 // Remove date on left side of event if the date is already displayed in above events
                 if (position > 0 && (eventItemList[position - 1] as? RINetEvent)?.startDateTime?.dayOfWeek != rinetEvent.startDateTime.dayOfWeek) {
                     eventViewHolder.dayInMonthTextView.text =
@@ -66,19 +71,18 @@ class EventsAdapter(
                     eventViewHolder.dayInWeekTextView.text =
                         rinetEvent.startDateTime.format(DateTimeFormatter.ofPattern("EEE"))
 
-                    // Check if event is first in a section for margin correction
-                    val topMargin =
-                        if (eventItemList[position - 1] is EventSectionHeader) 12F else 28F
-                    eventViewHolder.itemView.setCustomMargins(top = topMargin)
+                    eventViewHolder.itemView.setCustomMargins(top = 24F)
 
                 } else {
                     eventViewHolder.dayInMonthTextView.text = ""
                     eventViewHolder.dayInWeekTextView.text = ""
+
+                    eventViewHolder.itemView.setCustomMargins(top = 8F)
+
+
                 }
 
-                if (position == eventItemList.size - 1) {
-                    eventViewHolder.itemView.setCustomMargins(bottom = 20F)
-                }
+
 
                 eventViewHolder.eventPeriodTextView.text =
                    rinetEvent.getPeriod()

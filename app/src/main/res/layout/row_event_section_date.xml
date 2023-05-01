@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-        android:background="@color/app_background"
-
     android:layout_marginTop="20dp"
-    android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    android:layout_marginBottom="8dp"
+    android:orientation="vertical">
     <!--    android:background="@color/events_section_background"-->
 
-<!--    <View-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="1dp"-->
-<!--        android:background="#3A3A3A"-->
-<!--        />-->
+    <!--    <View-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="1dp"-->
+    <!--        android:background="#3A3A3A"-->
+    <!--        />-->
 
     <TextView
         android:id="@+id/sectionDateTextView"
@@ -31,7 +30,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#9A9A9A"
         android:layout_marginHorizontal="24dp"
-        />
+        android:background="#9A9A9A" />
 </LinearLayout>
