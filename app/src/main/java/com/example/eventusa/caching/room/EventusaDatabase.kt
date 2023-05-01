@@ -11,7 +11,9 @@ import com.example.eventusa.caching.room.daos.NotifsDao
 import com.example.eventusa.caching.room.daos.UsersDao
 import com.example.eventusa.caching.room.extraentities.EventNotification
 import com.example.eventusa.caching.room.typeconverters.LocalDateTimeConverter
+import com.example.eventusa.caching.room.typeconverters.UsersListConverter
 import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.screens.login.model.room.RoomUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,8 +21,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@Database(version = 5, entities = [RINetEvent::class, RoomUser::class, EventNotification::class])
-@TypeConverters(LocalDateTimeConverter::class)
+@Database(version = 6, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
+@TypeConverters(LocalDateTimeConverter::class, UsersListConverter::class)
 abstract class EventusaDatabase : RoomDatabase() {
 
     abstract fun getEventsDao(): EventsDao
@@ -51,6 +53,7 @@ abstract class EventusaDatabase : RoomDatabase() {
                 .addCallback(populateDbCallback)
                 .fallbackToDestructiveMigration()
                 .addTypeConverter(LocalDateTimeConverter())
+                .addTypeConverter(UsersListConverter())
                 .build()
 
         }

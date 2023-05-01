@@ -16,7 +16,7 @@ class UserRepository {
     fun attemptLogin(loginRequest: LoginRequest): ResultOf<LoginResponse> {
 
         if(alreadyLoggedIn && loginRequest == lastSuccessLoginRequest){
-            return ResultOf.Success(LoginResponse(Item1 = ResponseCodes.SUCCESS.value, Item2= User(Name=loginRequest.username)))
+            return ResultOf.Success(LoginResponse(Item1 = ResponseCodes.SUCCESS.value, Item2= User(name=loginRequest.username)))
         }
 
 

@@ -19,7 +19,7 @@ fun TextView.setTextAnimated(
     if (this.text == newText) return
 
     this.animate()
-        .setDuration(totalDuration/2)
+        .setDuration(totalDuration / 2)
         .alpha(0F)
         .translationY(yFirstTo)
         .setInterpolator(AccelerateInterpolator())
@@ -30,24 +30,29 @@ fun TextView.setTextAnimated(
                 .alpha(1F)
                 .translationY(0F)
                 .setInterpolator(DecelerateInterpolator())
-                .setDuration(totalDuration/2)
+                .setDuration(totalDuration / 2)
                 .start()
         }
         .start()
 }
 
-fun TextView.adaptStyleToTag(name: String) {
+enum class ChipStatus {
+    DEFAULT,
+    HIGHLIGHTED
+}
 
-    if (tag == "highlight") {
-        setChipHighlighted(name)
-    } else {
-        setChipDefault(name)
+fun TextView.updateChipStyle(status: ChipStatus) {
+
+    when (status) {
+        ChipStatus.DEFAULT -> setChipDefault(text.toString())
+        ChipStatus.HIGHLIGHTED -> setChipHighlighted(text.toString())
     }
 }
 
 
 fun TextView.setChipHighlighted(name: String) {
-
+    if (tag == "highlighted") return
+    tag = "highlighted"
     animateChange {
         text = name
         this.setTextColor(resources.getColor(R.color.chip_highlight))
@@ -63,6 +68,8 @@ fun TextView.setChipHighlighted(name: String) {
 }
 
 fun TextView.setChipDefault(name: String, animate: Boolean = true) {
+    tag = "default"
+
     if (animate) {
         animateChange {
             text = name
@@ -92,9 +99,14 @@ fun TextView.setChipDefault(name: String, animate: Boolean = true) {
 }
 
 
-
-
-fun TextView.animateChange(totalDuration: Long = 200, fromScaleX: Float = 1F, fromScaleY: Float = 1F, toScaleX: Float = 0f, toScaleY: Float = 0f, applyChanges: () -> Unit = {}) {
+fun TextView.animateChange(
+    totalDuration: Long = 200,
+    fromScaleX: Float = 1F,
+    fromScaleY: Float = 1F,
+    toScaleX: Float = 0f,
+    toScaleY: Float = 0f,
+    applyChanges: () -> Unit = {},
+) {
 
 
     val animIn = ScaleAnimation(
@@ -107,7 +119,7 @@ fun TextView.animateChange(totalDuration: Long = 200, fromScaleX: Float = 1F, fr
         Animation.RELATIVE_TO_SELF,
         0.5f
     )
-    animIn.duration = totalDuration/2
+    animIn.duration = totalDuration / 2
 //    animIn.setInterpolator(this.context, android.R.interpolator.accelerate_quint)
     this.startAnimation(animIn)
 
@@ -129,7 +141,7 @@ fun TextView.animateChange(totalDuration: Long = 200, fromScaleX: Float = 1F, fr
                     0.5F
                 )
             animOut.setInterpolator(this@animateChange.context, android.R.interpolator.overshoot)
-            animOut.duration = totalDuration/2
+            animOut.duration = totalDuration / 2
             this@animateChange.startAnimation(animOut)
         }
 

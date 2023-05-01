@@ -34,7 +34,7 @@ class EventsViewModel(
     }
 
     fun getUsername(): String {
-        return userRepository.user?.Name ?: "RI-NET employee!"
+        return userRepository.user?.name ?: "RI-NET employee!"
     }
 
 

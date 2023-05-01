@@ -2,11 +2,20 @@ package com.example.eventusa.screens.events.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.PATTERN_SERVER
 import com.example.eventusa.utils.extensions.toParsedString
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
+
+/**
+ *
+ * [usersAttending] list is used to create a relation with users, instead of a one to many relation.
+ * This way, we don't have the direct user - events references, but it's not necessary,
+ * we can just filter through all events,  whose size usually won't even reach two digits.
+ *
+ */
 @Entity("rinetevents_table")
 data class RINetEvent(
 
@@ -36,6 +45,8 @@ data class RINetEvent(
 
     var dateAddded: String? = LocalDateTime.now().toParsedString(PATTERN_SERVER),
 
+    var usersAttending: MutableList<User> = ArrayList()
+
     ) : EventItem {
 
     constructor() : this(
@@ -56,6 +67,8 @@ data class RINetEvent(
 
     override val type: EventItemType
         get() = EventItemType.EVENT
+
+
 
 }
 

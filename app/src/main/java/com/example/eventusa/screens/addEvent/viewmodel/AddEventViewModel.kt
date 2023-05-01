@@ -9,6 +9,7 @@ import com.example.eventusa.notifications.NotifManager
 import com.example.eventusa.repositories.EventsRepositoryLocal
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.map
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -32,15 +33,7 @@ const val defaultEventDuration = 60L
 class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel() {
 
     private var currUiState =
-        AddEventUiState(
-            -100,
-            RINetEvent(
-                -1,
-                null,
-                LocalDateTime.now().withMinute(0).plusHours(1),
-                LocalDateTime.now().withMinute(0).plusHours(2)
-            )
-        )
+        defaultUiState()
 
     private val _uiState =
         MutableStateFlow<ResultOf<AddEventUiState>>(ResultOf.Success(currUiState))
@@ -54,6 +47,10 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
 
     private val _notificationsEventState = MutableSharedFlow<ResultOf<NotificationsAdapterEvents>>()
     val notificationsEventState = _notificationsEventState.asSharedFlow()
+
+    private val _chooseAllCheckBoxState = MutableStateFlow<Boolean>(false)
+    val chooseAllCheckBoxState = _chooseAllCheckBoxState.asStateFlow()
+
 
     suspend fun updateOrInsertEvent(context: Context) {
 
@@ -234,6 +231,52 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
         currUiState.riNetEvent.description = summary
     }
 
+    /**
+     * @return false if new chip state is default, true if new chip state is highlighted
+     */
+    fun userChipClicked(user: User): Boolean {
+
+        currUiState.riNetEvent.usersAttending.apply {
+
+            val isHighlightedState = contains(user)
+
+            if (isHighlightedState) {
+                remove(user)
+            } else {
+                add(user)
+            }
+
+            _chooseAllCheckBoxState.value = isAllUserChipsActivated()
+
+            return contains(user)
+
+        }
+
+    }
+
+    fun isAllUserChipsActivated(): Boolean {
+        return currUiState.riNetEvent.usersAttending.containsAll(User.getAllUsers())
+    }
+
+    /**
+     * Check if every user is highlighted, if not, then add all users to event.
+     * If all the users were already checked, remove all users from event.
+     * @return true if all user chips are highlighted, false if all user chips are deactivated.
+     */
+    fun selectAllUserChips(isAllSelected: Boolean) {
+
+        currUiState.riNetEvent.usersAttending.apply {
+
+            if (isAllSelected) {
+                clear()
+                addAll(User.getAllUsers())
+            } else {
+                clear()
+            }
+
+        }
+
+    }
 
     fun startDateSet(year: Int, month: Int, day: Int) {
 
@@ -337,6 +380,24 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
     fun getCurrEndDateTime(): LocalDateTime {
         return currUiState.riNetEvent.endDateTime
     }
+
+
+    fun resetDefaultUiState() {
+        currUiState = defaultUiState()
+        _uiState.value = ResultOf.Success(currUiState.copy())
+        _chooseAllCheckBoxState.value = isAllUserChipsActivated()
+    }
+
+    fun defaultUiState() = AddEventUiState(
+        -100,
+        RINetEvent(
+            -1,
+            null,
+            LocalDateTime.now().withMinute(0).plusHours(1),
+            LocalDateTime.now().withMinute(0).plusHours(2),
+            usersAttending = ArrayList()
+        )
+    )
 
 }
 
