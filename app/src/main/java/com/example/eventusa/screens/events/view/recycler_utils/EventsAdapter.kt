@@ -2,6 +2,7 @@ package com.example.eventusa.screens.events.view.recycler_utils
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +12,8 @@ import com.example.eventusa.screens.events.data.EventItemType
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.extensions.getPeriod
+import com.example.eventusa.utils.extensions.getPeriodFirstInSeries
+import com.example.eventusa.utils.extensions.getPeriodLastInSeries
 import com.example.eventusa.utils.extensions.setCustomMargins
 import java.time.format.DateTimeFormatter
 
@@ -83,9 +86,16 @@ class EventsAdapter(
                 }
 
 
-
-                eventViewHolder.eventPeriodTextView.text =
-                   rinetEvent.getPeriod()
+                if (rinetEvent.isFirstInSeries) {
+                    eventViewHolder.eventPeriodTextView.text = rinetEvent.getPeriodFirstInSeries()
+                } else if (rinetEvent.isLastInSeries) {
+                    eventViewHolder.eventPeriodTextView.text = rinetEvent.getPeriodLastInSeries()
+                } else if (rinetEvent.isInSeries) {
+                    eventViewHolder.eventPeriodTextView.visibility = View.GONE
+                } else {
+                    eventViewHolder.eventPeriodTextView.text =
+                        rinetEvent.getPeriod()
+                }
 
             }
 

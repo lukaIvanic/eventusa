@@ -15,6 +15,7 @@ import java.time.LocalDateTime
  * This way, we don't have the direct user - events references, but it's not necessary,
  * we can just filter through all events,  whose size usually won't even reach two digits.
  *
+ * @param [isInSeries] true if the event last multiple days and was separated into each day for display in list
  */
 @Entity("rinetevents_table")
 data class RINetEvent(
@@ -24,7 +25,7 @@ data class RINetEvent(
 
 
     @JsonProperty("Name")
-    var title: String?,
+    var title: String = "",
 
 
     @JsonProperty("From")
@@ -45,7 +46,13 @@ data class RINetEvent(
 
     var dateAddded: String? = LocalDateTime.now().toParsedString(PATTERN_SERVER),
 
-    var usersAttending: MutableList<User> = ArrayList()
+    var usersAttending: MutableList<User> = ArrayList(),
+
+    var isInSeries: Boolean = false,
+
+    var isFirstInSeries: Boolean = false,
+
+    var isLastInSeries: Boolean = false,
 
     ) : EventItem {
 

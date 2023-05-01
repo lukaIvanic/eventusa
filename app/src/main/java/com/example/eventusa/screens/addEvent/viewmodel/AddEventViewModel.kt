@@ -392,7 +392,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
         -100,
         RINetEvent(
             -1,
-            null,
+            "",
             LocalDateTime.now().withMinute(0).plusHours(1),
             LocalDateTime.now().withMinute(0).plusHours(2),
             usersAttending = ArrayList()
