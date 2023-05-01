@@ -15,18 +15,44 @@ import java.time.format.DateTimeFormatter
  */
 
 const val PATTERN_UI_DATE_TIME = "d MMM yyyy HH:mm"
+const val PATTERN_UI_DATE_TIME_SHORT = "dd MMM HH:mm"
 const val PATTERN_UI_DATE = "EEE, d MMM yyyy"
-const val PATTERN_UI_DATE_SHORT = "d MMM"
+const val PATTERN_UI_DATE_SHORT = "dd MMM"
 const val PATTERN_UI_TIME = "HH:mm"
 const val PATTERN_SERVER = "yyyy-MM-dd'T'HH:mm:ss'Z'"
 
-fun RINetEvent.getPeriod(): String =
-    "${startDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}–${
-        endDateTime.format(
-            DateTimeFormatter.ofPattern("HH:mm")
-        )
-    }"
+fun RINetEvent.getPeriod(): String {
 
+    return if (getDaysLasting() == 1) {
+        "${startDateTime.toParsedString(PATTERN_UI_TIME)}–${
+            endDateTime.toParsedString(PATTERN_UI_TIME)
+        }"
+    } else {
+        "${startDateTime.toParsedString(PATTERN_UI_DATE_SHORT)} – ${
+            endDateTime.toParsedString(PATTERN_UI_DATE_SHORT)
+
+        }"
+    }
+
+}
+
+fun RINetEvent.getPeriodFirstInSeries(): String {
+
+    return "starting at ${startDateTime.toParsedString(PATTERN_UI_TIME)}"
+
+
+}
+
+fun RINetEvent.getPeriodLastInSeries(): String {
+
+    return "ending at ${endDateTime.toParsedString(PATTERN_UI_TIME)}"
+
+}
+
+
+fun RINetEvent.getDaysLasting(): Int {
+    return ((endDateTime.dayOfYear - startDateTime.dayOfYear + 365) % 365) + 1
+}
 
 fun LocalDateTime.toParsedString(
     pattern: String = PATTERN_UI_DATE_TIME,
