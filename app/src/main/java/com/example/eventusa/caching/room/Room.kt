@@ -18,6 +18,7 @@ object Room {
      */
     suspend fun insertEvent(rinetEvent: RINetEvent) {
         eventsDao.insert(rinetEvent.copy(eventId = 0))
+
     }
 
     suspend fun readAllEvents(): List<RINetEvent> {

@@ -27,17 +27,15 @@ import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAd
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
-import com.example.eventusa.utils.adaptStyleToTag
-import com.example.eventusa.utils.animateChange
+import com.example.eventusa.screens.login.model.User
+import com.example.eventusa.utils.*
 import com.example.eventusa.utils.extensions.*
-import com.example.eventusa.utils.setChipDefault
-import com.example.eventusa.utils.setTextAnimated
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-
 
 class AddEventActivity : AppCompatActivity() {
 
@@ -212,6 +210,29 @@ class AddEventActivity : AppCompatActivity() {
 
                             if (summaryEditText.text.isEmpty()) summaryEditText.setText(description)
 
+
+                            var allChipsHighlighted = true
+
+                            peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
+                                val chipTv = indexedChip.value as? TextView ?: return@forEach
+                                val user =
+                                    usersAttending.firstOrNull { it.name == chipTv.text.toString() }
+
+                                if (user != null) {
+                                    chipTv.setChipHighlighted(user.name ?: "")
+
+                                    // Animation eye sugar
+                                    val delayTime = 100 / (indexedChip.index / 2).plus(1)
+                                    delay(delayTime.toLong())
+                                } else {
+                                    allChipsHighlighted = false
+                                }
+
+                            }
+
+                            chooseAllSwitch.isChecked = allChipsHighlighted
+
+
                         }
                     }
 
@@ -234,76 +255,59 @@ class AddEventActivity : AppCompatActivity() {
         notifsAdapter = NotificationsRecyclerAdapter()
         notifsRecyclerView.adapter = notifsAdapter
 
-        lifecycleScope.launchWhenStarted {
-            notifsAdapter.cancelNotifFlow.collect { eventNotif ->
-                notifsAdapter.deleteNotif(eventNotif)
-                viewmodel.removeNotification(eventNotif)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                notifsAdapter.cancelNotifFlow.collect { eventNotif ->
+                    notifsAdapter.deleteNotif(eventNotif)
+                    viewmodel.removeNotification(eventNotif)
+                }
             }
         }
     }
 
     private fun setupPeopleChips() {
-        val names = arrayListOf(
-            "Luka Ivanic",
-            "Anja Stefan",
-            "Armando Sćulac",
-            "Branko Kojić",
-            "Branko Zuza",
-            "Danijel Pajalic",
-            "Draško Andrić",
-            "Nevija",
-            "Zvjezdana",
-            "David Pajo",
-            "Marko Andrić",
-            "Ivo Opancar"
-        )
 
-        names.forEach {
+
+        User.getAllUsers().forEach {
             addRinetChip(it)
         }
 
     }
 
-    private fun addRinetChip(name: String) {
+    private fun addRinetChip(user: User) {
         val textView = TextView(this)
 
         peopleChipGroup.addView(textView)
 
         textView.apply {
-            tag = "default"
-            setChipDefault(name, animate = false)
+            text = user.name
+            setChipDefault(user.name ?: "", animate = false)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15F)
             setPadding(dpToPx(10F), dpToPx(8F), dpToPx(10F), dpToPx(8F))
+//            updateChipStyle(ChipStatus.DEFAULT)
 
 
             setOnClickListener {
 
-                tag = if (tag == "highlight") "default" else "highlight"
+                if (handleChipClick(user)) {
+                    updateChipStyle(ChipStatus.HIGHLIGHTED)
+                } else {
+                    updateChipStyle(ChipStatus.DEFAULT)
+                }
 
-                adaptStyleToTag(name)
-
-                val areDefaults = areAllChipsDefault()
-                chooseAllSwitch.isChecked = !(areDefaults == null || areDefaults == true)
 
             }
         }
 
     }
 
-    // true -> every chip is not selected
-    // false -> every chip is selected
-    // null -> mixed states
-    // todo: prebacit u viewmodel
-    private fun areAllChipsDefault(): Boolean? {
-        var tag = ""
-        peopleChipGroup.children.iterator().forEach {
-            if (tag == "") {
-                tag = it.tag as? String ?: return null
-            }
-            if (it.tag != tag) return null
-        }
+    private fun handleChipClick(user: User): Boolean {
 
-        return tag == "default"
+        val isChipHighlight = viewmodel.userChipClicked(user)
+
+        chooseAllSwitch.isChecked = viewmodel.isAllUserChipsActivated()
+
+        return isChipHighlight
     }
 
 
@@ -365,6 +369,7 @@ class AddEventActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this).setTitle("Cancel")
             .setMessage("Do you want to cancel your draft?\nThe information will be lost.")
             .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("OK") { _, _ ->
+                viewmodel.resetDefaultUiState()
                 finish()
             }.show()
     }
@@ -384,9 +389,9 @@ class AddEventActivity : AppCompatActivity() {
 
 
                     lifecycleScope.launch {
-                        repeatOnLifecycle(Lifecycle.State.CREATED){
+                        repeatOnLifecycle(Lifecycle.State.CREATED) {
                             val success = viewmodel.addNotification(minsBeforeEvent)
-                            if(!success) return@repeatOnLifecycle
+                            if (!success) return@repeatOnLifecycle
 
                             notifsAdapter.addNotif(
                                 EventNotification(
@@ -406,18 +411,25 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun handleChooseAllSwitch() {
+
+        viewmodel.selectAllUserChips(chooseAllSwitch.isChecked)
+
+
         peopleChipGroup.children.iterator().forEach {
-            val tvIt = (it as? TextView) ?: return@forEach
+            (it as? TextView)?.let { tv ->
 
-            val newTag = if (chooseAllSwitch.isChecked) "highlight" else "default"
+                if (chooseAllSwitch.isChecked) {
+                    if (tv.tag != "highlighted")
+                        tv.updateChipStyle(ChipStatus.HIGHLIGHTED)
+                } else {
+                    tv.updateChipStyle(ChipStatus.DEFAULT)
+                }
 
-            if (tvIt.tag == newTag) return@forEach
+            }
 
-            tvIt.tag = newTag
-
-            tvIt.adaptStyleToTag(tvIt.text.toString())
         }
     }
+
 
     private fun setupStartDatePicker() {
 
@@ -544,9 +556,6 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun handleSaveEvent() {
 
-        if (chooseAllSwitch.isChecked) {
-            //todo: make sure everything is checked
-        }
 
         showProgressDialog()
 
@@ -556,6 +565,7 @@ class AddEventActivity : AppCompatActivity() {
             viewmodel.setTitle(titleEditText.text.toString())
             viewmodel.setLocation(locationEditText.text.toString())
             viewmodel.setSummary(summaryEditText.text.toString())
+
             viewmodel.updateOrInsertEvent(this@AddEventActivity)
 
         }
@@ -600,6 +610,8 @@ class AddEventActivity : AppCompatActivity() {
     }
 
 }
+
+
 
 
 
