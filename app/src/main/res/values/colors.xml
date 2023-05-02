@@ -36,6 +36,9 @@
     <color name="red_danger">#b00020</color>
     <color name="red_danger_light">#ea959b</color>
 
+    <color name="green_rinet">#09B626</color>
+    <color name="green_rinet_light">#25EA46</color>
+
     <color name="ripple_color">#3715A5D3</color>
 
     <color name="secondary_color">#d34515</color>

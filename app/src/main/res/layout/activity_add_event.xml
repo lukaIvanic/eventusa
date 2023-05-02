@@ -444,6 +444,7 @@
 
 
             <LinearLayout
+                android:id="@+id/chooseColorSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ripple_box"
@@ -454,11 +455,12 @@
                 android:orientation="horizontal">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/chooseColorCircle"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="26dp"
-                    android:backgroundTint="#0ECC0E"
+                    app:cardBackgroundColor="@color/green_rinet"
                     app:cardCornerRadius="50dp"
                     app:cardElevation="0dp"
                     app:tint="@color/icon_tint" />
