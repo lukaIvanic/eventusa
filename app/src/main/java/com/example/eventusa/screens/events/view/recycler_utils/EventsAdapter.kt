@@ -57,7 +57,7 @@ class EventsAdapter(
                 eventViewHolder.eventTitleTextView.text = rinetEvent.title
 
                 // Check if event is first in a section for margin correction
-                val topMargin = if (eventItemList[position - 1] is EventSectionHeader) 16F else 8F
+                val topMargin = if (eventItemList[position - 1] is EventSectionHeader) 20F else 4F
                 eventViewHolder.itemView.setCustomMargins(top = topMargin)
 
                 // Remove date on left side of event if the date is already displayed in above events
@@ -70,7 +70,7 @@ class EventsAdapter(
                     eventViewHolder.itemView.setCustomMargins(top = 20F)
 
                     if (rinetEvent.startDateTime.isToday()) {
-                        eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.secondary_color_roundede)
+                        eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.secondary_color_rounded)
                         eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#FFFBF8"))
                         eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#9B2F0C"))
                     } else {
@@ -83,7 +83,7 @@ class EventsAdapter(
                     eventViewHolder.dayInMonthTextView.text = ""
                     eventViewHolder.dayInWeekTextView.text = ""
 
-                    eventViewHolder.itemView.setCustomMargins(top = 8F)
+                    eventViewHolder.itemView.setCustomMargins(top = 4F)
 
 
                 }
@@ -106,7 +106,7 @@ class EventsAdapter(
 
                 // Set event color
                 eventViewHolder.eventLayout.setBackgroundResource(
-                    EventColors.getDrawableId(
+                    EventColors.getColorId(
                         rinetEvent.eventColor
                     )
                 )

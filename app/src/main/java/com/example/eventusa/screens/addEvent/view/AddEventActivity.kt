@@ -8,6 +8,7 @@ import android.app.TimePickerDialog.OnTimeSetListener
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+
 
 class AddEventActivity : AppCompatActivity() {
 
@@ -74,6 +76,7 @@ class AddEventActivity : AppCompatActivity() {
 
     lateinit var chooseColorSection: LinearLayout
     lateinit var chooseColorCircle: CardView
+    lateinit var eventColorTextView: TextView
 
     lateinit var deleteEventSection: LinearLayout
     lateinit var deleteEventSectionDivider: View
@@ -109,6 +112,8 @@ class AddEventActivity : AppCompatActivity() {
 
         chooseColorSection = findViewById(R.id.chooseColorSection)
         chooseColorCircle = findViewById(R.id.chooseColorCircle)
+        eventColorTextView = findViewById(R.id.eventColorTextView)
+
 
         deleteEventSection = findViewById(R.id.deleteEventSection)
         deleteEventSectionDivider = findViewById(R.id.deleteEventSectionDivider)
@@ -246,7 +251,7 @@ class AddEventActivity : AppCompatActivity() {
 
                             chooseAllSwitch.isChecked = allChipsHighlighted
 
-                            setCircleColor(eventColor)
+                            updateEventCircleColor(eventColor)
 
 
 
@@ -439,18 +444,52 @@ class AddEventActivity : AppCompatActivity() {
         chooseNotifDialog = notifDialogBuilder.show()
     }
 
+    class Item (val text: String, var drawableId: Int){
+        override fun toString(): String {
+            return text
+        }
+    }
+
     private fun showChooseColorDialog() {
+
+        val items = EventColors.getColorItems()
+
+        val pos = viewmodel.getEventColor()
+
+        items[pos].drawableId = EventColors.getDrawableIdFull(pos)
+
+
+        val adapter: ListAdapter = object : ArrayAdapter<Item?>(
+            this,
+            R.layout.select_dialog_item,
+            R.id.colorItemTextView,
+            items
+        ) {
+
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+
+                val view = super.getView(position, convertView, parent)
+
+                val tv = view.findViewById<TextView>(R.id.colorItemTextView)
+
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16F)
+
+                //Put the image on the TextView
+                tv.setCompoundDrawablesWithIntrinsicBounds(items.get(position).drawableId, 0, 0, 0)
+                tv.compoundDrawablePadding = dpToPx(16F)
+                return view
+            }
+        }
+
+
         val notifDialogBuilder =
             MaterialAlertDialogBuilder(this)
                 .setCancelable(true)
-                .setSingleChoiceItems(
-                    EventColors.getPresets(),
-                    viewmodel.getEventColor()
-                ) { _, index ->
+                .setAdapter(adapter) { _, index ->
 
                     viewmodel.setEventColor(index)
 
-                    setCircleColor(index)
+                    updateEventCircleColor(index)
 
 
                     chooseColorDialog?.dismiss()
@@ -460,7 +499,7 @@ class AddEventActivity : AppCompatActivity() {
         chooseColorDialog = notifDialogBuilder.show()
     }
 
-    private fun setCircleColor(index: Int) {
+    private fun updateEventCircleColor(index: Int) {
         chooseColorCircle.setCardBackgroundColor(
             resources.getColor(
                 EventColors.getColorId(
@@ -468,6 +507,9 @@ class AddEventActivity : AppCompatActivity() {
                 )
             )
         )
+
+        eventColorTextView.text = EventColors.getPresets().get(index)
+
     }
 
     private fun handleChooseAllSwitch() {

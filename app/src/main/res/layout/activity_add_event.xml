@@ -460,12 +460,13 @@
                     android:layout_height="16dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="26dp"
-                    app:cardBackgroundColor="@color/green_rinet"
+                    app:cardBackgroundColor="@color/event_rinet_blue"
                     app:cardCornerRadius="50dp"
                     app:cardElevation="0dp"
                     app:tint="@color/icon_tint" />
 
                 <TextView
+                    android:id="@+id/eventColorTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
