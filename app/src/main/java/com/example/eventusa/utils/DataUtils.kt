@@ -38,6 +38,7 @@ object DataUtils {
                         startDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong()),
                         endDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong()),
                         title = rinetevent.title + " (${i + 1}/${rinetevent.getDaysLasting()})",
+                        isInSeries = true,
                         isFirstInSeries = i == 0,
                         isLastInSeries = i == rinetevent.getDaysLasting() - 1
                     )
