@@ -57,7 +57,7 @@
         android:indeterminate="true"
         android:translationZ="10dp"
         android:visibility="gone"
-        app:indicatorColor="@color/rinet_color"
+        app:indicatorColor="@color/event_rinet_blue"
         app:layout_constraintBottom_toBottomOf="@+id/loginButton"
         app:layout_constraintEnd_toEndOf="@+id/loginButton"
         app:layout_constraintHorizontal_bias="0.5"

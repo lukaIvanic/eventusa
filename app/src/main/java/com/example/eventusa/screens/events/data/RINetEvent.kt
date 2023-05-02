@@ -3,11 +3,13 @@ package com.example.eventusa.screens.events.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.eventusa.R
+import com.example.eventusa.screens.addEvent.view.AddEventActivity.*
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.PATTERN_SERVER
 import com.example.eventusa.utils.extensions.toParsedString
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 
 /**
@@ -55,7 +57,7 @@ data class RINetEvent(
 
     var isLastInSeries: Boolean = false,
 
-    var eventColor: Int = EventColors.BLUE,
+    var eventColor: Int = EventColors.randomColor(),
 
     ) : EventItem {
 
@@ -84,46 +86,166 @@ data class RINetEvent(
 }
 
 object EventColors {
-    const val RED = 0
-    const val GREEN = 1
-    const val BLUE = 2
+    const val YELLOW = 0
+    const val RED = 1
+    const val DARK_BLUE = 2
+    const val RINET_BLUE = 3
+    const val LIGHT_PURPLE = 4
+    const val GREEN = 5
+    const val GRAY = 6
+    const val ORANGE = 7
+    const val BROWN = 8
+    const val PURPLE = 9
 
-    fun getPresets(): Array<String?> {
-        return arrayOf("Red", "Green", "Blue")
-    }
-
-    fun getDrawableId(eventColor: Int): Int {
-        return when (eventColor) {
-            RED -> {
-                R.drawable.ripple_event_red
-            }
-            GREEN -> {
-                R.drawable.ripple_event_green
-            }
-            BLUE -> {
-                R.drawable.rinet_color_ripple
-            }
-            else -> {
-                 R.drawable.rinet_color_ripple
-            }
-
-        }
+    fun getPresets(): Array<String> {
+        return arrayOf(
+            "Yellow",
+            "Red",
+            "Dark Blue",
+            "Rinet Blue",
+            "Light Purple",
+            "Green",
+            "Gray",
+            "Orange",
+            "Brown",
+            "Purple"
+        )
     }
 
     fun getColorId(eventColor: Int): Int {
-        return when(eventColor) {
+        return when (eventColor) {
+            YELLOW -> {
+                R.color.event_yellow
+            }
             RED -> {
-                R.color.red_danger
+                R.color.event_red
+            }
+            DARK_BLUE -> {
+                R.color.event_dark_blue
+            }
+            RINET_BLUE -> {
+                R.color.event_rinet_blue
+            }
+            LIGHT_PURPLE -> {
+                R.color.event_light_purple
             }
             GREEN -> {
-                R.color.green_rinet
+                R.color.event_dark_green
             }
-            BLUE -> {
-                R.color.rinet_color
+            GRAY -> {
+                R.color.event_dark_gray
+            }
+            ORANGE -> {
+                R.color.event_darker_orange
+            }
+            BROWN -> {
+                R.color.event_brown
+            }
+            PURPLE -> {
+                R.color.event_light_purple
             }
             else -> {
-                return R.color.rinet_color
+                return R.color.event_rinet_blue
             }
         }
     }
+
+    fun getDrawableIdEmpty(eventColor: Int): Int {
+        return when (eventColor) {
+            YELLOW -> {
+                R.drawable.color_option_empty_yellow
+            }
+            RED -> {
+                R.drawable.color_option_empty_red
+            }
+            DARK_BLUE -> {
+                R.drawable.color_option_empty_dark_blue
+            }
+            RINET_BLUE -> {
+                R.drawable.color_option_empty_rinet_blue
+            }
+            LIGHT_PURPLE -> {
+                R.drawable.color_option_empty_light_purple
+            }
+            GREEN -> {
+                R.drawable.color_option_empty_green
+            }
+            GRAY -> {
+                R.drawable.color_option_empty_gray
+            }
+            ORANGE -> {
+                R.drawable.color_option_empty_orange
+            }
+            BROWN -> {
+                R.drawable.color_option_empty_brown
+            }
+            PURPLE -> {
+                R.drawable.color_option_empty_dark_red
+            }
+            else -> {
+                return R.drawable.color_option_empty_rinet_blue
+            }
+        }
+
+    }
+
+    fun getDrawableIdFull(eventColor: Int): Int {
+
+
+
+
+        return when (eventColor) {
+            YELLOW -> {
+                R.drawable.color_option_full_yellow
+            }
+            RED -> {
+                R.drawable.color_option_full_red
+            }
+            DARK_BLUE -> {
+                R.drawable.color_option_full_dark_blue
+            }
+            RINET_BLUE -> {
+                R.drawable.color_option_full_rinet_blue
+            }
+            LIGHT_PURPLE -> {
+                R.drawable.color_option_full_light_purple
+            }
+            GREEN -> {
+                R.drawable.color_option_full_green
+            }
+            GRAY -> {
+                R.drawable.color_option_full_gray
+            }
+            ORANGE -> {
+                R.drawable.color_option_full_orange
+            }
+            BROWN -> {
+                R.drawable.color_option_full_brown
+            }
+            PURPLE -> {
+                R.drawable.color_option_full_dark_red
+            }
+            else -> {
+                return R.drawable.color_option_full_rinet_blue
+            }
+
+        }
+    }
+
+    fun randomColor(): Int {
+        return Random.nextInt(0, 9)
+    }
+
+    fun getColorItems(): Array<Item> {
+
+        val presetsText = getPresets()
+
+        var array: Array<Item> = presetsText.mapIndexed { indx, text ->
+            Item(text, getDrawableIdEmpty(indx))
+        }.toTypedArray()
+
+
+        return array
+    }
+
 }
