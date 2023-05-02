@@ -74,7 +74,7 @@ class EventsAdapter(
                     eventViewHolder.dayInWeekTextView.text =
                         rinetEvent.startDateTime.format(DateTimeFormatter.ofPattern("EEE"))
 
-                    eventViewHolder.itemView.setCustomMargins(top = 24F)
+                    eventViewHolder.itemView.setCustomMargins(top = 20F)
 
                 } else {
                     eventViewHolder.dayInMonthTextView.text = ""
@@ -85,14 +85,18 @@ class EventsAdapter(
 
                 }
 
+                eventViewHolder.eventPeriodTextView.visibility = View.GONE
 
                 if (rinetEvent.isFirstInSeries) {
+                    eventViewHolder.eventPeriodTextView.visibility = View.VISIBLE
                     eventViewHolder.eventPeriodTextView.text = rinetEvent.getPeriodFirstInSeries()
                 } else if (rinetEvent.isLastInSeries) {
+                    eventViewHolder.eventPeriodTextView.visibility = View.VISIBLE
                     eventViewHolder.eventPeriodTextView.text = rinetEvent.getPeriodLastInSeries()
                 } else if (rinetEvent.isInSeries) {
                     eventViewHolder.eventPeriodTextView.visibility = View.GONE
                 } else {
+                    eventViewHolder.eventPeriodTextView.visibility = View.VISIBLE
                     eventViewHolder.eventPeriodTextView.text =
                         rinetEvent.getPeriod()
                 }
