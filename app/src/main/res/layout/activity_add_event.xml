@@ -517,6 +517,12 @@
 
             </LinearLayout>
 
+            <View
+                android:id="@+id/deleteEventSectionDivider"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/settings_divider_height"
+                android:background="@color/divider" />
+
 
             <View
                 android:id="@+id/filler"

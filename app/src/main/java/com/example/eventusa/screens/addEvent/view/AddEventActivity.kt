@@ -7,6 +7,7 @@ import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.View
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -69,6 +70,7 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var addToCalendarCheckBox: CheckBox
 
     lateinit var deleteEventSection: LinearLayout
+    lateinit var deleteEventSectionDivider: View
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,6 +102,7 @@ class AddEventActivity : AppCompatActivity() {
         addToCalendarCheckBox = findViewById(R.id.addToCalendarCheckBox)
 
         deleteEventSection = findViewById(R.id.deleteEventSection)
+        deleteEventSectionDivider = findViewById(R.id.deleteEventSectionDivider)
 
         setupUI()
         setupStateObserving()
@@ -109,8 +112,10 @@ class AddEventActivity : AppCompatActivity() {
     private fun setupStateObserving() {
 
         val eventId = getIntentEventId()
-        eventId?.let {
-            viewmodel.fetchEvent(eventId)
+        if (eventId != null) {
+            handleEditEvent(eventId)
+        }else{
+            handleNewEvent()
         }
 
         lifecycleScope.launch {
@@ -240,6 +245,15 @@ class AddEventActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun handleEditEvent(eventId: Int) {
+        viewmodel.fetchEvent(eventId)
+    }
+
+    private fun handleNewEvent(){
+        deleteEventSection.visibility = View.GONE
+        deleteEventSectionDivider.visibility = View.GONE
     }
 
     private fun setupUI() {

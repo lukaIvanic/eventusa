@@ -37,14 +37,13 @@
 
     <TextView
         android:id="@+id/dayInMonthTextView"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:fontFamily="sans-serif"
         tools:text="12"
         android:textAlignment="center"
         android:textColor="#252525"
-
-
+        android:gravity="center"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="@+id/dayInWeekTextView"
         app:layout_constraintHorizontal_bias="0.5"
@@ -59,7 +58,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="32dp"
         app:cardCornerRadius="10dp"
-
+        android:layout_marginTop="8dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

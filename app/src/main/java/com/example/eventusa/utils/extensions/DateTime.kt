@@ -54,6 +54,10 @@ fun RINetEvent.getDaysLasting(): Int {
     return ((endDateTime.dayOfYear - startDateTime.dayOfYear + 365) % 365) + 1
 }
 
+fun LocalDateTime.isToday(): Boolean {
+    return this.toLocalDate() == LocalDate.now()
+}
+
 fun LocalDateTime.toParsedString(
     pattern: String = PATTERN_UI_DATE_TIME,
 ): String {

@@ -1,6 +1,7 @@
 package com.example.eventusa.screens.events.view.recycler_utils
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +12,13 @@ import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventItemType
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
-import com.example.eventusa.utils.extensions.getPeriod
-import com.example.eventusa.utils.extensions.getPeriodFirstInSeries
-import com.example.eventusa.utils.extensions.getPeriodLastInSeries
-import com.example.eventusa.utils.extensions.setCustomMargins
+import com.example.eventusa.utils.extensions.*
 import java.time.format.DateTimeFormatter
 
 class EventsAdapter(
     private var eventItemList: MutableList<EventItem> = ArrayList(),
     val onEventClick: (riNetEvent: RINetEvent) -> Unit,
-) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -63,18 +60,27 @@ class EventsAdapter(
                 eventViewHolder.eventTitleTextView.text = rinetEvent.title
 
                 // Check if event is first in a section for margin correction
-                val topMargin =
-                    if (eventItemList[position - 1] is EventSectionHeader) 16F else 8F
+                val topMargin = if (eventItemList[position - 1] is EventSectionHeader) 16F else 8F
                 eventViewHolder.itemView.setCustomMargins(top = topMargin)
 
                 // Remove date on left side of event if the date is already displayed in above events
-                if (position > 0 && (eventItemList[position - 1] as? RINetEvent)?.startDateTime?.dayOfWeek != rinetEvent.startDateTime.dayOfWeek) {
+                if (isEventFirstInDate(position, rinetEvent)) {
                     eventViewHolder.dayInMonthTextView.text =
                         rinetEvent.startDateTime.dayOfMonth.toString()
                     eventViewHolder.dayInWeekTextView.text =
                         rinetEvent.startDateTime.format(DateTimeFormatter.ofPattern("EEE"))
 
                     eventViewHolder.itemView.setCustomMargins(top = 20F)
+
+                    if (rinetEvent.startDateTime.isToday()) {
+                        eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.secondary_color_roundede)
+                        eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#FFFBF8"))
+                        eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#9B2F0C"))
+                    }else{
+                        eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.app_background_rounded)
+                        eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#252525"))
+                        eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#404040"))
+                    }
 
                 } else {
                     eventViewHolder.dayInMonthTextView.text = ""
@@ -99,7 +105,9 @@ class EventsAdapter(
                     eventViewHolder.eventPeriodTextView.visibility = View.VISIBLE
                     eventViewHolder.eventPeriodTextView.text =
                         rinetEvent.getPeriod()
+
                 }
+
 
             }
 
@@ -108,6 +116,12 @@ class EventsAdapter(
 
 
     }
+
+    private fun isEventFirstInDate(
+        position: Int,
+        rinetEvent: RINetEvent,
+    ) =
+        position > 0 && (eventItemList[position - 1] as? RINetEvent)?.startDateTime?.dayOfWeek != rinetEvent.startDateTime.dayOfWeek
 
     override fun getItemViewType(position: Int): Int {
         return eventItemList.get(position).type.ordinal
