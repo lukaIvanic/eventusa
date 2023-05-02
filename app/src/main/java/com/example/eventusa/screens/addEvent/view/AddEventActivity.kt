@@ -246,6 +246,9 @@ class AddEventActivity : AppCompatActivity() {
 
                             chooseAllSwitch.isChecked = allChipsHighlighted
 
+                            setCircleColor(eventColor)
+
+
 
                         }
                     }
@@ -267,7 +270,6 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun setupUI() {
         setupPeopleChips()
-        setupEventColor()
         setupProgressDialog()
         setupTouch()
     }
@@ -333,11 +335,6 @@ class AddEventActivity : AppCompatActivity() {
 
         return isChipHighlight
     }
-
-    private fun setupEventColor() {
-        chooseColorCircle.setCardBackgroundColor(resources.getColor(EventColors.getColorId(viewmodel.getEventColor())))
-    }
-
 
     private fun setupProgressDialog() {
         val builder = AlertDialog.Builder(this)
@@ -453,13 +450,7 @@ class AddEventActivity : AppCompatActivity() {
 
                     viewmodel.setEventColor(index)
 
-                    chooseColorCircle.setCardBackgroundColor(
-                        resources.getColor(
-                            EventColors.getColorId(
-                                index
-                            )
-                        )
-                    )
+                    setCircleColor(index)
 
 
                     chooseColorDialog?.dismiss()
@@ -467,6 +458,16 @@ class AddEventActivity : AppCompatActivity() {
 
 
         chooseColorDialog = notifDialogBuilder.show()
+    }
+
+    private fun setCircleColor(index: Int) {
+        chooseColorCircle.setCardBackgroundColor(
+            resources.getColor(
+                EventColors.getColorId(
+                    index
+                )
+            )
+        )
     }
 
     private fun handleChooseAllSwitch() {

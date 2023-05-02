@@ -110,7 +110,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
                     is ResultOf.Loading -> _uiState.value = ResultOf.Loading
                     is ResultOf.Success -> {
                         _uiState.value = result.map {
-                            AddEventUiState(eventId, it)
+                            AddEventUiState(eventId, it.copy())
                         }
                         currUiState = (_uiState.value as ResultOf.Success).data
                     }
