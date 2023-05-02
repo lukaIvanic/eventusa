@@ -8,10 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
-import com.example.eventusa.screens.events.data.EventItem
-import com.example.eventusa.screens.events.data.EventItemType
-import com.example.eventusa.screens.events.data.EventSectionHeader
-import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.screens.events.data.*
 import com.example.eventusa.utils.extensions.*
 import java.time.format.DateTimeFormatter
 
@@ -76,7 +73,7 @@ class EventsAdapter(
                         eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.secondary_color_roundede)
                         eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#FFFBF8"))
                         eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#9B2F0C"))
-                    }else{
+                    } else {
                         eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.app_background_rounded)
                         eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#252525"))
                         eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#404040"))
@@ -105,8 +102,14 @@ class EventsAdapter(
                     eventViewHolder.eventPeriodTextView.visibility = View.VISIBLE
                     eventViewHolder.eventPeriodTextView.text =
                         rinetEvent.getPeriod()
-
                 }
+
+                // Set event color
+                eventViewHolder.eventLayout.setBackgroundResource(
+                    EventColors.getDrawableId(
+                        rinetEvent.eventColor
+                    )
+                )
 
 
             }

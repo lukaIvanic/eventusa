@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
@@ -28,6 +29,7 @@ import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAd
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
+import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.*
 import com.example.eventusa.utils.extensions.*
@@ -44,11 +46,15 @@ class AddEventActivity : AppCompatActivity() {
 
     lateinit var progressDialog: AlertDialog
     var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
+    var chooseColorDialog: androidx.appcompat.app.AlertDialog? = null
 
     lateinit var saveEventButton: TextView
     lateinit var cancelButton: ImageView
 
     lateinit var titleEditText: EditText
+
+    lateinit var addToCalendarSection: LinearLayout
+    lateinit var addToCalendarCheckBox: CheckBox
 
     lateinit var startDateTextView: TextView
     lateinit var startTimeTextView: TextView
@@ -66,8 +72,8 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var locationEditText: EditText
     lateinit var summaryEditText: EditText
 
-    lateinit var addToCalendarSection: LinearLayout
-    lateinit var addToCalendarCheckBox: CheckBox
+    lateinit var chooseColorSection: LinearLayout
+    lateinit var chooseColorCircle: CardView
 
     lateinit var deleteEventSection: LinearLayout
     lateinit var deleteEventSectionDivider: View
@@ -82,6 +88,9 @@ class AddEventActivity : AppCompatActivity() {
         saveEventButton = findViewById(R.id.saveEventButton)
         saveEventButton = findViewById(R.id.saveEventButton)
         cancelButton = findViewById(R.id.cancelNotifRowButton)
+
+        addToCalendarSection = findViewById(R.id.addToCalendarSection)
+        addToCalendarCheckBox = findViewById(R.id.addToCalendarCheckBox)
 
         startDateTextView = findViewById(R.id.dateStartTextView)
         startTimeTextView = findViewById(R.id.timeStartTextView)
@@ -98,8 +107,8 @@ class AddEventActivity : AppCompatActivity() {
 
         setupNotificationSection()
 
-        addToCalendarSection = findViewById(R.id.addToCalendarSection)
-        addToCalendarCheckBox = findViewById(R.id.addToCalendarCheckBox)
+        chooseColorSection = findViewById(R.id.chooseColorSection)
+        chooseColorCircle = findViewById(R.id.chooseColorCircle)
 
         deleteEventSection = findViewById(R.id.deleteEventSection)
         deleteEventSectionDivider = findViewById(R.id.deleteEventSectionDivider)
@@ -114,7 +123,7 @@ class AddEventActivity : AppCompatActivity() {
         val eventId = getIntentEventId()
         if (eventId != null) {
             handleEditEvent(eventId)
-        }else{
+        } else {
             handleNewEvent()
         }
 
@@ -251,13 +260,14 @@ class AddEventActivity : AppCompatActivity() {
         viewmodel.fetchEvent(eventId)
     }
 
-    private fun handleNewEvent(){
+    private fun handleNewEvent() {
         deleteEventSection.visibility = View.GONE
         deleteEventSectionDivider.visibility = View.GONE
     }
 
     private fun setupUI() {
         setupPeopleChips()
+        setupEventColor()
         setupProgressDialog()
         setupTouch()
     }
@@ -324,6 +334,10 @@ class AddEventActivity : AppCompatActivity() {
         return isChipHighlight
     }
 
+    private fun setupEventColor() {
+        chooseColorCircle.setCardBackgroundColor(resources.getColor(EventColors.getColorId(viewmodel.getEventColor())))
+    }
+
 
     private fun setupProgressDialog() {
         val builder = AlertDialog.Builder(this)
@@ -374,6 +388,10 @@ class AddEventActivity : AppCompatActivity() {
             showChooseNotificationDialog()
         }
 
+        chooseColorSection.setOnClickListener {
+            showChooseColorDialog()
+        }
+
         deleteEventSection.setOnClickListener { handleDeleteEvent() }
 
 
@@ -422,6 +440,33 @@ class AddEventActivity : AppCompatActivity() {
 
 
         chooseNotifDialog = notifDialogBuilder.show()
+    }
+
+    private fun showChooseColorDialog() {
+        val notifDialogBuilder =
+            MaterialAlertDialogBuilder(this)
+                .setCancelable(true)
+                .setSingleChoiceItems(
+                    EventColors.getPresets(),
+                    viewmodel.getEventColor()
+                ) { _, index ->
+
+                    viewmodel.setEventColor(index)
+
+                    chooseColorCircle.setCardBackgroundColor(
+                        resources.getColor(
+                            EventColors.getColorId(
+                                index
+                            )
+                        )
+                    )
+
+
+                    chooseColorDialog?.dismiss()
+                }
+
+
+        chooseColorDialog = notifDialogBuilder.show()
     }
 
     private fun handleChooseAllSwitch() {

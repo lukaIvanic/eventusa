@@ -381,6 +381,14 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
         return currUiState.riNetEvent.endDateTime
     }
 
+    fun setEventColor(eventColor: Int){
+        currUiState.riNetEvent.eventColor = eventColor
+    }
+
+    fun getEventColor(): Int{
+        return currUiState.riNetEvent.eventColor
+    }
+
 
     fun resetDefaultUiState() {
         currUiState = defaultUiState()

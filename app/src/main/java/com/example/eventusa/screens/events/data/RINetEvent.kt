@@ -2,6 +2,7 @@ package com.example.eventusa.screens.events.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.eventusa.R
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.PATTERN_SERVER
 import com.example.eventusa.utils.extensions.toParsedString
@@ -54,6 +55,8 @@ data class RINetEvent(
 
     var isLastInSeries: Boolean = false,
 
+    var eventColor: Int = EventColors.BLUE,
+
     ) : EventItem {
 
     constructor() : this(
@@ -67,8 +70,10 @@ data class RINetEvent(
         0,
         LocalDateTime.now().toParsedString(
             PATTERN_SERVER
-        )
-    ) {
+        ),
+
+
+        ) {
 
     }
 
@@ -76,6 +81,49 @@ data class RINetEvent(
         get() = EventItemType.EVENT
 
 
-
 }
 
+object EventColors {
+    const val RED = 0
+    const val GREEN = 1
+    const val BLUE = 2
+
+    fun getPresets(): Array<String?> {
+        return arrayOf("Red", "Green", "Blue")
+    }
+
+    fun getDrawableId(eventColor: Int): Int {
+        return when (eventColor) {
+            RED -> {
+                R.drawable.ripple_event_red
+            }
+            GREEN -> {
+                R.drawable.ripple_event_green
+            }
+            BLUE -> {
+                R.drawable.rinet_color_ripple
+            }
+            else -> {
+                 R.drawable.rinet_color_ripple
+            }
+
+        }
+    }
+
+    fun getColorId(eventColor: Int): Int {
+        return when(eventColor) {
+            RED -> {
+                R.color.red_danger
+            }
+            GREEN -> {
+                R.color.green_rinet
+            }
+            BLUE -> {
+                R.color.rinet_color
+            }
+            else -> {
+                return R.color.rinet_color
+            }
+        }
+    }
+}

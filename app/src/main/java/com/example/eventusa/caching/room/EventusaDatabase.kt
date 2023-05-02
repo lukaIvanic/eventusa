@@ -21,7 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@Database(version = 7, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
+@Database(version = 8, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
 @TypeConverters(LocalDateTimeConverter::class, UsersListConverter::class)
 abstract class EventusaDatabase : RoomDatabase() {
 
