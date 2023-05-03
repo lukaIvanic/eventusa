@@ -67,7 +67,8 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
             context,
             0,
             startAppIntent,
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                PendingIntent.FLAG_MUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val deleteIntent = Intent(context, AlarmNotificationDismissedBroadcastReceiver::class.java)

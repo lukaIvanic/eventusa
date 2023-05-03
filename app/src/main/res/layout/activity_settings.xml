@@ -100,6 +100,11 @@
         android:layout_height="@dimen/settings_divider_height"
         android:background="@color/divider" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/settings_divider_height"
+        android:background="@color/divider" />
+
     <LinearLayout
         android:id="@+id/notifTestLayout"
         android:layout_width="match_parent"
