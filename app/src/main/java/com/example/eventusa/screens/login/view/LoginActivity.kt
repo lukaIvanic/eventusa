@@ -67,6 +67,8 @@ class LoginActivity : AppCompatActivity() {
                     LocalStorageManager.turnOffRememberMe()
                 }
 
+                viewmodel.setUserIsLoggedIn()
+
                 hideLoginText()
                 disableRememberMeCheckBox()
                 showProgressBar()

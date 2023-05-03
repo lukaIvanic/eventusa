@@ -2,6 +2,7 @@ package com.example.eventusa.caching.room.extraentities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.*
 import kotlin.random.Random
 
 /**
@@ -16,6 +17,6 @@ data class EventNotification(
 ) {
 
     @PrimaryKey()
-    var notifId: Int = Random.nextInt()
+    var notifId: Int = Random.nextInt(0, Integer.MAX_VALUE - 1)
 
 }
