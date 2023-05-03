@@ -383,7 +383,7 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun hideProgressDialog() {
-        progressDialog.hide()
+        progressDialog.dismiss()
     }
 
     private fun setupTouch() {
