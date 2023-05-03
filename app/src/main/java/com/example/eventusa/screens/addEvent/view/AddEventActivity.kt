@@ -391,7 +391,13 @@ class AddEventActivity : AppCompatActivity() {
         cancelButton.setOnClickListener {
 
 
-            showCancelEditDialog()
+            sendInputsToViewmodel()
+            if (viewmodel.wasEditMade()) {
+                showCancelEditDialog()
+            } else {
+                finishAndReturnToEventsScreen()
+            }
+
         }
 
         saveEventButton.setOnClickListener {
@@ -439,14 +445,17 @@ class AddEventActivity : AppCompatActivity() {
 
                 viewmodel.resetDefaultUiState()
 
-                if(isActivityFromNotif){
-                    gotoEventsScreen()
-                }
-
-                finish()
+                finishAndReturnToEventsScreen()
 
 
             }.show()
+    }
+
+    private fun finishAndReturnToEventsScreen() {
+        if (isActivityFromNotif) {
+            gotoEventsScreen()
+        }
+        finish()
     }
 
     private fun showChooseNotificationDialog() {
@@ -705,15 +714,20 @@ class AddEventActivity : AppCompatActivity() {
         lifecycleScope.launch {
 
 
-            viewmodel.setTitle(titleEditText.text.toString())
-            viewmodel.setLocation(locationEditText.text.toString())
-            viewmodel.setSummary(summaryEditText.text.toString())
+            sendInputsToViewmodel()
 
             viewmodel.updateOrInsertEvent(this@AddEventActivity)
 
         }
 
 
+    }
+
+    private fun sendInputsToViewmodel() {
+        viewmodel.setTitle(titleEditText.text.toString())
+        viewmodel.setLocation(locationEditText.text.toString())
+        viewmodel.setSummary(summaryEditText.text.toString())
+        viewmodel.setCalendarEnabled(addToCalendarCheckBox.isChecked)
     }
 
 

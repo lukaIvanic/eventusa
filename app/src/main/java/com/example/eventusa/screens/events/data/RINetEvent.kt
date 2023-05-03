@@ -23,20 +23,16 @@ import kotlin.random.Random
 @Entity("rinetevents_table")
 data class RINetEvent(
 
-    @PrimaryKey(autoGenerate = true)
-    var eventId: Int = 0,
+    @PrimaryKey(autoGenerate = true) var eventId: Int = 0,
 
 
-    @JsonProperty("Name")
-    var title: String = "",
+    @JsonProperty("Name") var title: String = "",
 
 
-    @JsonProperty("From")
-    var startDateTime: LocalDateTime = LocalDateTime.now(),
+    @JsonProperty("From") var startDateTime: LocalDateTime = LocalDateTime.now(),
 
 
-    @JsonProperty("To")
-    var endDateTime: LocalDateTime = LocalDateTime.now(),
+    @JsonProperty("To") var endDateTime: LocalDateTime = LocalDateTime.now(),
 
 
     var location: String? = "",
@@ -82,6 +78,20 @@ data class RINetEvent(
     override val type: EventItemType
         get() = EventItemType.EVENT
 
+    override fun equals(other: Any?): Boolean {
+        val otherEvent = other as? RINetEvent ?: return false
+
+
+        return eventId == otherEvent.eventId
+                && title == otherEvent.title
+                && startDateTime == otherEvent.startDateTime
+                && endDateTime == otherEvent.endDateTime
+                && location == otherEvent.location
+                && description == otherEvent.description
+                && calendar == otherEvent.calendar
+                && usersAttending.toSet() == otherEvent.usersAttending.toSet()
+                && eventColor == otherEvent.eventColor
+    }
 
 }
 
@@ -95,7 +105,7 @@ object EventColors {
     const val GRAY = 6
     const val ORANGE = 7
     const val BROWN = 8
-    const val PURPLE = 9
+    const val DARK_RED = 9
 
     fun getPresets(): Array<String> {
         return arrayOf(
@@ -108,7 +118,7 @@ object EventColors {
             "Gray",
             "Orange",
             "Brown",
-            "Purple"
+            "Dark red"
         )
     }
 
@@ -141,8 +151,8 @@ object EventColors {
             BROWN -> {
                 R.color.event_brown
             }
-            PURPLE -> {
-                R.color.event_light_purple
+            DARK_RED -> {
+                R.color.event_dark_red
             }
             else -> {
                 return R.color.event_rinet_blue
@@ -179,7 +189,7 @@ object EventColors {
             BROWN -> {
                 R.drawable.color_option_empty_brown
             }
-            PURPLE -> {
+            DARK_RED -> {
                 R.drawable.color_option_empty_dark_red
             }
             else -> {
@@ -222,7 +232,7 @@ object EventColors {
             BROWN -> {
                 R.drawable.color_option_full_brown
             }
-            PURPLE -> {
+            DARK_RED -> {
                 R.drawable.color_option_full_dark_red
             }
             else -> {
