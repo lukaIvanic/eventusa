@@ -36,6 +36,8 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
     private var currUiState =
         defaultUiState()
 
+    private var originalEvent: RINetEvent? = null
+
     private val _uiState =
         MutableStateFlow<ResultOf<AddEventUiState>>(ResultOf.Success(currUiState))
     val uiState = _uiState.asStateFlow()
@@ -119,16 +121,22 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
                     return@async result
                 }
 
-                val cachedEvent = deferred.await()
+                val cachedEventResult = deferred.await()
 
-                if (cachedEvent != null) {
-                    emitFetchEvent(eventId, cachedEvent)
+                if (cachedEventResult != null) {
+
+                    if(cachedEventResult is ResultOf.Success){
+                        originalEvent = cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending.toMutableList())
+                    }
+
+                    emitFetchEvent(eventId, cachedEventResult)
                     return@withContext
                 }
 
                 try {
                     val eventFromDb = eventsRepository.getEventRoom(eventId)
                     emitFetchEvent(eventId, ResultOf.Success(eventFromDb))
+                    originalEvent = eventFromDb.copy(usersAttending = eventFromDb.usersAttending.toMutableList())
                 } catch (e: Exception) {
                     emitFetchEvent(eventId, ResultOf.Error(Exception("Event was deleted.")))
                 }
@@ -140,6 +148,9 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
                  _uiState.value = result.map {
                             AddEventUiState(eventId, it.copy())
                         }
+
+                        originalEvent = result.data.copy()
+
                         currUiState = (_uiState.value as ResultOf.Success).data
              */
 
@@ -264,6 +275,10 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
 
     fun setSummary(summary: String) {
         currUiState.riNetEvent.description = summary
+    }
+
+    fun setCalendarEnabled(calendarEnabled: Boolean){
+        currUiState.riNetEvent.calendar = calendarEnabled
     }
 
     /**
@@ -441,6 +456,12 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
             usersAttending = ArrayList()
         )
     )
+
+    fun wasEditMade(): Boolean {
+        val first = currUiState.riNetEvent
+        val second = originalEvent
+        return first != second || addedNotifications.isNotEmpty()
+    }
 
 }
 
