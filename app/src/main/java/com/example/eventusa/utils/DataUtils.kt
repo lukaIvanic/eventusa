@@ -1,5 +1,6 @@
 package com.example.eventusa.utils
 
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -30,10 +31,18 @@ object DataUtils {
 
             var rinetevent = _rinetevent.copy(isInSeries = true)
 
+
             for (i in 0 until rinetevent.getDaysLasting()) {
 
+                if (LocalStorageManager.readShowMultipleDayEvents()
+                        .not() && (i != rinetevent.getDaysLasting() - 1) && i != 0
+                ) {
+                    continue
+                }
+
                 val newStartDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong())
-                val newEndDateTime = newStartDateTime.withHour(rinetevent.endDateTime.hour).withMinute(rinetevent.endDateTime.minute)
+                val newEndDateTime = newStartDateTime.withHour(rinetevent.endDateTime.hour)
+                    .withMinute(rinetevent.endDateTime.minute)
 
                 rawEventsUnsorted.add(
                     rinetevent.copy(

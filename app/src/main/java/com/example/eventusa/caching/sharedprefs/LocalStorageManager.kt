@@ -56,6 +56,27 @@ object LocalStorageManager {
         return sharedPreferences.getString("pass", null)
     }
 
+    fun readShowMultipleDayEvents(): Boolean {
+        return sharedPreferences.getBoolean("showMultipleDayEvents", true)
+    }
+
+    fun setCheckedShowMultipleDayEvents() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("showMultipleDayEvents", true)
+
+        myEdit.apply()
+    }
+
+    fun setUncheckedShowMultipleDayEvents() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("showMultipleDayEvents", false)
+
+        myEdit.apply()
+    }
+
+
     fun readAskConfirmDateBefore(): Boolean {
         return sharedPreferences.getBoolean("askAgainDateBefore", true)
     }
