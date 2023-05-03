@@ -21,7 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@Database(version = 8, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
+@Database(version = 10, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
 @TypeConverters(LocalDateTimeConverter::class, UsersListConverter::class)
 abstract class EventusaDatabase : RoomDatabase() {
 
@@ -36,7 +36,7 @@ abstract class EventusaDatabase : RoomDatabase() {
 
         private var populateDbCallback = object : Callback() {
             override fun onOpen(db: SupportSQLiteDatabase) {
-//                populateDb()
+                populateDb()
                 populateUsers()
                 super.onOpen(db)
             }
@@ -121,7 +121,8 @@ abstract class EventusaDatabase : RoomDatabase() {
                                 .withHour(13)
                                 .withMinute(30),
                             location = "Ured",
-                            description = "Neki description"
+                            description = "Neki description",
+                            isFirstInDate = false
                         ),
 
                         RINetEvent(

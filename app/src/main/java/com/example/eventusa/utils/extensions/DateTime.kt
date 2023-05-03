@@ -58,6 +58,10 @@ fun LocalDateTime.isToday(): Boolean {
     return this.toLocalDate() == LocalDate.now()
 }
 
+fun LocalDateTime.isSameDate(localDateTime: LocalDateTime):Boolean{
+    return this.dayOfYear == localDateTime.dayOfYear
+}
+
 fun LocalDateTime.toParsedString(
     pattern: String = PATTERN_UI_DATE_TIME,
 ): String {
