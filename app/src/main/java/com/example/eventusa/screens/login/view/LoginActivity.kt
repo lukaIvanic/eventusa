@@ -18,6 +18,7 @@ import com.example.eventusa.screens.login.viewmodel.LoginViewModel
 import com.example.eventusa.screens.login.viewmodel.LoginViewModelFactory
 import com.example.eventusa.utils.extensions.doIfFailure
 import com.example.eventusa.utils.extensions.doIfSucces
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -58,8 +59,22 @@ class LoginActivity : AppCompatActivity() {
         }
 
         guestLoginButton.setOnClickListener {
-            gotoEventsScreen()
-            finish()
+            lifecycleScope.launch {
+
+                if (rememberMeCheckBox.isChecked) {
+                    LocalStorageManager.turnOnRememberMe()
+                } else {
+                    LocalStorageManager.turnOffRememberMe()
+                }
+
+                hideLoginText()
+                disableRememberMeCheckBox()
+                showProgressBar()
+                disableLoginButton()
+                delay(100)
+                gotoEventsScreen()
+                finish()
+            }
         }
 
         val rememberMeEnabled = LocalStorageManager.readRememberMe()
@@ -72,12 +87,14 @@ class LoginActivity : AppCompatActivity() {
 
                     if (loginResult is ResultOf.Loading) {
                         hideLoginText()
+                        disableRememberMeCheckBox()
                         showProgressBar()
                         disableLoginButton()
                     }
 
                     loginResult.doIfFailure {
                         showLoginText()
+                        enableRememberMeCheckBox()
                         hideProgressBar()
                         enableLoginButton()
                         showError(it.localizedMessage)
@@ -131,6 +148,8 @@ class LoginActivity : AppCompatActivity() {
         if (!LocalStorageManager.readRememberMe()) return
 
         guestLoginButton.callOnClick()
+
+
         return
 
         val user = LocalStorageManager.readUsername()
@@ -148,6 +167,14 @@ class LoginActivity : AppCompatActivity() {
             message ?: "An error occured, please try again.",
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    private fun enableRememberMeCheckBox(){
+        rememberMeCheckBox.isEnabled = false
+    }
+
+    private fun disableRememberMeCheckBox(){
+        rememberMeCheckBox.isEnabled = false
     }
 
     private fun showProgressBar() {
