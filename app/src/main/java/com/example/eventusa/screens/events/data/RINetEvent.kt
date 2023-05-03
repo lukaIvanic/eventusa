@@ -55,6 +55,8 @@ data class RINetEvent(
 
     var eventColor: Int = EventColors.randomColor(),
 
+    var isFirstInDate: Boolean = true
+
     ) : EventItem {
 
     constructor() : this(
@@ -91,6 +93,10 @@ data class RINetEvent(
                 && calendar == otherEvent.calendar
                 && usersAttending.toSet() == otherEvent.usersAttending.toSet()
                 && eventColor == otherEvent.eventColor
+                && isFirstInDate == otherEvent.isFirstInDate
+                && isInSeries == otherEvent.isFirstInSeries
+                && isFirstInSeries == otherEvent.isFirstInSeries
+                && isLastInSeries == otherEvent.isLastInSeries
     }
 
 }

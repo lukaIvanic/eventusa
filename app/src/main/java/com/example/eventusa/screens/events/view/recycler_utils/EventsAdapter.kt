@@ -60,8 +60,17 @@ class EventsAdapter(
                 val topMargin = if (eventItemList[position - 1] is EventSectionHeader) 20F else 4F
                 eventViewHolder.itemView.setCustomMargins(top = topMargin)
 
+                eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.app_background_rounded)
+                eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#252525"))
+                eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#404040"))
+
+                eventViewHolder.dayInMonthTextView.text = ""
+                eventViewHolder.dayInWeekTextView.text = ""
+
+                eventViewHolder.itemView.setCustomMargins(top = 4F)
+
                 // Remove date on left side of event if the date is already displayed in above events
-                if (isEventFirstInDate(position, rinetEvent)) {
+                if (rinetEvent.isFirstInDate) {
                     eventViewHolder.dayInMonthTextView.text =
                         rinetEvent.startDateTime.dayOfMonth.toString()
                     eventViewHolder.dayInWeekTextView.text =
@@ -73,18 +82,7 @@ class EventsAdapter(
                         eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.secondary_color_rounded)
                         eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#FFFBF8"))
                         eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#9B2F0C"))
-                    } else {
-                        eventViewHolder.dayInMonthTextView.setBackgroundResource(R.drawable.app_background_rounded)
-                        eventViewHolder.dayInMonthTextView.setTextColor(Color.parseColor("#252525"))
-                        eventViewHolder.dayInWeekTextView.setTextColor(Color.parseColor("#404040"))
                     }
-
-                } else {
-                    eventViewHolder.dayInMonthTextView.text = ""
-                    eventViewHolder.dayInWeekTextView.text = ""
-
-                    eventViewHolder.itemView.setCustomMargins(top = 4F)
-
 
                 }
 
@@ -136,10 +134,6 @@ class EventsAdapter(
 
     fun updateEvents(eventItems: MutableList<EventItem>) {
 
-        eventItemList = eventItems
-        notifyDataSetChanged()
-        return
-
         val diffCallback = EventsDiffCallBack(this.eventItemList, eventItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
@@ -174,7 +168,7 @@ private class EventsDiffCallBack(
         }
 
         if (oldItem is RINetEvent && newItem is RINetEvent) {
-            return (oldItem.eventId == newItem.eventId && oldItem.title == newItem.title && oldItem.startDateTime == newItem.startDateTime && oldItem.endDateTime == newItem.endDateTime)
+            return oldItem == newItem
         }
         return false
     }
@@ -194,7 +188,7 @@ private class EventsDiffCallBack(
         }
 
         if (oldItem is RINetEvent && newItem is RINetEvent) {
-            return (oldItem.eventId == newItem.eventId && oldItem.title == newItem.title && oldItem.startDateTime == newItem.startDateTime && oldItem.endDateTime == newItem.endDateTime)
+            return oldItem == newItem
         }
         return false
     }

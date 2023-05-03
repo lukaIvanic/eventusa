@@ -5,6 +5,7 @@ import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.extensions.getDaysLasting
+import com.example.eventusa.utils.extensions.isSameDate
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -40,7 +41,7 @@ object DataUtils {
                     continue
                 }
 
-                val newStartDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong())
+                val newStartDateTime = rinetevent.startDateTime.plusDays((i).toLong())
                 val newEndDateTime = newStartDateTime.withHour(rinetevent.endDateTime.hour)
                     .withMinute(rinetevent.endDateTime.minute)
 
@@ -144,15 +145,18 @@ object DataUtils {
                 currentWeeksItems.add(generateEventsSectionHeader(currWeekMonDate))
             }
 
-
-
+            if(i >= 1 && riNetEvent.startDateTime.isSameDate(rawEvents.get(i-1).startDateTime)){
+                riNetEvent.isFirstInDate = false
+            }else{
+                riNetEvent.isFirstInDate = true
+            }
 
             currentWeeksItems.add(riNetEvent)
+
 
         }
 
         eventItems.addAll(currentWeeksItems)
-
 
 
         return eventItems
