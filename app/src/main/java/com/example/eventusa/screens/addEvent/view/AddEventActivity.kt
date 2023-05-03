@@ -5,7 +5,9 @@ import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +33,9 @@ import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRe
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
 import com.example.eventusa.screens.events.data.EventColors
+import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.model.User
+import com.example.eventusa.screens.login.view.LoginActivity
 import com.example.eventusa.utils.*
 import com.example.eventusa.utils.extensions.*
 import com.google.android.material.chip.ChipGroup
@@ -49,6 +53,8 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var progressDialog: AlertDialog
     var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
     var chooseColorDialog: androidx.appcompat.app.AlertDialog? = null
+
+    var isActivityFromNotif = false
 
     lateinit var saveEventButton: TextView
     lateinit var cancelButton: ImageView
@@ -119,18 +125,43 @@ class AddEventActivity : AppCompatActivity() {
         deleteEventSectionDivider = findViewById(R.id.deleteEventSectionDivider)
 
         setupUI()
+        setupIsFromNotif()
+        setupAddOrEditState()
         setupStateObserving()
 
     }
 
-    private fun setupStateObserving() {
+    private fun setupIsFromNotif(){
+        isActivityFromNotif = getIntentIsFromNotif()
 
+        if(isActivityFromNotif){
+            if((application as? EventusaApplication)?.userRepository?.isUserAlreadyLoggedIn()?.not() == true){
+                gotoLoginScreen()
+                finish()
+            }
+
+        }
+    }
+    private fun setupAddOrEditState(){
         val eventId = getIntentEventId()
         if (eventId != null) {
             handleEditEvent(eventId)
         } else {
             handleNewEvent()
         }
+
+        val bundle = intent.extras
+        if (bundle != null) {
+            for (key in bundle.keySet()) {
+                Log.e("BUNDLE ADD EVENT", key + " : " + if (bundle[key] != null) bundle[key] else "NULL")
+            }
+        }
+
+    }
+
+    private fun setupStateObserving() {
+
+
 
         lifecycleScope.launch {
             viewmodel.postEventState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
@@ -358,6 +389,8 @@ class AddEventActivity : AppCompatActivity() {
     private fun setupTouch() {
 
         cancelButton.setOnClickListener {
+
+
             showCancelEditDialog()
         }
 
@@ -403,8 +436,16 @@ class AddEventActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this).setTitle("Cancel")
             .setMessage("Do you want to cancel your draft?\nThe information will be lost.")
             .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("OK") { _, _ ->
+
                 viewmodel.resetDefaultUiState()
+
+                if(isActivityFromNotif){
+                    gotoEventsScreen()
+                }
+
                 finish()
+
+
             }.show()
     }
 
@@ -701,10 +742,25 @@ class AddEventActivity : AppCompatActivity() {
         }
     }
 
+    private fun getIntentIsFromNotif(): Boolean {
+        return intent.getBooleanExtra("is_from_notif", false)
+    }
 
     private fun getIntentEventId(): Int? {
         val eventId = intent.getIntExtra("event_id", -550)
         return if (eventId != -550) eventId else null
+    }
+
+    private fun gotoEventsScreen(){
+        val intent = Intent(this@AddEventActivity, EventsActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+    }
+
+    private fun gotoLoginScreen(){
+        val intent = Intent(this@AddEventActivity, LoginActivity::class.java)
+        startActivity(intent)
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
     override fun onBackPressed() {

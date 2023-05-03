@@ -13,6 +13,7 @@ import com.example.eventusa.utils.extensions.getPeriod
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import kotlin.random.Random
 
 class NotifManager(
     val context: Context,
@@ -29,6 +30,8 @@ class NotifManager(
         val eventNotification = EventNotification(event.eventId, minsUntilEvent)
         if (existingNotifId != null) {
             eventNotification.notifId = existingNotifId
+        }else{
+            eventNotification.notifId = Random.nextInt(0, Integer.MAX_VALUE)
         }
 
         if (existingNotifId == null) {

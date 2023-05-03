@@ -62,14 +62,16 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
 
         val startAppIntent = Intent(context, AddEventActivity::class.java)
         startAppIntent.putExtra("event_id", eventId)
+        startAppIntent.putExtra("is_from_notif", true)
         val startAppPendingIntent = PendingIntent.getActivity(
             context,
             0,
             startAppIntent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val deleteIntent = Intent(context, AlarmNotificationDismissedBroadcastReceiver::class.java)
+        deleteIntent.putExtra("notif_id", notificationId)
         val deletePendingIntent = PendingIntent.getBroadcast(
             context,
             0,
@@ -101,8 +103,12 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
                 .setContentIntent(startAppPendingIntent)
                 .setDeleteIntent(deletePendingIntent)
+                .setOngoing(false)
+                .setAutoCancel(true)
 
         val notification = notificationBuilder.build()
+
+
 
         notificationManager.notify(notificationId, notification)
 

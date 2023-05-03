@@ -131,6 +131,10 @@ class EventsRepositoryLocal(
 
     }
 
+    suspend fun getEventRoom(eventId: Int): RINetEvent{
+        return Room.readEvent(eventId)
+    }
+
     // Update
     suspend fun updateEvent(rinetEvent: RINetEvent){
         Room.updateEvent(rinetEvent)

@@ -21,6 +21,10 @@ object Room {
 
     }
 
+    suspend fun readEvent(eventId: Int): RINetEvent {
+        delay(500)
+        return eventsDao.getEvent(eventId)
+    }
     suspend fun readAllEvents(): List<RINetEvent> {
         delay(500)
         return eventsDao.getAllEvents()

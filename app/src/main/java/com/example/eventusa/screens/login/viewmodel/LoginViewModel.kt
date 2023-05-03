@@ -46,12 +46,19 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
                 val roomUser = Room.findUserInDb(RoomUser(0, username, password))
                 if (roomUser != null) {
                     _loginStateFlow.emit(ResultOf.Success(roomUser))
+                    userRepository.setUserIsLoggedIn()
                 } else {
                     _loginStateFlow.emit(ResultOf.Error(Exception("Username or password incorrect")))
                 }
             }
         }
     }
+
+
+    fun setUserIsLoggedIn(){
+        userRepository.setUserIsLoggedIn()
+    }
+
 
 }
 

@@ -1,6 +1,7 @@
 package com.example.eventusa.screens.addEvent.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.eventusa.caching.room.Room
 import com.example.eventusa.caching.room.extraentities.EventNotification
@@ -102,20 +103,45 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
     }
 
     fun fetchEvent(eventId: Int) {
-        viewModelScope.launch {
+
+        val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+            Log.i("Fetch event - Add Event View model", throwable.localizedMessage)
+        }
+
+        viewModelScope.launch(coroutineExceptionHandler) {
             withContext(Dispatchers.Default) {
-                val result = eventsRepository.getEventWithId(eventId)
-                when (result) {
-                    is ResultOf.Error -> _uiState.value = ResultOf.Error(result.exception)
-                    is ResultOf.Loading -> _uiState.value = ResultOf.Loading
-                    is ResultOf.Success -> {
-                        _uiState.value = result.map {
+
+                val deferred = async {
+                    val result = eventsRepository.getEventWithId(eventId)
+                    if (result is ResultOf.Error) {
+                        return@async null
+                    }
+                    return@async result
+                }
+
+                val cachedEvent = deferred.await()
+
+                if (cachedEvent != null) {
+                    emitFetchEvent(eventId, cachedEvent)
+                    return@withContext
+                }
+
+                try {
+                    val eventFromDb = eventsRepository.getEventRoom(eventId)
+                    emitFetchEvent(eventId, ResultOf.Success(eventFromDb))
+                } catch (e: Exception) {
+                    emitFetchEvent(eventId, ResultOf.Error(Exception("Event was deleted.")))
+                }
+
+
+            }
+
+            /*
+                 _uiState.value = result.map {
                             AddEventUiState(eventId, it.copy())
                         }
                         currUiState = (_uiState.value as ResultOf.Success).data
-                    }
-                }
-            }
+             */
 
             _notificationsEventState.emit(
                 ResultOf.Success(
@@ -128,6 +154,15 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
             )
         }
 
+
+    }
+
+    private fun emitFetchEvent(eventId: Int, result: ResultOf<RINetEvent>) {
+
+        _uiState.value = result.map {
+            AddEventUiState(eventId, it.copy())
+        }
+        currUiState = (_uiState.value as ResultOf.Success).data
 
     }
 
@@ -381,11 +416,11 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
         return currUiState.riNetEvent.endDateTime
     }
 
-    fun setEventColor(eventColor: Int){
+    fun setEventColor(eventColor: Int) {
         currUiState.riNetEvent.eventColor = eventColor
     }
 
-    fun getEventColor(): Int{
+    fun getEventColor(): Int {
         return currUiState.riNetEvent.eventColor
     }
 
