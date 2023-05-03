@@ -32,11 +32,13 @@ object DataUtils {
 
             for (i in 0 until rinetevent.getDaysLasting()) {
 
+                val newStartDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong())
+                val newEndDateTime = newStartDateTime.withHour(rinetevent.endDateTime.hour).withMinute(rinetevent.endDateTime.minute)
 
                 rawEventsUnsorted.add(
                     rinetevent.copy(
-                        startDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong()),
-                        endDateTime = rinetevent.startDateTime.plusDays((i + 1).toLong()),
+                        startDateTime = newStartDateTime,
+                        endDateTime = newEndDateTime,
                         title = rinetevent.title + " (${i + 1}/${rinetevent.getDaysLasting()})",
                         isInSeries = true,
                         isFirstInSeries = i == 0,
