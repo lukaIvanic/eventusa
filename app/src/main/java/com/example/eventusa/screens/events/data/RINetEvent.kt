@@ -86,7 +86,9 @@ data class RINetEvent(
 
         return eventId == otherEvent.eventId
                 && title == otherEvent.title
-                && startDateTime == otherEvent.startDateTime
+                && startDateTime.toLocalDate() == otherEvent.startDateTime.toLocalDate()
+                && startDateTime.hour == otherEvent.startDateTime.hour
+                && startDateTime.minute == otherEvent.startDateTime.minute
                 && endDateTime == otherEvent.endDateTime
                 && location == otherEvent.location
                 && description == otherEvent.description
@@ -94,7 +96,7 @@ data class RINetEvent(
                 && usersAttending.toSet() == otherEvent.usersAttending.toSet()
                 && eventColor == otherEvent.eventColor
                 && isFirstInDate == otherEvent.isFirstInDate
-                && isInSeries == otherEvent.isFirstInSeries
+                && isInSeries == otherEvent.isInSeries
                 && isFirstInSeries == otherEvent.isFirstInSeries
                 && isLastInSeries == otherEvent.isLastInSeries
     }
