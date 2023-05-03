@@ -22,6 +22,9 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var dateBeforeTodayLayout: LinearLayout
     lateinit var dateBeforeTodaySwitch: SwitchMaterial
 
+    lateinit var showMultipleDayEventsLayout: LinearLayout
+    lateinit var showMultipleDayEventsSwitch: SwitchMaterial
+
     lateinit var notifTest: LinearLayout
     lateinit var readDbTest: LinearLayout
 
@@ -39,6 +42,11 @@ class SettingsActivity : AppCompatActivity() {
         dateBeforeTodayLayout = findViewById(R.id.dateBeforeTodayLayout)
         dateBeforeTodaySwitch = findViewById(R.id.dateBeforeTodaySwitch)
 
+
+        showMultipleDayEventsLayout = findViewById(R.id.showMultipleDayEventsLayout)
+        showMultipleDayEventsSwitch = findViewById(R.id.showMultipleDayEventsSwitch)
+
+
         notifTest = findViewById(R.id.notifTestLayout)
         readDbTest = findViewById(R.id.readDbTestLayout)
 
@@ -50,6 +58,8 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadSettings() {
         dateBeforeTodaySwitch.isChecked =
             LocalStorageManager.readAskConfirmDateBefore()
+
+        showMultipleDayEventsSwitch.isChecked = LocalStorageManager.readShowMultipleDayEvents()
     }
 
     private fun handleClicks() {
@@ -62,6 +72,18 @@ class SettingsActivity : AppCompatActivity() {
                 LocalStorageManager.setCheckedAskConfirmDateBefore()
             } else {
                 LocalStorageManager.setUncheckedAskConfirmDateBefore()
+            }
+        }
+
+        showMultipleDayEventsLayout.setOnClickListener {
+            showMultipleDayEventsSwitch.performClick()
+        }
+
+        showMultipleDayEventsSwitch.setOnClickListener {
+            if (showMultipleDayEventsSwitch.isChecked) {
+                LocalStorageManager.setCheckedShowMultipleDayEvents()
+            } else {
+                LocalStorageManager.setUncheckedShowMultipleDayEvents()
             }
         }
 

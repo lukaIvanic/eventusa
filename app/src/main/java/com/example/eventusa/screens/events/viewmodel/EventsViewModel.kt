@@ -61,6 +61,11 @@ class EventsViewModel(
 
     }
 
+    fun makeEventsUpdateTick(){
+        viewModelScope.launch {
+            eventsRepository.makeEventsUpdate()
+        }
+    }
 
 }
 

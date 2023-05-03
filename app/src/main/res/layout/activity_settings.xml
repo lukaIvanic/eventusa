@@ -62,6 +62,38 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/showMultipleDayEventsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ripple_box"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:minHeight="@dimen/settings_row_height"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/hideMultipleDayEventsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:text="Show Multiple Day Events (removes clutter)"
+            android:paddingVertical="16dp"
+            android:paddingStart="20dp"
+            android:layout_weight="1"
+            android:textColor="@color/text_dark_settings"
+            android:textColorHint="@color/text_hint"
+            android:textSize="@dimen/settings_text_size" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/showMultipleDayEventsSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"/>
+
+    </LinearLayout>
+
 
     <View
         android:layout_width="match_parent"
