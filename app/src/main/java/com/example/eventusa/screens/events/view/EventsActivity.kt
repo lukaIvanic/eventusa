@@ -17,7 +17,7 @@ import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.network.ResultOf
-import com.example.eventusa.screens.addEvent.view.AddEventActivity
+import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity
 import com.example.eventusa.screens.events.EventsViewModel
 import com.example.eventusa.screens.events.EventsViewModelFactory
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -78,17 +78,7 @@ class EventsActivity : AppCompatActivity() {
 
         newEventButton = findViewById(R.id.newEventFab)
 
-        logoutButton.setOnClickListener {
-            doLogout()
-        }
-
-        settingsButton.setOnClickListener {
-            gotoSettings()
-        }
-
-        newEventButton.setOnClickListener {
-            onEventClick()
-        }
+        setupTouch()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -113,6 +103,20 @@ class EventsActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun setupTouch() {
+        logoutButton.setOnClickListener {
+            doLogout()
+        }
+
+        settingsButton.setOnClickListener {
+            gotoSettings()
+        }
+
+        newEventButton.setOnClickListener {
+            onEventClick()
+        }
     }
 
     private fun animateProgressBar(isStartLoading: Boolean) {
