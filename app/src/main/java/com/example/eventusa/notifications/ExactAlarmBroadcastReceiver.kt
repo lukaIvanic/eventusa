@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.example.eventusa.R
 import com.example.eventusa.caching.room.EventusaDatabase
 import com.example.eventusa.caching.room.Room
-import com.example.eventusa.screens.addEvent.view.AddEventActivity
+import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch

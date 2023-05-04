@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".screens.addEvent.view.AddEventActivity"
+            android:name=".screens.addEvent.view.activity.AddEventActivity"
             android:exported="false" />
         <activity
             android:name=".screens.events.view.EventsActivity"

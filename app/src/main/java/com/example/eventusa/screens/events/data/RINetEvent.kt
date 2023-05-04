@@ -3,7 +3,8 @@ package com.example.eventusa.screens.events.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.eventusa.R
-import com.example.eventusa.screens.addEvent.view.AddEventActivity.*
+import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity.*
+import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.PATTERN_SERVER
 import com.example.eventusa.utils.extensions.toParsedString
