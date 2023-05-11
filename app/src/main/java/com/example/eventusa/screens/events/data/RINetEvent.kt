@@ -249,7 +249,7 @@ object EventColors {
     }
 
     fun randomColor(): Int {
-        return Random.nextInt(0, 9)
+        return Random.nextInt(0, 10)
     }
 
     fun getColorItems(): Array<Item> {

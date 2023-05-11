@@ -95,14 +95,14 @@ class EventsRepository(
 
 
     private suspend fun refreshEvents() {
-        _events.emit(ResultOf.Loading)
-        try {
-//            val newEvents: MutableList<RINetEvent> = ArrayList()
-            val newEvents = Network.getEvents()
-//            if (newEvents.isEmpty()) newEvents.addAll(getDummyData())
-            _events.emit(ResultOf.Success(newEvents))
-        } catch (e: Exception) {
-            _events.emit(ResultOf.Error(e))
+        externalScope.launch {
+            _events.emit(ResultOf.Loading)
+            try {
+                val newEventsResultOf = Network.getEvents()
+                _events.emit(newEventsResultOf)
+            } catch (e: Exception) {
+                _events.emit(ResultOf.Error(e))
+            }
         }
     }
 
@@ -180,12 +180,12 @@ class EventsRepository(
             )
     }
 
-    suspend fun addEvent(rinetEvent: RINetEvent) {
-        Network.insertEvent(rinetEvent)
+    suspend fun addEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> {
+        return Network.insertEvent(rinetEvent)
     }
 
-    suspend fun updateEvent(rinetEvent: RINetEvent){
-        Network.updateEvent(rinetEvent)
+    suspend fun updateEvent(rinetEvent: RINetEvent): ResultOf<Boolean> {
+        return Network.updateEvent(rinetEvent)
     }
 
     fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
@@ -208,16 +208,15 @@ class EventsRepository(
     }
 
 
-    suspend fun deleteEvent(eventId: Int){
+    suspend fun deleteEvent(eventId: Int) {
         externalScope.launch {
             Network.deleteEvent(eventId)
         }
     }
 
-    public suspend fun makeEventsUpdate(){
+    public suspend fun makeEventsUpdate() {
         refreshEvents()
     }
-
 
 
 }

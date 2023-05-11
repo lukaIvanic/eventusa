@@ -98,9 +98,8 @@ class EventsRepositoryLocal(
         externalScope.launch {
             _events.emit(ResultOf.Loading)
             try {
-                val newEvents: MutableList<RINetEvent> = Network.getEvents()
-//            val newEvents: MutableList<RINetEvent> = Room.readAllEvents() as MutableList
-                _events.emit(ResultOf.Success(newEvents))
+                val newEvents = Network.getEvents()
+                _events.emit(newEvents)
             } catch (e: Exception) {
                 _events.emit(ResultOf.Error(e))
             }

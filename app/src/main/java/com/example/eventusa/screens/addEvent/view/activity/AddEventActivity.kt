@@ -24,6 +24,8 @@ class AddEventActivity : AppCompatActivity() {
 
     val viewmodel: AddEventViewModel by viewModels { AddEventViewModelFactory((application as EventusaApplication).eventsRepository) }
 
+    lateinit var addEventActivityLayout: LinearLayout
+
     lateinit var progressDialog: AlertDialog
     var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
     var chooseColorDialog: androidx.appcompat.app.AlertDialog? = null

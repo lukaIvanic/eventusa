@@ -13,6 +13,7 @@ import com.example.eventusa.utils.extensions.doIfSucces
 import com.example.eventusa.utils.extensions.toParsedString
 import com.example.eventusa.utils.setChipHighlighted
 import com.example.eventusa.utils.setTextAnimated
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -40,11 +41,7 @@ fun AddEventActivity.handleDeleteEvent() {
         viewmodel.deleteEventState.collect { result ->
 
             result.doIfFailure {
-                Toast.makeText(
-                    this@handleDeleteEvent,
-                    it.localizedMessage ?: "An error occured with deleting event.",
-                    Toast.LENGTH_LONG
-                ).show()
+               showError(it.localizedMessage)
             }
 
             result.doIfSucces {
@@ -77,11 +74,7 @@ fun AddEventActivity.setupSaveEventFlowObserving() {
                 }
 
                 result.doIfFailure {
-                    Toast.makeText(
-                        this@setupSaveEventFlowObserving,
-                        it.localizedMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
+                  showError(it.localizedMessage)
                 }
 
                 result.doIfSucces {
@@ -165,4 +158,8 @@ fun AddEventActivity.setupFetchEventStateObserving() {
 
             }
     }
+}
+
+fun AddEventActivity.showError(message: String?){
+    Snackbar.make(addEventActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG).show()
 }

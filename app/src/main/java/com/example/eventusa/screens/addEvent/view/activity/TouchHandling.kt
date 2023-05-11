@@ -23,6 +23,7 @@ fun AddEventActivity.setupTouch() {
             200, fromScaleX = 1F, toScaleX = 1.2F, fromScaleY = 1F, toScaleY = 0.7F
         )
         handleSaveEvent()
+        titleEditText.clearFocus()
     }
 
     addToCalendarSection.setOnClickListener {

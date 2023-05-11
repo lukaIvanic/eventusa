@@ -70,13 +70,21 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
                 if (currUiState.eventId > 0) {
 
-                    eventsRepository.updateEvent(currUiState.riNetEvent)
-                    saveNotifications(context)
-                    _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
+                    val resultOfUpdate = eventsRepository.updateEvent(currUiState.riNetEvent)
+                    if(resultOfUpdate is ResultOf.Success){
+                        saveNotifications(context)
+                        _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
+                    }else{
+                        _postEventState.emit(resultOfUpdate.map { _ -> RINetEvent() })
+                    }
+
                 } else {
-                    eventsRepository.addEvent(currUiState.riNetEvent)
-                    saveNotifications(context)
-                    _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
+                    val insertEventResult = eventsRepository.addEvent(currUiState.riNetEvent)
+                    if(insertEventResult is ResultOf.Success){
+                        saveNotifications(context)
+                    }
+                     _postEventState.emit(insertEventResult)
+
                 }
 
                 eventsRepository.makeUpdateTick()
