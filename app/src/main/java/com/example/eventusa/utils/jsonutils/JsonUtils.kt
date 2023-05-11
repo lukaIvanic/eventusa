@@ -1,6 +1,5 @@
 package com.example.eventusa.utils.jsonutils
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.type.CollectionType
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -11,9 +10,15 @@ import java.time.LocalDateTime
 object JsonUtils {
 
     val mapper = jacksonObjectMapper()
-        .setPropertyNamingStrategy(PropertyNamingStrategies.UPPER_CAMEL_CASE)
+//        .setPropertyNamingStrategy(PropertyNamingStrategies.UPPER_CAMEL_CASE)
         .registerModule(JavaTimeModule())
-        .registerModule(SimpleModule().addSerializer(LocalDateTime::class.java, LocalDateTimeSerializer()))
+        .registerModule(SimpleModule()
+            .addSerializer(LocalDateTime::class.java, LocalDateTimeSerializer())
+            .addSerializer(Boolean::class.java, BooleanSerializer())
+            .addDeserializer(LocalDateTime::class.java, LocalDateTimeDeserializer())
+            .addDeserializer(Boolean::class.java, BooleanDeserializer())
+
+        )
 
     inline fun <reified T> fromJsonToList(jsonString: String): MutableList<T> {
         val listType: CollectionType =

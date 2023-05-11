@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.eventusa.network.ResultOf
-import com.example.eventusa.repositories.EventsRepositoryLocal
+import com.example.eventusa.repositories.EventsRepository
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.utils.DataUtils
@@ -20,7 +20,7 @@ data class EventsUiState(
 
 
 class EventsViewModel(
-    private val eventsRepository: EventsRepositoryLocal,
+    private val eventsRepository: EventsRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
@@ -71,7 +71,7 @@ class EventsViewModel(
 
 
 class EventsViewModelFactory(
-    private val eventsRepository: EventsRepositoryLocal,
+    private val eventsRepository: EventsRepository,
     private val userRepository: UserRepository,
 ) :
     ViewModelProvider.Factory {

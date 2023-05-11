@@ -1,102 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/eventsActivityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:background="@color/app_background"
     tools:context=".screens.events.view.EventsActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/logoutButton"
-
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp"
-            app:tint="@color/icon_tint"
-            android:src="@drawable/logout_icon"
-            android:background="@drawable/ripple_round"
-            app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
-            app:layout_constraintEnd_toStartOf="@id/settingsButton"
-            app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView" />
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="@color/app_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/settingsButton"
+            <ImageView
+                android:id="@+id/logoutButton"
 
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:padding="16dp"
-            app:tint="@color/icon_tint"
-            android:src="@drawable/settings_icon"
-            android:background="@drawable/ripple_round"
-            app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView" />
-
-
-
-        <TextView
-            android:id="@+id/welcomeNameTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="16dp"
-            android:layout_marginStart="24dp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text="Welcome, Luka Rinet employee"
-            android:textColor="@color/black"
-            android:textSize="26dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/logoutButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/progressBar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:indeterminate="true"
-            android:visibility="visible"
-            app:indicatorColor="@color/event_rinet_blue"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/welcomeNameTextView"
-            tools:visibility="visible" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/ripple_round"
+                android:padding="8dp"
+                android:src="@drawable/logout_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
+                app:layout_constraintEnd_toStartOf="@id/settingsButton"
+                app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView"
+                app:tint="@color/icon_tint" />
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/app_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/progressBar"
-            tools:listitem="@layout/row_event" />
+            <ImageView
+                android:id="@+id/settingsButton"
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/newEventFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:backgroundTint="@color/secondary_color"
-            app:borderWidth="0dp"
-            android:contentDescription="New event"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/plus_icon"
-            app:tint="@color/event_text" />
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/ripple_round"
+                android:padding="16dp"
+                android:src="@drawable/settings_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView"
+                app:tint="@color/icon_tint" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <TextView
+                android:id="@+id/welcomeNameTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="16dp"
+                android:layout_marginStart="24dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Welcome, Luka Rinet employee"
+                android:textColor="@color/black"
+                android:textSize="26dp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/logoutButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:indeterminate="true"
+                android:visibility="visible"
+                app:indicatorColor="@color/event_rinet_blue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/welcomeNameTextView"
+                tools:visibility="visible" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/app_background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/progressBar"
+                tools:listitem="@layout/row_event" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/newEventFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/secondary_color"
+        android:contentDescription="New event"
+        app:borderWidth="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/plus_icon"
+        app:tint="@color/event_text" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -133,7 +133,7 @@ fun AddEventActivity.setupFetchEventStateObserving() {
 
                         if (locationEditText.text.isEmpty()) locationEditText.setText(location)
 
-                        if (summaryEditText.text.isEmpty()) summaryEditText.setText(description)
+                        if (summaryEditText.text.isEmpty()) summaryEditText.setText(summary)
 
 
                         var allChipsHighlighted = true
@@ -141,7 +141,7 @@ fun AddEventActivity.setupFetchEventStateObserving() {
                         peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
                             val chipTv = indexedChip.value as? TextView ?: return@forEach
                             val user =
-                                usersAttending.firstOrNull { it.name == chipTv.text.toString() }
+                                usersAttending?.firstOrNull { it.name == chipTv.text.toString() }
 
                             if (user != null) {
                                 chipTv.setChipHighlighted(user.name ?: "")

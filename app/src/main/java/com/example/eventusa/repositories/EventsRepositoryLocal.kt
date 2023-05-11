@@ -1,6 +1,6 @@
 package com.example.eventusa.repositories
 
-import com.example.eventusa.caching.room.Room
+import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.extensions.doIfSucces
@@ -95,19 +95,23 @@ class EventsRepositoryLocal(
     }
 
     private suspend fun refreshEvents() {
-        _events.emit(ResultOf.Loading)
-        try {
-            val newEvents: MutableList<RINetEvent> = Room.readAllEvents() as MutableList
-            _events.emit(ResultOf.Success(newEvents))
-        } catch (e: Exception) {
-            _events.emit(ResultOf.Error(e))
+        externalScope.launch {
+            _events.emit(ResultOf.Loading)
+            try {
+                val newEvents: MutableList<RINetEvent> = Network.getEvents()
+//            val newEvents: MutableList<RINetEvent> = Room.readAllEvents() as MutableList
+                _events.emit(ResultOf.Success(newEvents))
+            } catch (e: Exception) {
+                _events.emit(ResultOf.Error(e))
+            }
         }
+
     }
 
     // Create
-    suspend fun addEvent(rinetEvent: RINetEvent) {
-        Room.insertEvent(rinetEvent)
-    }
+//    suspend fun addEvent(rinetEvent: RINetEvent) {
+//        Room.insertEvent(rinetEvent)
+//    }
 
     // Read
     fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
@@ -131,19 +135,19 @@ class EventsRepositoryLocal(
 
     }
 
-    suspend fun getEventRoom(eventId: Int): RINetEvent{
-        return Room.readEvent(eventId)
-    }
+//    suspend fun getEventRoom(eventId: Int): RINetEvent{
+//        return Room.readEvent(eventId)
+//    }
 
     // Update
-    suspend fun updateEvent(rinetEvent: RINetEvent){
-        Room.updateEvent(rinetEvent)
-    }
+//    suspend fun updateEvent(rinetEvent: RINetEvent){
+//        Room.updateEvent(rinetEvent)
+//    }
 
     // Delete
-    suspend fun deleteEvent(eventId: Int){
-        Room.deleteEvent(eventId)
-    }
+//    suspend fun deleteEvent(eventId: Int){
+//        Room.deleteEvent(eventId)
+//    }
 
 
 

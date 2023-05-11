@@ -3,14 +3,14 @@ package com.example.eventusa.app
 import android.app.Application
 import com.example.eventusa.caching.room.EventusaDatabase
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
-import com.example.eventusa.repositories.EventsRepositoryLocal
-import com.example.eventusa.repositories.TickHandlerLocal
+import com.example.eventusa.repositories.EventsRepository
+import com.example.eventusa.repositories.TickHandler
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.login.model.LoginRequest
 
 class EventusaApplication : Application() {
 
-    val eventsRepository = EventsRepositoryLocal(TickHandlerLocal())
+    val eventsRepository = EventsRepository(TickHandler())
 
     var userRepository = UserRepository()
 
