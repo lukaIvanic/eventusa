@@ -21,7 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@Database(version = 10, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
+@Database(version = 11, entities = [RINetEvent::class, RoomUser::class, EventNotification::class, User::class])
 @TypeConverters(LocalDateTimeConverter::class, UsersListConverter::class)
 abstract class EventusaDatabase : RoomDatabase() {
 
@@ -106,7 +106,7 @@ abstract class EventusaDatabase : RoomDatabase() {
                                 .withHour(12)
                                 .withMinute(30),
                             location = "Ured",
-                            description = "Neki description"
+                            summary = "Neki description"
                         ),
 
                         RINetEvent(
@@ -121,7 +121,7 @@ abstract class EventusaDatabase : RoomDatabase() {
                                 .withHour(13)
                                 .withMinute(30),
                             location = "Ured",
-                            description = "Neki description",
+                            summary = "Neki description",
                             isFirstInDate = false
                         ),
 
@@ -137,7 +137,7 @@ abstract class EventusaDatabase : RoomDatabase() {
                                 .withHour(13)
                                 .withMinute(30),
                             location = "Ured",
-                            description = "Neki description"
+                            summary = "Neki description"
                         ),
 
                         RINetEvent(
@@ -152,7 +152,7 @@ abstract class EventusaDatabase : RoomDatabase() {
                                 .withHour(18)
                                 .withMinute(0),
                             location = "Ured",
-                            description = "Neki description"
+                            summary = "Neki description"
                         ),
 
                         )

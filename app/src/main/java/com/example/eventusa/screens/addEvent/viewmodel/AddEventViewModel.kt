@@ -7,7 +7,7 @@ import com.example.eventusa.caching.room.Room
 import com.example.eventusa.caching.room.extraentities.EventNotification
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.notifications.NotifManager
-import com.example.eventusa.repositories.EventsRepositoryLocal
+import com.example.eventusa.repositories.EventsRepository
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.User
@@ -31,7 +31,7 @@ data class AddEventUiState(
 
 const val defaultEventDuration = 60L
 
-class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel() {
+class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
     private var currUiState =
         defaultUiState()
@@ -126,7 +126,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
                 if (cachedEventResult != null) {
 
                     if(cachedEventResult is ResultOf.Success){
-                        originalEvent = cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending.toMutableList())
+                        originalEvent = cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending?.toMutableList())
                     }
 
                     emitFetchEvent(eventId, cachedEventResult)
@@ -134,9 +134,14 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
                 }
 
                 try {
-                    val eventFromDb = eventsRepository.getEventRoom(eventId)
-                    emitFetchEvent(eventId, ResultOf.Success(eventFromDb))
-                    originalEvent = eventFromDb.copy(usersAttending = eventFromDb.usersAttending.toMutableList())
+                    val eventFromDb = eventsRepository.getEventWithId(eventId)
+                    emitFetchEvent(eventId, eventFromDb)
+
+                    if(eventFromDb is ResultOf.Success){
+                        originalEvent = eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending?.toMutableList())
+                    }else if (eventFromDb is ResultOf.Error){
+                        throw eventFromDb.exception
+                    }
                 } catch (e: Exception) {
                     emitFetchEvent(eventId, ResultOf.Error(Exception("Event was deleted.")))
                 }
@@ -274,11 +279,11 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
     }
 
     fun setSummary(summary: String) {
-        currUiState.riNetEvent.description = summary
+        currUiState.riNetEvent.summary = summary
     }
 
     fun setCalendarEnabled(calendarEnabled: Boolean){
-        currUiState.riNetEvent.calendar = calendarEnabled
+        currUiState.riNetEvent.isInCalendar = calendarEnabled
     }
 
     /**
@@ -286,7 +291,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
      */
     fun userChipClicked(user: User): Boolean {
 
-        currUiState.riNetEvent.usersAttending.apply {
+        currUiState.riNetEvent.usersAttending?.apply {
 
             val isHighlightedState = contains(user)
 
@@ -302,10 +307,12 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
 
         }
 
+        return false
+
     }
 
     fun isAllUserChipsActivated(): Boolean {
-        return currUiState.riNetEvent.usersAttending.containsAll(User.getAllUsers())
+        return currUiState.riNetEvent.usersAttending?.containsAll(User.getAllUsers()) ?: false
     }
 
     /**
@@ -315,7 +322,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
      */
     fun selectAllUserChips(isAllSelected: Boolean) {
 
-        currUiState.riNetEvent.usersAttending.apply {
+        currUiState.riNetEvent.usersAttending?.apply {
 
             if (isAllSelected) {
                 clear()
@@ -465,7 +472,7 @@ class AddEventViewModel(val eventsRepository: EventsRepositoryLocal) : ViewModel
 
 }
 
-class AddEventViewModelFactory(private val eventsRepository: EventsRepositoryLocal) :
+class AddEventViewModelFactory(private val eventsRepository: EventsRepository) :
     ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

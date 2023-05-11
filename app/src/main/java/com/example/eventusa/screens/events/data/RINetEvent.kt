@@ -6,9 +6,7 @@ import com.example.eventusa.R
 import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity.*
 import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
-import com.example.eventusa.utils.extensions.PATTERN_SERVER
-import com.example.eventusa.utils.extensions.toParsedString
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
 import kotlin.random.Random
 
@@ -27,35 +25,37 @@ data class RINetEvent(
     @PrimaryKey(autoGenerate = true) var eventId: Int = 0,
 
 
-    @JsonProperty("Name") var title: String = "",
+    var title: String = "",
 
 
-    @JsonProperty("From") var startDateTime: LocalDateTime = LocalDateTime.now(),
+    var startDateTime: LocalDateTime = LocalDateTime.now(),
 
 
-    @JsonProperty("To") var endDateTime: LocalDateTime = LocalDateTime.now(),
+    var endDateTime: LocalDateTime = LocalDateTime.now(),
 
 
     var location: String? = "",
 
-    var description: String? = "",
+    var summary: String? = "",
 
-    var calendar: Boolean? = false,
+    var isInCalendar: Boolean = false,
 
-    var days: Int? = 0,
 
-    var dateAddded: String? = LocalDateTime.now().toParsedString(PATTERN_SERVER),
-
-    var usersAttending: MutableList<User> = ArrayList(),
-
-    var isInSeries: Boolean = false,
-
-    var isFirstInSeries: Boolean = false,
-
-    var isLastInSeries: Boolean = false,
+    var usersAttending: MutableList<User>? = ArrayList(),
 
     var eventColor: Int = EventColors.randomColor(),
 
+    @JsonIgnore
+    var isInSeries: Boolean = false,
+
+    @JsonIgnore
+    var isFirstInSeries: Boolean = false,
+
+    @JsonIgnore
+    var isLastInSeries: Boolean = false,
+
+
+    @JsonIgnore
     var isFirstInDate: Boolean = true
 
     ) : EventItem {
@@ -68,10 +68,7 @@ data class RINetEvent(
         "location",
         "descritpion",
         false,
-        0,
-        LocalDateTime.now().toParsedString(
-            PATTERN_SERVER
-        ),
+
 
 
         ) {
@@ -92,9 +89,9 @@ data class RINetEvent(
                 && startDateTime.minute == otherEvent.startDateTime.minute
                 && endDateTime == otherEvent.endDateTime
                 && location == otherEvent.location
-                && description == otherEvent.description
-                && calendar == otherEvent.calendar
-                && usersAttending.toSet() == otherEvent.usersAttending.toSet()
+                && summary == otherEvent.summary
+                && isInCalendar == otherEvent.isInCalendar
+                && usersAttending?.toSet() == otherEvent.usersAttending?.toSet()
                 && eventColor == otherEvent.eventColor
                 && isFirstInDate == otherEvent.isFirstInDate
                 && isInSeries == otherEvent.isInSeries

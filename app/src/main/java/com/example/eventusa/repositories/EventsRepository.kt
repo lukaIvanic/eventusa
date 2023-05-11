@@ -1,8 +1,9 @@
 package com.example.eventusa.repositories
 
-import com.example.eventusa.caching.room.Room
+import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.data.RINetEvent
+import com.example.eventusa.utils.extensions.doIfSucces
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -96,9 +97,9 @@ class EventsRepository(
     private suspend fun refreshEvents() {
         _events.emit(ResultOf.Loading)
         try {
-            val newEvents: MutableList<RINetEvent> = ArrayList()
-//            val newEvents = Network.getEvents()
-            if (newEvents.isEmpty()) newEvents.addAll(getDummyData())
+//            val newEvents: MutableList<RINetEvent> = ArrayList()
+            val newEvents = Network.getEvents()
+//            if (newEvents.isEmpty()) newEvents.addAll(getDummyData())
             _events.emit(ResultOf.Success(newEvents))
         } catch (e: Exception) {
             _events.emit(ResultOf.Error(e))
@@ -128,7 +129,7 @@ class EventsRepository(
                     .withHour(12)
                     .withMinute(30),
                 location = "Ured",
-                description = "Neki description"
+                summary = "Neki description"
             ),
 
             RINetEvent(
@@ -143,7 +144,7 @@ class EventsRepository(
                     .withHour(13)
                     .withMinute(30),
                 location = "Ured",
-                description = "Neki description"
+                summary = "Neki description"
             ),
 
             RINetEvent(
@@ -158,7 +159,7 @@ class EventsRepository(
                     .withHour(13)
                     .withMinute(30),
                 location = "Ured",
-                description = "Neki description"
+                summary = "Neki description"
             ),
 
             RINetEvent(
@@ -173,35 +174,30 @@ class EventsRepository(
                     .withHour(18)
                     .withMinute(0),
                 location = "Ured",
-                description = "Neki description"
+                summary = "Neki description"
             ),
 
             )
     }
 
     suspend fun addEvent(rinetEvent: RINetEvent) {
-        Room.insertEvent(rinetEvent)
+        Network.insertEvent(rinetEvent)
     }
 
     suspend fun updateEvent(rinetEvent: RINetEvent){
-        Room.updateEvent(rinetEvent)
+        Network.updateEvent(rinetEvent)
     }
 
     fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
 
 
-//        cachedSuccessEvents.replayCache
-//            .last()
-//            .doIfSucces { latestCachedEvents ->
-//                latestCachedEvents.forEach {
-//                    if (it.eventId == eventId) return ResultOf.Success(it)
-//                }
-//            }
-
-        val event = dummyList.filter { it.eventId == eventId }.firstOrNull()
-        if (event != null) {
-            return ResultOf.Success(event)
-        }
+        cachedSuccessEvents.replayCache
+            .last()
+            .doIfSucces { latestCachedEvents ->
+                latestCachedEvents.forEach {
+                    if (it.eventId == eventId) return ResultOf.Success(it)
+                }
+            }
 
         return ResultOf.Error(Exception("Couldn't find event, was it deleted recently?"))
 
@@ -210,6 +206,18 @@ class EventsRepository(
     fun makeUpdateTick() {
         tickHandler.makeTick()
     }
+
+
+    suspend fun deleteEvent(eventId: Int){
+        externalScope.launch {
+            Network.deleteEvent(eventId)
+        }
+    }
+
+    public suspend fun makeEventsUpdate(){
+        refreshEvents()
+    }
+
 
 
 }

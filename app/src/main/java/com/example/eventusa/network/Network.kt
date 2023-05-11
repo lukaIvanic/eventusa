@@ -1,8 +1,7 @@
 package com.example.eventusa.network
 
 import com.example.eventusa.network.Network.NetworkCore
-import com.example.eventusa.network.RequestType.GET
-import com.example.eventusa.network.RequestType.POST
+import com.example.eventusa.network.RequestType.*
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.LoginRequest
 import com.example.eventusa.screens.login.model.LoginResponse
@@ -20,12 +19,12 @@ import okhttp3.RequestBody
  */
 object Network {
 
-    private val baseUrl = "https://eventusamobile-production-api.azurewebsites.net"
+    private val baseUrl = "https://eventusabackendapptestservice.azurewebsites.net/api/"
 
-    private val CREATE_EVENT = "/Event/new-event"
-    private val READ_EVENTS = "/Event/event-list"
-    private val UPDATE_EVENT = "/Event/update-event"
-    private val DELETE_EVENT = "/Event/delete-event"
+    private val CREATE_EVENT = "Events/create"
+    private val READ_EVENTS = "/Events"
+    private val UPDATE_EVENT = "Events/update/"
+    private val DELETE_EVENT = "/Events/delete"
     private val LOGIN_PATH = "/User/login"
 
     /**
@@ -87,7 +86,7 @@ object Network {
 
         try {
             val eventJson = JsonUtils.toJson(rinetEvent)
-            val id = NetworkCore.sendRequest(UPDATE_EVENT, eventJson)
+            val id = NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
             if (id == "true") {
                 return ResultOf.Success(true)
             } else {
@@ -102,8 +101,8 @@ object Network {
     fun deleteEvent(eventId: Int): ResultOf<Boolean> {
 
         try {
-            val responseDelete = NetworkCore.sendRequest("$DELETE_EVENT?id=$eventId")
-            if (responseDelete == "true") {
+            val responseDelete = NetworkCore.sendRequest("$DELETE_EVENT/$eventId")
+            if (responseDelete.isEmpty()) {
                 return ResultOf.Success(true)
             } else {
                 return ResultOf.Error(Exception("Was not able to delete event."))
@@ -121,8 +120,6 @@ object Network {
     private object NetworkCore {
         fun sendRequest(urlPath: String, requestBodyString: String = ""): String {
 
-            throw Exception("You shouldn't make network requests, this version of the app only uses local storage.")
-
             val requestType: RequestType =
                 getRequestMethodForUrlPath(urlPath)
                     ?: throw Exception("Request method not set.")
@@ -132,7 +129,7 @@ object Network {
             val mediaType: MediaType? = MediaType.parse("application/json")
 
             var requestBody: RequestBody? =
-                if (requestType === POST) RequestBody.create(mediaType, requestBodyString) else null
+                if (requestType == POST || requestType == PUT) RequestBody.create(mediaType, requestBodyString) else null
 
             val request: Request = Request.Builder()
                 .url(baseUrl + urlPath)
@@ -147,10 +144,11 @@ object Network {
         }
 
         private fun getRequestMethodForUrlPath(path: String): RequestType? {
-            if (path.contains(DELETE_EVENT)) return POST
+            if (path.contains(DELETE_EVENT)) return DELETE
             when (path) {
                 READ_EVENTS -> return GET
-                CREATE_EVENT, UPDATE_EVENT, LOGIN_PATH -> return POST
+                CREATE_EVENT, LOGIN_PATH -> return POST
+                UPDATE_EVENT -> return PUT
             }
             return null
         }
@@ -160,5 +158,5 @@ object Network {
 }
 
 enum class RequestType(val label: String) {
-    GET("GET"), POST("POST");
+    GET("GET"), POST("POST"), PUT("PUT"), DELETE("DELETE");
 }
