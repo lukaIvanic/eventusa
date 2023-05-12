@@ -4,11 +4,8 @@ import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.extensions.doIfSucces
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 /**
@@ -208,8 +205,8 @@ class EventsRepository(
     }
 
 
-    suspend fun deleteEvent(eventId: Int) {
-        externalScope.launch {
+    suspend fun deleteEvent(eventId: Int): ResultOf<Unit> {
+        return withContext(externalScope.coroutineContext) {
             Network.deleteEvent(eventId)
         }
     }

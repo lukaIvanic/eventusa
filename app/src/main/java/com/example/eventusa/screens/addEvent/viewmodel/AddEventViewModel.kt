@@ -45,7 +45,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
     private val _postEventState = MutableSharedFlow<ResultOf<RINetEvent>>()
     val postEventState: SharedFlow<ResultOf<RINetEvent>> = _postEventState.asSharedFlow()
 
-    private val _deleteEventState = MutableSharedFlow<ResultOf<Boolean>>()
+    private val _deleteEventState = MutableSharedFlow<ResultOf<Unit>>()
     val deleteEventState = _deleteEventState.asSharedFlow()
 
     private val _notificationsEventState = MutableSharedFlow<ResultOf<NotificationsAdapterEvents>>()
@@ -57,8 +57,9 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
     suspend fun updateOrInsertEvent(context: Context) {
 
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+        _postEventState.emit(ResultOf.Loading)
+
+        viewModelScope.launch(Dispatchers.IO) {
 
 //                if (currUiState.eventId > 0) {
 //                    val res = Network.updateEvent(currUiState.riNetEvent)
@@ -68,48 +69,46 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 //                    _postEventState.emit(res.map { currUiState.riNetEvent })
 //                }
 
-                if (currUiState.eventId > 0) {
+            if (currUiState.eventId > 0) {
 
-                    val resultOfUpdate = eventsRepository.updateEvent(currUiState.riNetEvent)
-                    if(resultOfUpdate is ResultOf.Success){
-                        saveNotifications(context)
-                        _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
-                    }else{
-                        _postEventState.emit(resultOfUpdate.map { _ -> RINetEvent() })
-                    }
-
+                val resultOfUpdate = eventsRepository.updateEvent(currUiState.riNetEvent)
+                if (resultOfUpdate is ResultOf.Success) {
+                    saveNotifications(context)
+                    _postEventState.emit(ResultOf.Success(currUiState.riNetEvent))
                 } else {
-                    val insertEventResult = eventsRepository.addEvent(currUiState.riNetEvent)
-                    if(insertEventResult is ResultOf.Success){
-                        saveNotifications(context)
-                    }
-                     _postEventState.emit(insertEventResult)
-
+                    _postEventState.emit(resultOfUpdate.map { _ -> RINetEvent() })
                 }
 
-                eventsRepository.makeUpdateTick()
+            } else {
+                val insertEventResult = eventsRepository.addEvent(currUiState.riNetEvent)
+                if (insertEventResult is ResultOf.Success) {
+                    saveNotifications(context)
+                }
+                _postEventState.emit(insertEventResult)
 
             }
+
+            eventsRepository.makeUpdateTick()
+
 
         }
 
     }
 
-    suspend fun deleteEvent() {
+    suspend fun deleteEvent(): Flow<ResultOf<Unit>> {
+
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
 
-                _deleteEventState.emit(ResultOf.Loading)
-//
-//                val deleteResult = Network.deleteEvent(currUiState.eventId)
-//                _deleteEventState.emit(deleteResult)
+            val deleteEventResult = eventsRepository.deleteEvent(currUiState.eventId)
+            _deleteEventState.emit(deleteEventResult)
 
-                eventsRepository.deleteEvent(currUiState.eventId)
-                _deleteEventState.emit(ResultOf.Success(true))
+            if (deleteEventResult is ResultOf.Success) {
                 eventsRepository.makeUpdateTick()
-
             }
+
         }
+
+        return deleteEventState
     }
 
     fun fetchEvent(eventId: Int) {
@@ -133,8 +132,9 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
                 if (cachedEventResult != null) {
 
-                    if(cachedEventResult is ResultOf.Success){
-                        originalEvent = cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending?.toMutableList())
+                    if (cachedEventResult is ResultOf.Success) {
+                        originalEvent =
+                            cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending?.toMutableList())
                     }
 
                     emitFetchEvent(eventId, cachedEventResult)
@@ -145,9 +145,10 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
                     val eventFromDb = eventsRepository.getEventWithId(eventId)
                     emitFetchEvent(eventId, eventFromDb)
 
-                    if(eventFromDb is ResultOf.Success){
-                        originalEvent = eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending?.toMutableList())
-                    }else if (eventFromDb is ResultOf.Error){
+                    if (eventFromDb is ResultOf.Success) {
+                        originalEvent =
+                            eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending?.toMutableList())
+                    } else if (eventFromDb is ResultOf.Error) {
                         throw eventFromDb.exception
                     }
                 } catch (e: Exception) {
@@ -290,7 +291,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
         currUiState.riNetEvent.summary = summary
     }
 
-    fun setCalendarEnabled(calendarEnabled: Boolean){
+    fun setCalendarEnabled(calendarEnabled: Boolean) {
         currUiState.riNetEvent.isInCalendar = calendarEnabled
     }
 

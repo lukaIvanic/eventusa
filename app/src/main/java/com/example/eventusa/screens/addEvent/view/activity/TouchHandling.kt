@@ -52,7 +52,9 @@ fun AddEventActivity.setupTouch() {
         showChooseColorDialog()
     }
 
-    deleteEventSection.setOnClickListener { handleDeleteEvent() }
+    deleteEventSection.setOnClickListener {
+        handleDeleteEvent()
+    }
 
 
 }

@@ -27,10 +27,14 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var addEventActivityLayout: LinearLayout
 
     lateinit var progressDialog: AlertDialog
+    lateinit var progressDialogView: View
     var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
     var chooseColorDialog: androidx.appcompat.app.AlertDialog? = null
 
     var isActivityFromNotif = false
+    var isActivityEditEvent = false
+
+
 
     lateinit var saveEventButton: TextView
     lateinit var cancelButton: ImageView
@@ -89,11 +93,13 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun setupProgressDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setView(R.layout.progress_dialog)
+        progressDialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
+        builder.setView(progressDialogView)
         progressDialog = builder.create()
     }
 
-    fun showProgressDialog() {
+    fun showProgressDialog(loadingMessage: String) {
+        progressDialogView.findViewById<TextView>(R.id.loadingTextView).text = loadingMessage
         progressDialog.show()
     }
 
@@ -102,8 +108,9 @@ class AddEventActivity : AppCompatActivity() {
     }
 
 
-    private fun setupAddOrEditState(){
+    private fun setupAddOrEditState() {
         val eventId = getIntentEventId()
+        isActivityEditEvent = (eventId != null)
         if (eventId != null) {
             handleEditEvent(eventId)
         } else {
@@ -131,13 +138,13 @@ class AddEventActivity : AppCompatActivity() {
     }
 
 
-    fun gotoEventsScreen(){
+    fun gotoEventsScreen() {
         val intent = Intent(this@AddEventActivity, EventsActivity::class.java)
         startActivity(intent)
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
-    fun gotoLoginScreen(){
+    fun gotoLoginScreen() {
         val intent = Intent(this@AddEventActivity, LoginActivity::class.java)
         startActivity(intent)
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)

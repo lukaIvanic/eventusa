@@ -1,7 +1,7 @@
 package com.example.eventusa.network
 
-import com.example.eventusa.exceptions.EventusaExceptions.JSON_PARSE_EXCEPTION
-import com.example.eventusa.exceptions.EventusaExceptions.NETWORK_EXCEPTION
+import com.example.eventusa.exceptions.EventusaExceptions.*
+import com.example.eventusa.exceptions.ExceptionResponse
 import com.example.eventusa.network.Network.NetworkCore
 import com.example.eventusa.network.RequestType.*
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -57,10 +57,17 @@ object Network {
             return NETWORK_EXCEPTION()
         }
 
-        try{
+        try {
             val returnedEvent = JsonUtils.fromJsonToObject<RINetEvent>(eventReturnJson)
             return ResultOf.Success(returnedEvent)
-        }catch (e:Exception){
+        } catch (e: Exception) {
+
+            try {
+                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(eventReturnJson)
+                return errorResponse.getException()
+            } catch (ignore: Exception) {
+            }
+
             return JSON_PARSE_EXCEPTION()
         }
 
@@ -96,25 +103,46 @@ object Network {
 
         try {
             val eventJson = JsonUtils.toJson(rinetEvent)
-            val id = NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
-            return ResultOf.Success(true)
+            val responseJson =
+                NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
+            if (responseJson.isEmpty()) {
+                return ResultOf.Success(true)
+            } else {
+
+                return try {
+                    val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseJson)
+                    errorResponse.getException()
+                } catch (e: Exception) {
+                    if (e.localizedMessage.isNullOrEmpty()) GENERAL_EXCEPTION() else ResultOf.Error(
+                        e
+                    )
+                }
+
+            }
         } catch (e: Exception) {
-            return ResultOf.Error(e)
+            return NETWORK_EXCEPTION()
         }
 
     }
 
-    fun deleteEvent(eventId: Int): ResultOf<Boolean> {
+    fun deleteEvent(eventId: Int): ResultOf<Unit> {
 
         try {
             val responseDelete = NetworkCore.sendRequest("$DELETE_EVENT/$eventId")
             if (responseDelete.isEmpty()) {
-                return ResultOf.Success(true)
+                return ResultOf.Success(Unit)
             } else {
-                return ResultOf.Error(Exception("Was not able to delete event."))
+
+                return try{
+                    val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseDelete)
+                    errorResponse.getException()
+                }catch(e: Exception){
+                    GENERAL_EXCEPTION()
+                }
+
             }
         } catch (e: Exception) {
-            return ResultOf.Error(Exception(e))
+            return NETWORK_EXCEPTION()
         }
 
     }
@@ -154,7 +182,7 @@ object Network {
 
         private fun getRequestMethodForUrlPath(path: String): RequestType? {
             if (path.contains(DELETE_EVENT)) return DELETE
-            if(path.contains(UPDATE_EVENT)) return PUT
+            if (path.contains(UPDATE_EVENT)) return PUT
             when (path) {
                 READ_EVENTS -> return GET
                 CREATE_EVENT, LOGIN_PATH -> return POST
