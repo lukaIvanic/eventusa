@@ -1,5 +1,7 @@
 package com.example.eventusa.network
 
+import com.example.eventusa.exceptions.EventusaExceptions.*
+import com.example.eventusa.exceptions.ExceptionResponse
 import com.example.eventusa.network.Network.NetworkCore
 import com.example.eventusa.network.RequestType.*
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -46,21 +48,28 @@ object Network {
     }
 
 
-    fun insertEvent(rinetEvent: RINetEvent): ResultOf<Boolean> {
-
-
+    fun insertEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> {
+        var eventReturnJson = ""
         try {
             val eventJson = JsonUtils.toJson(rinetEvent.copy(eventId = 0))
-            val id = NetworkCore.sendRequest(CREATE_EVENT, eventJson)
-            return if (id.isNotEmpty()) {
-                ResultOf.Success(true)
-            } else {
-                ResultOf.Error(Exception("Server didn't accept event"))
-            }
+            eventReturnJson = NetworkCore.sendRequest(CREATE_EVENT, eventJson)
         } catch (e: Exception) {
-            return ResultOf.Error(e)
+            return NETWORK_EXCEPTION()
         }
 
+        try {
+            val returnedEvent = JsonUtils.fromJsonToObject<RINetEvent>(eventReturnJson)
+            return ResultOf.Success(returnedEvent)
+        } catch (e: Exception) {
+
+            try {
+                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(eventReturnJson)
+                return errorResponse.getException()
+            } catch (ignore: Exception) {
+            }
+
+            return JSON_PARSE_EXCEPTION()
+        }
 
     }
 
@@ -68,15 +77,23 @@ object Network {
      * Returns events or empty body.
      * Because of the possibility of an empty body a json validity check is neccessary.
      */
-    fun getEvents(): MutableList<RINetEvent> {
+    fun getEvents(): ResultOf<MutableList<RINetEvent>> {
 
-        val eventsJson = NetworkCore.sendRequest(READ_EVENTS)
+        var eventsJson = ""
 
-        if (eventsJson.first() != '[' && eventsJson.first() != '{') {
-            throw Exception(eventsJson)
+        try {
+            eventsJson = NetworkCore.sendRequest(READ_EVENTS)
+        } catch (e: Exception) {
+            return NETWORK_EXCEPTION()
         }
 
-        return JsonUtils.fromJsonToList(eventsJson)
+        try {
+            val events = JsonUtils.fromJsonToList<RINetEvent>(eventsJson)
+            return ResultOf.Success(events)
+        } catch (e: Exception) {
+            return JSON_PARSE_EXCEPTION()
+        }
+
 
     }
 
@@ -86,29 +103,46 @@ object Network {
 
         try {
             val eventJson = JsonUtils.toJson(rinetEvent)
-            val id = NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
-            if (id == "true") {
+            val responseJson =
+                NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
+            if (responseJson.isEmpty()) {
                 return ResultOf.Success(true)
             } else {
-                return ResultOf.Error(Exception("Server didn't accept event"))
+
+                return try {
+                    val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseJson)
+                    errorResponse.getException()
+                } catch (e: Exception) {
+                    if (e.localizedMessage.isNullOrEmpty()) GENERAL_EXCEPTION() else ResultOf.Error(
+                        e
+                    )
+                }
+
             }
         } catch (e: Exception) {
-            return ResultOf.Error(e)
+            return NETWORK_EXCEPTION()
         }
 
     }
 
-    fun deleteEvent(eventId: Int): ResultOf<Boolean> {
+    fun deleteEvent(eventId: Int): ResultOf<Unit> {
 
         try {
             val responseDelete = NetworkCore.sendRequest("$DELETE_EVENT/$eventId")
             if (responseDelete.isEmpty()) {
-                return ResultOf.Success(true)
+                return ResultOf.Success(Unit)
             } else {
-                return ResultOf.Error(Exception("Was not able to delete event."))
+
+                return try{
+                    val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseDelete)
+                    errorResponse.getException()
+                }catch(e: Exception){
+                    GENERAL_EXCEPTION()
+                }
+
             }
         } catch (e: Exception) {
-            return ResultOf.Error(Exception(e))
+            return NETWORK_EXCEPTION()
         }
 
     }
@@ -129,7 +163,10 @@ object Network {
             val mediaType: MediaType? = MediaType.parse("application/json")
 
             var requestBody: RequestBody? =
-                if (requestType == POST || requestType == PUT) RequestBody.create(mediaType, requestBodyString) else null
+                if (requestType == POST || requestType == PUT) RequestBody.create(
+                    mediaType,
+                    requestBodyString
+                ) else null
 
             val request: Request = Request.Builder()
                 .url(baseUrl + urlPath)
@@ -145,10 +182,10 @@ object Network {
 
         private fun getRequestMethodForUrlPath(path: String): RequestType? {
             if (path.contains(DELETE_EVENT)) return DELETE
+            if (path.contains(UPDATE_EVENT)) return PUT
             when (path) {
                 READ_EVENTS -> return GET
                 CREATE_EVENT, LOGIN_PATH -> return POST
-                UPDATE_EVENT -> return PUT
             }
             return null
         }

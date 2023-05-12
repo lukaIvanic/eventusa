@@ -13,8 +13,10 @@ import com.example.eventusa.utils.extensions.doIfSucces
 import com.example.eventusa.utils.extensions.toParsedString
 import com.example.eventusa.utils.setChipHighlighted
 import com.example.eventusa.utils.setTextAnimated
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 fun AddEventActivity.getIntentEventId(): Int? {
@@ -24,7 +26,7 @@ fun AddEventActivity.getIntentEventId(): Int? {
 
 fun AddEventActivity.handleSaveEvent() {
 
-    showProgressDialog()
+    showProgressDialog("Saving event..")
 
     lifecycleScope.launch {
         sendInputsToViewmodel()
@@ -35,26 +37,26 @@ fun AddEventActivity.handleSaveEvent() {
 
 fun AddEventActivity.handleDeleteEvent() {
     lifecycleScope.launch {
-        viewmodel.deleteEvent()
 
-        viewmodel.deleteEventState.collect { result ->
+        showProgressDialog("Deleting event..")
+
+        viewmodel.deleteEvent().stateIn(this).collectLatest { result ->
+
+            if (result !is ResultOf.Loading) {
+                hideProgressDialog()
+            }
+
 
             result.doIfFailure {
-                Toast.makeText(
-                    this@handleDeleteEvent,
-                    it.localizedMessage ?: "An error occured with deleting event.",
-                    Toast.LENGTH_LONG
-                ).show()
+                showError(it.localizedMessage)
             }
 
             result.doIfSucces {
-                Toast.makeText(this@handleDeleteEvent, "Event deleted!", Toast.LENGTH_LONG)
-                    .show()
-                //TODO: handle notification deletion
                 finish()
             }
 
         }
+
     }
 }
 
@@ -71,17 +73,14 @@ fun AddEventActivity.setupSaveEventFlowObserving() {
         viewmodel.postEventState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .collect { result ->
                 if (result is ResultOf.Loading) {
-                    showProgressDialog()
+
+                    showProgressDialog(if (isActivityEditEvent) "Saving event.." else "Creating event..")
                 } else {
                     hideProgressDialog()
                 }
 
                 result.doIfFailure {
-                    Toast.makeText(
-                        this@setupSaveEventFlowObserving,
-                        it.localizedMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    showError(it.localizedMessage)
                 }
 
                 result.doIfSucces {
@@ -90,7 +89,6 @@ fun AddEventActivity.setupSaveEventFlowObserving() {
             }
     }
 }
-
 
 fun AddEventActivity.setupFetchEventStateObserving() {
     lifecycleScope.launch {
@@ -164,5 +162,14 @@ fun AddEventActivity.setupFetchEventStateObserving() {
                 }
 
             }
+    }
+}
+
+fun AddEventActivity.showError(message: String?) {
+    val snackbar =
+        Snackbar.make(addEventActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG)
+
+    if (!snackbar.isShownOrQueued) {
+        snackbar.show()
     }
 }

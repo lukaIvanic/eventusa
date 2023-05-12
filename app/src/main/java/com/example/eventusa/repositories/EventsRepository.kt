@@ -4,11 +4,8 @@ import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.extensions.doIfSucces
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 /**
@@ -95,14 +92,14 @@ class EventsRepository(
 
 
     private suspend fun refreshEvents() {
-        _events.emit(ResultOf.Loading)
-        try {
-//            val newEvents: MutableList<RINetEvent> = ArrayList()
-            val newEvents = Network.getEvents()
-//            if (newEvents.isEmpty()) newEvents.addAll(getDummyData())
-            _events.emit(ResultOf.Success(newEvents))
-        } catch (e: Exception) {
-            _events.emit(ResultOf.Error(e))
+        externalScope.launch {
+            _events.emit(ResultOf.Loading)
+            try {
+                val newEventsResultOf = Network.getEvents()
+                _events.emit(newEventsResultOf)
+            } catch (e: Exception) {
+                _events.emit(ResultOf.Error(e))
+            }
         }
     }
 
@@ -180,12 +177,12 @@ class EventsRepository(
             )
     }
 
-    suspend fun addEvent(rinetEvent: RINetEvent) {
-        Network.insertEvent(rinetEvent)
+    suspend fun addEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> {
+        return Network.insertEvent(rinetEvent)
     }
 
-    suspend fun updateEvent(rinetEvent: RINetEvent){
-        Network.updateEvent(rinetEvent)
+    suspend fun updateEvent(rinetEvent: RINetEvent): ResultOf<Boolean> {
+        return Network.updateEvent(rinetEvent)
     }
 
     fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
@@ -208,16 +205,15 @@ class EventsRepository(
     }
 
 
-    suspend fun deleteEvent(eventId: Int){
-        externalScope.launch {
+    suspend fun deleteEvent(eventId: Int): ResultOf<Unit> {
+        return withContext(externalScope.coroutineContext) {
             Network.deleteEvent(eventId)
         }
     }
 
-    public suspend fun makeEventsUpdate(){
+    public suspend fun makeEventsUpdate() {
         refreshEvents()
     }
-
 
 
 }

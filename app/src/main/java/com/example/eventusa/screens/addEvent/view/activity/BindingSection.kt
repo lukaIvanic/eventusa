@@ -3,6 +3,9 @@ package com.example.eventusa.screens.addEvent.view.activity
 import com.example.eventusa.R
 
 fun AddEventActivity.bindViews(){
+
+    addEventActivityLayout = findViewById(R.id.addEventActivityLayout)
+
     titleEditText = findViewById(R.id.addTitleEditText)
 
     saveEventButton = findViewById(R.id.saveEventButton)

@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,6 +30,7 @@ import com.example.eventusa.utils.extensions.doIfSucces
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.*
@@ -43,6 +45,8 @@ class EventsActivity : AppCompatActivity() {
             (application as EventusaApplication).userRepository
         )
     }
+
+    lateinit var eventsActivityLayout: ConstraintLayout
 
     lateinit var nameTextView: TextView
     lateinit var logoutButton: ImageView
@@ -62,6 +66,8 @@ class EventsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_events)
+
+        eventsActivityLayout = findViewById(R.id.eventsActivityLayout)
 
         nameTextView = findViewById(R.id.welcomeNameTextView)
         nameTextView.text = "Welcome, ${viewModel.getUsername()}"
@@ -91,11 +97,7 @@ class EventsActivity : AppCompatActivity() {
                     }
 
                     resultOf.doIfFailure {
-                        Toast.makeText(
-                            this@EventsActivity,
-                            "An error occured. ${it.localizedMessage}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        showError(it.localizedMessage)
                     }
 
                 }
@@ -181,6 +183,10 @@ class EventsActivity : AppCompatActivity() {
         Intent(this@EventsActivity, SettingsActivity::class.java).apply {
             startActivity(this)
         }
+    }
+
+    private fun showError(message: String?){
+        Snackbar.make(eventsActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG).show()
     }
 
     override fun onResume() {
