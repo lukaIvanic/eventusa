@@ -4,7 +4,7 @@
 
     <item >
         <shape android:shape="rectangle">
-            <solid android:color="@color/chip_highlight" />
+            <solid android:color="@color/chip_highlight_rinet_blue" />
 
             <corners android:bottomLeftRadius="8dp"
                 android:bottomRightRadius="8dp"
@@ -21,7 +21,7 @@
     <item>
 
         <shape android:shape="rectangle">
-            <solid android:color="@color/chip_background" />
+            <solid android:color="@color/chip_background_rinet_blue" />
             <corners android:radius="8dp" />
             <padding
                 android:top="10dp"/>

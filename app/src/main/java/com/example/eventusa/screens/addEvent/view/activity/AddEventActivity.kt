@@ -2,6 +2,7 @@ package com.example.eventusa.screens.addEvent.view.activity
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -9,12 +10,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModel
 import com.example.eventusa.screens.addEvent.viewmodel.AddEventViewModelFactory
+import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.view.LoginActivity
 import com.google.android.material.chip.ChipGroup
@@ -33,7 +36,6 @@ class AddEventActivity : AppCompatActivity() {
 
     var isActivityFromNotif = false
     var isActivityEditEvent = false
-
 
 
     lateinit var saveEventButton: TextView
@@ -100,6 +102,8 @@ class AddEventActivity : AppCompatActivity() {
 
     fun showProgressDialog(loadingMessage: String) {
         progressDialogView.findViewById<TextView>(R.id.loadingTextView).text = loadingMessage
+        progressDialogView.findViewById<ProgressBar>(R.id.loader).indeterminateTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this, EventColors.getColorId(viewmodel.getEventColor())))
         progressDialog.show()
     }
 

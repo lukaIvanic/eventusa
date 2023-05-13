@@ -12,7 +12,7 @@ import com.example.eventusa.utils.extensions.dpToPx
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
-class Item (val text: String, var drawableId: Int){
+class Item(val text: String, var drawableId: Int) {
     override fun toString(): String {
         return text
     }
