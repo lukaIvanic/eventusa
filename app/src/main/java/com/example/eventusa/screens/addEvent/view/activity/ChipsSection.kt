@@ -3,6 +3,7 @@ package com.example.eventusa.screens.addEvent.view.activity
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.core.view.children
+import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.ChipStatus
 import com.example.eventusa.utils.extensions.dpToPx

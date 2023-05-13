@@ -8,7 +8,6 @@ import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
-import kotlin.random.Random
 
 
 /**
@@ -43,7 +42,7 @@ data class RINetEvent(
 
     var usersAttending: MutableList<User>? = ArrayList(),
 
-    var eventColor: Int = EventColors.randomColor(),
+    var eventColor: Int = EventColors.RINET_BLUE,
 
     @JsonIgnore
     var isInSeries: Boolean = false,
@@ -56,7 +55,7 @@ data class RINetEvent(
 
 
     @JsonIgnore
-    var isFirstInDate: Boolean = true
+    var isFirstInDate: Boolean = true,
 
     ) : EventItem {
 
@@ -68,7 +67,6 @@ data class RINetEvent(
         "location",
         "descritpion",
         false,
-
 
 
         ) {
@@ -129,6 +127,7 @@ object EventColors {
     }
 
     fun getColorId(eventColor: Int): Int {
+
         return when (eventColor) {
             YELLOW -> {
                 R.color.event_yellow
@@ -208,8 +207,6 @@ object EventColors {
     fun getDrawableIdFull(eventColor: Int): Int {
 
 
-
-
         return when (eventColor) {
             YELLOW -> {
                 R.drawable.color_option_full_yellow
@@ -246,10 +243,6 @@ object EventColors {
             }
 
         }
-    }
-
-    fun randomColor(): Int {
-        return Random.nextInt(0, 10)
     }
 
     fun getColorItems(): Array<Item> {

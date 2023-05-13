@@ -55,9 +55,9 @@
     <color name="secondary_color">#d34515</color>
     <color name="button_stroke">#ba380d</color>
 
-    <color name="chip_highlight">#227CB1</color>
+    <color name="chip_highlight_rinet_blue">#227CB1</color>
 <!--    <color name="chip_primary">#E87400</color>-->
-    <color name="chip_background">#E2F6FC</color>
+    <color name="chip_background_rinet_blue">#E2F6FC</color>
 <!--    <color name="chip_backgroun">#FFF9E7</color>-->
 
     <color name="chip_text_default">#A0B5B4</color>

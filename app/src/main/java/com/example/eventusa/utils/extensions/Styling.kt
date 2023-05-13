@@ -55,8 +55,8 @@ fun TextView.setChipHighlighted(name: String) {
     tag = "highlighted"
     animateChange {
         text = name
-        this.setTextColor(resources.getColor(R.color.chip_highlight))
-        setBackgroundResource(R.drawable.chip_highlighted)
+        this.setTextColor(resources.getColor(R.color.chip_highlight_rinet_blue))
+        setBackgroundResource(R.drawable.chip_highlighted_rinet_blue)
         setPadding(
             dpToPx(10F),
             dpToPx(8F),
