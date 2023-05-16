@@ -71,14 +71,6 @@ class AddEventViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
 
-//                if (currUiState.eventId > 0) {
-//                    val res = Network.updateEvent(currUiState.riNetEvent)
-//                    _postEventState.emit(res.map { currUiState.riNetEvent })
-//                } else {
-//                    val res = Network.insertEvent(currUiState.riNetEvent)
-//                    _postEventState.emit(res.map { currUiState.riNetEvent })
-//                }
-
             if (currUiState.eventId > 0) {
 
                 val resultOfUpdate = eventsRepository.updateEvent(currUiState.riNetEvent)
@@ -141,13 +133,20 @@ class AddEventViewModel(
                 val cachedEventResult = deferred.await()
 
                 if (cachedEventResult != null) {
-
+                    if(cachedEventResult is ResultOf.Success){
+                        originalEvent = cachedEventResult.data
+                    }
                     emitFetchEvent(eventId, cachedEventResult)
                     return@withContext
                 }
 
                 try {
                     val eventFromDb = eventsRepository.getEventWithId(eventId)
+
+                    if(eventFromDb is ResultOf.Success){
+                        originalEvent = eventFromDb.data
+                    }
+
                     emitFetchEvent(eventId, eventFromDb)
 
                     if (eventFromDb is ResultOf.Success) {
@@ -194,16 +193,9 @@ class AddEventViewModel(
         }
         currUiState = (_uiState.value as ResultOf.Success).data.copy()
 
+
     }
-
-    suspend fun getAllUsers(): List<User> = withContext(viewModelScope.coroutineContext) {
-        val users = userRepository.getAllUsers()
-        if (users is ResultOf.Success) return@withContext users.data
-
-        return@withContext ArrayList<User>()
-    }
-
-    suspend fun getAttendingUsers(): MutableList<User> {
+    fun getAttendingUsers(): MutableList<User> {
         return currUiState.riNetEvent.usersAttending
     }
 

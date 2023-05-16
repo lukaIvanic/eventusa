@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.eventusa.network.ResultOf
-import com.example.eventusa.repositories.LoggedInState
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.login.model.ResponseCodes.*
 import com.example.eventusa.screens.login.model.User
@@ -19,24 +18,8 @@ class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            userRepository.loginStateFlow.collect { loggedInState ->
-
-                    if (loggedInState is LoggedInState.Idle) return@collect
-
-
-                    when (loggedInState) {
-                        is LoggedInState.Error -> {
-                            _loginStateFlow.emit(ResultOf.Error(loggedInState.exception))
-                        }
-                        is LoggedInState.Loading -> {
-                            _loginStateFlow.emit(  ResultOf.Loading)
-                        }
-                        is LoggedInState.Success -> {
-                            _loginStateFlow.emit(ResultOf.Success(loggedInState.user))
-                        }
-                        else -> {}
-                    }
-
+            userRepository.loginStateFlow.collect { resultOf ->
+                    _loginStateFlow.emit(resultOf)
             }
         }
     }

@@ -4,6 +4,7 @@ import android.util.TypedValue
 import android.widget.TextView
 import androidx.core.view.children
 import androidx.lifecycle.lifecycleScope
+import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.ChipStatus
 import com.example.eventusa.utils.extensions.dpToPx
@@ -18,7 +19,7 @@ fun AddEventActivity.setupPeopleChips() {
 
     lifecycleScope.launch {
 
-        viewmodel.getAllUsers().forEach { user -> addRinetChip(user) }
+        UserRepository.getAllUsers().forEach { user -> addRinetChip(user) }
         peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
             val chipTv = indexedChip.value as? TextView ?: return@forEach
             val user =
