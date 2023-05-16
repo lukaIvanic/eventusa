@@ -116,6 +116,8 @@ fun AddEventActivity.setupFetchEventStateObserving() {
                             titleEditText.clearFocus()
                         }
 
+                        addToCalendarCheckBox.isChecked = isInCalendar
+
                         startDateTextView.setTextAnimated(
                             startDateTime.toLocalDate().toParsedString()
                         )

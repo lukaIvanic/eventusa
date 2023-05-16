@@ -5,9 +5,9 @@ import com.example.eventusa.exceptions.EventusaExceptions.*
 import com.example.eventusa.exceptions.ExceptionResponse
 import com.example.eventusa.network.Network.NetworkCore
 import com.example.eventusa.network.RequestType.*
+import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.User
-import com.example.eventusa.utils.extensions.doIfSucces
 import com.example.eventusa.utils.jsonutils.JsonUtils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -69,36 +69,6 @@ object Network {
         return GENERAL_EXCEPTION()
     }
 
-    var cachedUsers: MutableList<User> = ArrayList<User>()
-
-    fun getAllUsers(): ResultOf<List<User>> {
-        if(cachedUsers.isNotEmpty()) return ResultOf.Success(cachedUsers)
-
-        var usersListJson = ""
-        try {
-            usersListJson = NetworkCore.sendRequest(READ_USERS)
-        } catch (e: Exception) {
-            return NETWORK_EXCEPTION()
-        }
-
-        try {
-            val userList = JsonUtils.fromJsonToList<User>(usersListJson)
-            cachedUsers = userList
-            return ResultOf.Success(userList)
-        } catch (e: Exception) {
-
-            try {
-                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(usersListJson)
-                return errorResponse.getException()
-            } catch (ignore: Exception) {
-            }
-
-        }
-
-        return GENERAL_EXCEPTION()
-    }
-
-
     fun insertEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> {
         var eventReturnJson = ""
         try {
@@ -154,30 +124,37 @@ object Network {
 
         return events.mapIndexed { index, event ->
 
-            getAllUsers().doIfSucces { users ->
+            val users = UserRepository.getAllUsers()
 
-                var attendingUsers: MutableList<User> = ArrayList()
+            var attendingUsers: MutableList<User> = ArrayList()
 
-                if(event.userIdsStringList.isNullOrEmpty() || event.userIdsStringList == "null") return@doIfSucces
-                var b = event.eventId
-                var userIdsList =
+            if (event.userIdsStringList.isNullOrEmpty() || event.userIdsStringList == "null") return@mapIndexed event
+
+            var userIdsList: List<Int>?
+
+            try{
+                userIdsList =
                     event.userIdsStringList?.split(",")?.map { stringId -> stringId.trim().toInt() }
-
-                users.forEach { user ->
-                    if (userIdsList?.contains(user.userId) == true) {
-                        attendingUsers.add(user)
-                    }
-                }
-
-                return@mapIndexed event.copy(
-                    usersAttending = attendingUsers
-                )
+            }catch(e: NumberFormatException){
+                return@mapIndexed event
             }
 
 
+            users.forEach { user ->
+                if (userIdsList?.contains(user.userId) == true) {
+                    attendingUsers.add(user)
+                }
+            }
 
-            return@mapIndexed event.copy()
+            return@mapIndexed event.copy(
+                usersAttending = attendingUsers
+            )
         }
+
+
+
+
+
 
     }
 
