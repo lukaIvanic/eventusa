@@ -25,7 +25,12 @@ import com.google.android.material.chip.ChipGroup
 
 class AddEventActivity : AppCompatActivity() {
 
-    val viewmodel: AddEventViewModel by viewModels { AddEventViewModelFactory((application as EventusaApplication).eventsRepository) }
+    val viewmodel: AddEventViewModel by viewModels {
+        AddEventViewModelFactory(
+            (application as EventusaApplication).eventsRepository,
+            (application as EventusaApplication).userRepository
+        )
+    }
 
     lateinit var addEventActivityLayout: LinearLayout
 
@@ -103,7 +108,12 @@ class AddEventActivity : AppCompatActivity() {
     fun showProgressDialog(loadingMessage: String) {
         progressDialogView.findViewById<TextView>(R.id.loadingTextView).text = loadingMessage
         progressDialogView.findViewById<ProgressBar>(R.id.loader).indeterminateTintList =
-            ColorStateList.valueOf(ContextCompat.getColor(this, EventColors.getColorId(viewmodel.getEventColor())))
+            ColorStateList.valueOf(
+                ContextCompat.getColor(
+                    this,
+                    EventColors.getColorId(viewmodel.getEventColor())
+                )
+            )
         progressDialog.show()
     }
 

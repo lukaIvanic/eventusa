@@ -9,7 +9,6 @@ import com.example.eventusa.screens.login.model.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
 
-
 /**
  *
  * [usersAttending] list is used to create a relation with users, instead of a one to many relation.
@@ -39,8 +38,11 @@ data class RINetEvent(
 
     var isInCalendar: Boolean = false,
 
+    @JsonIgnore
+    var usersAttending: MutableList<User> = ArrayList(),
 
-    var usersAttending: MutableList<User>? = ArrayList(),
+    var userIdsStringList: String? = "",
+
 
     var eventColor: Int = EventColors.RINET_BLUE,
 
@@ -59,7 +61,22 @@ data class RINetEvent(
 
     ) : EventItem {
 
-    constructor() : this(
+//            get() {
+//                var s = ""
+//                usersAttending.dropLast(1).forEach {
+//                    s += "$it, "
+//                }
+//
+//                usersAttending.lastOrNull()?.let {
+//                    s += it
+//                }
+//
+//                return s
+//            }
+
+
+
+        constructor() : this(
         0,
         "name",
         LocalDateTime.now(),

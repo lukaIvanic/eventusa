@@ -2,16 +2,15 @@ package com.example.eventusa.screens.login.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.fasterxml.jackson.annotation.JsonProperty
 
 @Entity
 data class User(
 
     @PrimaryKey(autoGenerate = true)
     val userId: Int = 0,
-
-    @JsonProperty("Name")
-    val name: String? = null,
+    val displayName: String = "",
+    val username: String = "",
+    val pass: String = ""
 
     ) {
 
@@ -30,7 +29,7 @@ data class User(
             "David Pajo",
             "Marko Andrić",
             "Ivo Opancar"
-        ).map { User(name = it) }
+        ).map { User(displayName = it) }
 
         fun getAllUsers(): List<User> {
             return allUsers

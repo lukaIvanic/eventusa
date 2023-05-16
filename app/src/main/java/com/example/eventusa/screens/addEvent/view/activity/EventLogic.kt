@@ -139,10 +139,10 @@ fun AddEventActivity.setupFetchEventStateObserving() {
                         peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
                             val chipTv = indexedChip.value as? TextView ?: return@forEach
                             val user =
-                                usersAttending?.firstOrNull { it.name == chipTv.text.toString() }
+                                usersAttending.firstOrNull { it.displayName == chipTv.text.toString() }
 
                             if (user != null) {
-                                chipTv.setChipHighlighted(user.name ?: "")
+                                chipTv.setChipHighlighted(user.displayName)
 
                                 // Animation eye sugar
                                 val delayTime = 100 / (indexedChip.index / 2).plus(1)

@@ -8,6 +8,7 @@ import com.example.eventusa.caching.room.extraentities.EventNotification
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.notifications.NotifManager
 import com.example.eventusa.repositories.EventsRepository
+import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.User
@@ -18,7 +19,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-//TODO move to proper place
 data class AddEventUiState(
     var eventId: Int,
     var riNetEvent: RINetEvent,
@@ -31,7 +31,10 @@ data class AddEventUiState(
 
 const val defaultEventDuration = 60L
 
-class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
+class AddEventViewModel(
+    val eventsRepository: EventsRepository,
+    val userRepository: UserRepository,
+) : ViewModel() {
 
     private var currUiState =
         defaultUiState()
@@ -56,6 +59,13 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
 
     suspend fun updateOrInsertEvent(context: Context) {
+
+        var s = ""
+
+        currUiState.riNetEvent.usersAttending.dropLast(1).forEach { s+= "${it.userId}, " }
+        currUiState.riNetEvent.usersAttending.lastOrNull()?.let{ s += it.userId }
+
+        currUiState.riNetEvent = currUiState.riNetEvent.copy(userIdsStringList = s)
 
         _postEventState.emit(ResultOf.Loading)
 
@@ -132,11 +142,6 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
                 if (cachedEventResult != null) {
 
-                    if (cachedEventResult is ResultOf.Success) {
-                        originalEvent =
-                            cachedEventResult.data.copy(usersAttending = cachedEventResult.data.usersAttending?.toMutableList())
-                    }
-
                     emitFetchEvent(eventId, cachedEventResult)
                     return@withContext
                 }
@@ -147,7 +152,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
                     if (eventFromDb is ResultOf.Success) {
                         originalEvent =
-                            eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending?.toMutableList())
+                            eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending.toMutableList())
                     } else if (eventFromDb is ResultOf.Error) {
                         throw eventFromDb.exception
                     }
@@ -187,8 +192,19 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
         _uiState.value = result.map {
             AddEventUiState(eventId, it.copy())
         }
-        currUiState = (_uiState.value as ResultOf.Success).data
+        currUiState = (_uiState.value as ResultOf.Success).data.copy()
 
+    }
+
+    suspend fun getAllUsers(): List<User> = withContext(viewModelScope.coroutineContext) {
+        val users = userRepository.getAllUsers()
+        if (users is ResultOf.Success) return@withContext users.data
+
+        return@withContext ArrayList<User>()
+    }
+
+    suspend fun getAttendingUsers(): MutableList<User> {
+        return currUiState.riNetEvent.usersAttending
     }
 
     private val addedNotifications = mutableListOf<EventNotification>()
@@ -295,6 +311,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
         currUiState.riNetEvent.isInCalendar = calendarEnabled
     }
 
+
     /**
      * @return false if new chip state is default, true if new chip state is highlighted
      */
@@ -321,7 +338,7 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
     }
 
     fun isAllUserChipsActivated(): Boolean {
-        return currUiState.riNetEvent.usersAttending?.containsAll(User.getAllUsers()) ?: false
+        return currUiState.riNetEvent.usersAttending.containsAll(User.getAllUsers()) ?: false
     }
 
     /**
@@ -402,6 +419,8 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
         }
 
+        adjustDateTime()
+
         _uiState.value = ResultOf.Success(currUiState.copy())
 
     }
@@ -481,13 +500,16 @@ class AddEventViewModel(val eventsRepository: EventsRepository) : ViewModel() {
 
 }
 
-class AddEventViewModelFactory(private val eventsRepository: EventsRepository) :
+class AddEventViewModelFactory(
+    private val eventsRepository: EventsRepository,
+    private val userRepository: UserRepository,
+) :
     ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AddEventViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AddEventViewModel(eventsRepository) as T
+            return AddEventViewModel(eventsRepository, userRepository) as T
         }
         throw java.lang.IllegalArgumentException("UNKNOWN VIEW MODEL CLASS")
     }

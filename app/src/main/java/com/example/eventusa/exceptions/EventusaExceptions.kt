@@ -8,10 +8,20 @@ enum class EventusaExceptions(val errorMessage: String) {
     JSON_PARSE_EXCEPTION("An error occured while parsing json."),
     NOT_FOUND_EXCEPTION("Could not find event."),
     INVALID_EVENT_EXCEPTION("The event you submited was invalid."),
-    GENERAL_EXCEPTION("An exception occured.");
+    GENERAL_EXCEPTION("An exception occured."),
+    UNAUTHORIZED_EXCEPTION("The password is incorrect.");
 
 
     operator fun invoke(): ResultOf.Error {
         return ResultOf.Error(Exception(errorMessage))
+    }
+
+    companion object {
+        fun getStatusCode(eventusaExceptions: EventusaExceptions): Int{
+            return when(eventusaExceptions){
+                NOT_FOUND_EXCEPTION -> 404
+                else -> -1
+            }
+        }
     }
 }

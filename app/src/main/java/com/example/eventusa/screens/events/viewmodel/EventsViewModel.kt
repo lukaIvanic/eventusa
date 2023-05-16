@@ -33,8 +33,8 @@ class EventsViewModel(
         fetchEvents()
     }
 
-    fun getUsername(): String {
-        return userRepository.user?.name ?: "RI-NET employee!"
+    fun getUsername(): String? {
+        return userRepository.loggedInUser?.displayName
     }
 
 
@@ -48,7 +48,9 @@ class EventsViewModel(
                     .collect { resultOf ->
 
                         _eventsUiState.value = resultOf.map { rinetEvents ->
-                            EventsUiState(DataUtils.eventsDisplayItems(rinetEvents))
+                            EventsUiState(DataUtils.eventsDisplayItems(
+                                rinetEvents
+                            ))
                         }
                     }
             }
@@ -60,6 +62,7 @@ class EventsViewModel(
         }
 
     }
+
 
     fun makeEventsUpdateTick(){
         viewModelScope.launch {

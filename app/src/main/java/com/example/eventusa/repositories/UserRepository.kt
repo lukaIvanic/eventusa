@@ -1,57 +1,69 @@
 package com.example.eventusa.repositories
 
-import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.network.Network
 import com.example.eventusa.network.ResultOf
-import com.example.eventusa.screens.login.model.LoginRequest
-import com.example.eventusa.screens.login.model.LoginResponse
-import com.example.eventusa.screens.login.model.ResponseCodes
 import com.example.eventusa.screens.login.model.User
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class UserRepository {
 
-    var user: User? = null
-    private var alreadyLoggedIn = false
-    var lastSuccessLoginRequest: LoginRequest? = null
+    private val _loginStateFlow: MutableStateFlow<LoggedInState> =
+        MutableStateFlow(LoggedInState.Idle)
+    val loginStateFlow = _loginStateFlow.asStateFlow()
 
+    var loggedInUser: User? = null
 
-    fun isUserAlreadyLoggedIn(): Boolean {
-        return LocalStorageManager.readRememberMe()
-    }
-    fun setUserIsLoggedIn() {
-        alreadyLoggedIn = true
-    }
+    private var cachedUsers: List<User>? = null
 
-    fun setUserisLoggedOut() {
-        alreadyLoggedIn = false
-    }
+    fun attemptLogin(user: User) {
 
-    fun attemptLogin(loginRequest: LoginRequest): ResultOf<LoginResponse> {
+        CoroutineScope(Dispatchers.IO).launch {
 
-        if (alreadyLoggedIn && loginRequest == lastSuccessLoginRequest) {
-            return ResultOf.Success(
-                LoginResponse(
-                    Item1 = ResponseCodes.SUCCESS.value,
-                    Item2 = User(name = loginRequest.username)
-                )
-            )
-        }
+            _loginStateFlow.value = LoggedInState.Loading
 
+            val resultOfLogin = Network.attemptLogin(user)
 
-        val resultOf = Network.attemptLogin(loginRequest)
-        if (resultOf is ResultOf.Success && resultOf.data.Item1 == 0) {
-            user = resultOf.data.Item2
-        }
-
-        if (resultOf is ResultOf.Success) {
-            if (ResponseCodes.get(resultOf.data.Item1) == ResponseCodes.SUCCESS) {
-                alreadyLoggedIn = true
-                lastSuccessLoginRequest = loginRequest
+            _loginStateFlow.value = when (resultOfLogin) {
+                is ResultOf.Error -> LoggedInState.Error(resultOfLogin.exception)
+                is ResultOf.Loading -> LoggedInState.Loading
+                is ResultOf.Success -> {
+                    loggedInUser = resultOfLogin.data
+                    LoggedInState.Success(resultOfLogin.data)
+                }
             }
+
+            if(resultOfLogin is ResultOf.Success){
+                delay(300)
+                _loginStateFlow.value = LoggedInState.Idle
+            }
+
+
         }
 
-        return resultOf
     }
 
 
+
+    suspend fun getAllUsers(): ResultOf<List<User>> = withContext(Dispatchers.IO){
+
+        if(cachedUsers != null) return@withContext ResultOf.Success(cachedUsers!!)
+
+        val resultOfUsers = Network.getAllUsers()
+
+        if(resultOfUsers is ResultOf.Success){
+            cachedUsers = resultOfUsers.data
+        }
+
+        return@withContext resultOfUsers
+    }
+
+}
+
+sealed class LoggedInState {
+    object Idle : LoggedInState()
+    object Loading : LoggedInState()
+    data class Success(val user: User) : LoggedInState()
+    data class Error(val exception: Exception) : LoggedInState()
 }

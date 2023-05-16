@@ -5,8 +5,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.caching.room.extraentities.EventNotification
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.screens.addEvent.data.NotificationPreset
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsRecyclerAdapter
@@ -20,7 +20,7 @@ fun AddEventActivity.handleIsFromNotif(){
     isActivityFromNotif = getIntentIsFromNotif()
 
     if(isActivityFromNotif){
-        if((application as? EventusaApplication)?.userRepository?.isUserAlreadyLoggedIn()?.not() == true){
+        if(!LocalStorageManager.readRememberMe()){
             gotoLoginScreen()
             finish()
         }

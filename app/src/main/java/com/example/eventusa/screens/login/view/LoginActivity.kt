@@ -3,9 +3,13 @@ package com.example.eventusa.screens.login.view
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ProgressBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,11 +22,12 @@ import com.example.eventusa.screens.login.viewmodel.LoginViewModel
 import com.example.eventusa.screens.login.viewmodel.LoginViewModelFactory
 import com.example.eventusa.utils.extensions.doIfFailure
 import com.example.eventusa.utils.extensions.doIfSucces
-import kotlinx.coroutines.delay
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
+    lateinit var loginActivityLayout: ConstraintLayout
 
     lateinit var usernameEditText: EditText
     lateinit var passwordEditText: EditText
@@ -44,6 +49,8 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        loginActivityLayout = findViewById(R.id.loginActivityLayout)
+
         usernameEditText = findViewById(R.id.usernameEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
 
@@ -56,28 +63,29 @@ class LoginActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             handleLogin()
+            usernameEditText.clearFocus()
+            passwordEditText.clearFocus()
         }
 
-        guestLoginButton.setOnClickListener {
-            lifecycleScope.launch {
-
-                if (rememberMeCheckBox.isChecked) {
-                    LocalStorageManager.turnOnRememberMe()
-                } else {
-                    LocalStorageManager.turnOffRememberMe()
-                }
-
-                viewmodel.setUserIsLoggedIn()
-
-                hideLoginText()
-                disableRememberMeCheckBox()
-                showProgressBar()
-                disableLoginButton()
-                delay(100)
-                gotoEventsScreen()
-                finish()
-            }
-        }
+//        guestLoginButton.setOnClickListener {
+//            lifecycleScope.launch {
+//
+//                if (rememberMeCheckBox.isChecked) {
+//                    LocalStorageManager.turnOnRememberMe()
+//                } else {
+//                    LocalStorageManager.turnOffRememberMe()
+//                }
+//
+//
+//                hideLoginText()
+//                disableRememberMeCheckBox()
+//                showProgressBar()
+//                disableLoginButton()
+//
+//                gotoEventsScreen()
+//                finish()
+//            }
+//        }
 
         val rememberMeEnabled = LocalStorageManager.readRememberMe()
         rememberMeCheckBox.isChecked = rememberMeEnabled
@@ -99,7 +107,7 @@ class LoginActivity : AppCompatActivity() {
                         enableRememberMeCheckBox()
                         hideProgressBar()
                         enableLoginButton()
-                        showError(it.localizedMessage)
+                        showError(it.localizedMessage ?: "An error occured, please try again.")
                     }
 
                     loginResult.doIfSucces {
@@ -119,7 +127,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        automaticLogin()
 
     }
 
@@ -129,10 +136,10 @@ class LoginActivity : AppCompatActivity() {
         val password = passwordEditText.text.toString()
 
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(
-                this@LoginActivity,
+            Snackbar.make(
+                loginActivityLayout,
                 "Username and password are required.",
-                Toast.LENGTH_LONG
+                Snackbar.LENGTH_SHORT
             ).show()
             return
         }
@@ -146,33 +153,17 @@ class LoginActivity : AppCompatActivity() {
         viewmodel.login(username, password)
     }
 
-    private fun automaticLogin() {
-        if (!LocalStorageManager.readRememberMe()) return
 
-        guestLoginButton.callOnClick()
-
-
-        return
-
-        val user = LocalStorageManager.readUsername()
-        val pass = LocalStorageManager.readPassword()
-
-        usernameEditText.setText(user)
-        passwordEditText.setText(pass)
-
-        loginButton.callOnClick()
-    }
-
-    private fun showError(message: String?) {
-        Toast.makeText(
-            this@LoginActivity,
-            message ?: "An error occured, please try again.",
-            Toast.LENGTH_LONG
+    private fun showError(message: String) {
+        Snackbar.make(
+            loginActivityLayout,
+            message,
+            Snackbar.LENGTH_LONG
         ).show()
     }
 
     private fun enableRememberMeCheckBox(){
-        rememberMeCheckBox.isEnabled = false
+        rememberMeCheckBox.isEnabled = true
     }
 
     private fun disableRememberMeCheckBox(){
@@ -202,12 +193,6 @@ class LoginActivity : AppCompatActivity() {
     private fun disableLoginButton() {
         loginButton.isEnabled = false
     }
-
-
-//    private fun gotoEventsScreen() {
-//        val intent = Intent(this@LoginActivity, EventsActivity::class.java)
-//        startActivity(intent)
-//    }
 
     private fun gotoEventsScreen() {
         val intent = Intent(this@LoginActivity, EventsActivity::class.java)

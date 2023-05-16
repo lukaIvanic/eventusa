@@ -70,7 +70,8 @@ class EventsActivity : AppCompatActivity() {
         eventsActivityLayout = findViewById(R.id.eventsActivityLayout)
 
         nameTextView = findViewById(R.id.welcomeNameTextView)
-        nameTextView.text = "Welcome, ${viewModel.getUsername()}"
+        nameTextView.text =
+            if (viewModel.getUsername() != null) "Welcome, ${viewModel.getUsername()}" else "Welcome!"
 
         logoutButton = findViewById(R.id.logoutButton)
         settingsButton = findViewById(R.id.settingsButton)
@@ -179,14 +180,15 @@ class EventsActivity : AppCompatActivity() {
 
     }
 
-    private fun gotoSettings(){
+    private fun gotoSettings() {
         Intent(this@EventsActivity, SettingsActivity::class.java).apply {
             startActivity(this)
         }
     }
 
-    private fun showError(message: String?){
-        Snackbar.make(eventsActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG).show()
+    private fun showError(message: String?) {
+        Snackbar.make(eventsActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG)
+            .show()
     }
 
     override fun onResume() {

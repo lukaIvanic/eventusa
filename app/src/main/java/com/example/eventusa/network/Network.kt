@@ -1,12 +1,13 @@
 package com.example.eventusa.network
 
+import com.example.eventusa.exceptions.EventusaExceptions
 import com.example.eventusa.exceptions.EventusaExceptions.*
 import com.example.eventusa.exceptions.ExceptionResponse
 import com.example.eventusa.network.Network.NetworkCore
 import com.example.eventusa.network.RequestType.*
 import com.example.eventusa.screens.events.data.RINetEvent
-import com.example.eventusa.screens.login.model.LoginRequest
-import com.example.eventusa.screens.login.model.LoginResponse
+import com.example.eventusa.screens.login.model.User
+import com.example.eventusa.utils.extensions.doIfSucces
 import com.example.eventusa.utils.jsonutils.JsonUtils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -23,28 +24,78 @@ object Network {
 
     private val baseUrl = "https://eventusabackendapptestservice.azurewebsites.net/api/"
 
+    private val LOGIN_PATH = "Users/login"
+    private val READ_USERS = "Users"
     private val CREATE_EVENT = "Events/create"
-    private val READ_EVENTS = "/Events"
-    private val UPDATE_EVENT = "Events/update/"
-    private val DELETE_EVENT = "/Events/delete"
-    private val LOGIN_PATH = "/User/login"
+    private val READ_EVENTS = "Events"
+    private val UPDATE_EVENT = "Events/update"
+    private val DELETE_EVENT = "Events/delete"
 
     /**
      * Successful return marks successful login. Only indication of a failed authorization is an exception in the catch block.
      * LoginResponse contains a lot of meaningless data that should be removed from server.
      */
-    fun attemptLogin(loginRequest: LoginRequest): ResultOf<LoginResponse> {
-        try {
-            val loginRequestJson = JsonUtils.toJson(loginRequest)
-            val responseJson = NetworkCore.sendRequest(LOGIN_PATH, loginRequestJson)
+    fun attemptLogin(inputUser: User): ResultOf<User> {
 
-            val loginResponse: LoginResponse = JsonUtils.fromJsonToObject(responseJson)
-            return ResultOf.Success(loginResponse)
+        var responseJson = ""
+        try {
+            val inputUserJson = JsonUtils.toJson(inputUser)
+            responseJson = NetworkCore.sendRequest(LOGIN_PATH, inputUserJson)
 
         } catch (e: Exception) {
-            return ResultOf.Error(e)
+            return NETWORK_EXCEPTION()
         }
 
+
+        try {
+            val loginResponseUser: User = JsonUtils.fromJsonToObject(responseJson)
+            return ResultOf.Success(loginResponseUser)
+
+        } catch (e: Exception) {
+
+
+            try {
+                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseJson)
+                if (errorResponse.status == EventusaExceptions.getStatusCode(NOT_FOUND_EXCEPTION)) {
+                    return ResultOf.Error(Exception("User not found."))
+                }
+                return errorResponse.getException()
+            } catch (ignore: Exception) {
+
+            }
+
+        }
+
+        return GENERAL_EXCEPTION()
+    }
+
+    var cachedUsers: MutableList<User> = ArrayList<User>()
+
+    fun getAllUsers(): ResultOf<List<User>> {
+        if(cachedUsers.isNotEmpty()) return ResultOf.Success(cachedUsers)
+
+        var usersListJson = ""
+        try {
+            usersListJson = NetworkCore.sendRequest(READ_USERS)
+        } catch (e: Exception) {
+            return NETWORK_EXCEPTION()
+        }
+
+        try {
+            val userList = JsonUtils.fromJsonToList<User>(usersListJson)
+            cachedUsers = userList
+            return ResultOf.Success(userList)
+        } catch (e: Exception) {
+
+            try {
+                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(usersListJson)
+                return errorResponse.getException()
+            } catch (ignore: Exception) {
+            }
+
+        }
+
+        return GENERAL_EXCEPTION()
     }
 
 
@@ -83,17 +134,50 @@ object Network {
 
         try {
             eventsJson = NetworkCore.sendRequest(READ_EVENTS)
+            if (eventsJson.isEmpty()) throw Exception()
         } catch (e: Exception) {
             return NETWORK_EXCEPTION()
         }
 
         try {
             val events = JsonUtils.fromJsonToList<RINetEvent>(eventsJson)
-            return ResultOf.Success(events)
+
+            return ResultOf.Success(parseUserIdsStringList(events) as MutableList<RINetEvent>)
         } catch (e: Exception) {
             return JSON_PARSE_EXCEPTION()
         }
 
+
+    }
+
+    private fun parseUserIdsStringList(events: List<RINetEvent>): List<RINetEvent> {
+
+        return events.mapIndexed { index, event ->
+
+            getAllUsers().doIfSucces { users ->
+
+                var attendingUsers: MutableList<User> = ArrayList()
+
+                if(event.userIdsStringList.isNullOrEmpty() || event.userIdsStringList == "null") return@doIfSucces
+                var b = event.eventId
+                var userIdsList =
+                    event.userIdsStringList?.split(",")?.map { stringId -> stringId.trim().toInt() }
+
+                users.forEach { user ->
+                    if (userIdsList?.contains(user.userId) == true) {
+                        attendingUsers.add(user)
+                    }
+                }
+
+                return@mapIndexed event.copy(
+                    usersAttending = attendingUsers
+                )
+            }
+
+
+
+            return@mapIndexed event.copy()
+        }
 
     }
 
@@ -133,10 +217,11 @@ object Network {
                 return ResultOf.Success(Unit)
             } else {
 
-                return try{
-                    val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseDelete)
+                return try {
+                    val errorResponse =
+                        JsonUtils.fromJsonToObject<ExceptionResponse>(responseDelete)
                     errorResponse.getException()
-                }catch(e: Exception){
+                } catch (e: Exception) {
                     GENERAL_EXCEPTION()
                 }
 
@@ -184,7 +269,7 @@ object Network {
             if (path.contains(DELETE_EVENT)) return DELETE
             if (path.contains(UPDATE_EVENT)) return PUT
             when (path) {
-                READ_EVENTS -> return GET
+                READ_EVENTS, READ_USERS -> return GET
                 CREATE_EVENT, LOGIN_PATH -> return POST
             }
             return null

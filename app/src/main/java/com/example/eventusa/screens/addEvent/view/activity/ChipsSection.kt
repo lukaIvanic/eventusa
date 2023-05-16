@@ -3,21 +3,42 @@ package com.example.eventusa.screens.addEvent.view.activity
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.core.view.children
-import com.example.eventusa.screens.events.data.EventColors
+import androidx.lifecycle.lifecycleScope
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.ChipStatus
 import com.example.eventusa.utils.extensions.dpToPx
 import com.example.eventusa.utils.setChipDefault
+import com.example.eventusa.utils.setChipHighlighted
 import com.example.eventusa.utils.updateChipStyle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 fun AddEventActivity.setupPeopleChips() {
 
 
-    User.getAllUsers().forEach {
-        addRinetChip(it)
+    lifecycleScope.launch {
+
+        viewmodel.getAllUsers().forEach { user -> addRinetChip(user) }
+        peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
+            val chipTv = indexedChip.value as? TextView ?: return@forEach
+            val user =
+                viewmodel.getAttendingUsers()
+                    .firstOrNull { it.displayName == chipTv.text.toString() }
+
+            if (user != null) {
+                chipTv.setChipHighlighted(user.displayName)
+
+                // Animation eye sugar
+                val delayTime = 100 / (indexedChip.index / 2).plus(1)
+                delay(delayTime.toLong())
+            }
+
+        }
+
     }
 
 }
+
 
 fun AddEventActivity.addRinetChip(user: User) {
     val textView = TextView(this)
@@ -25,11 +46,11 @@ fun AddEventActivity.addRinetChip(user: User) {
     peopleChipGroup.addView(textView)
 
     textView.apply {
-        text = user.name
-        setChipDefault(user.name ?: "", animate = false)
+        text = user.displayName
+        setChipDefault(user.displayName ?: "", animate = false)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 15F)
         setPadding(dpToPx(10F), dpToPx(8F), dpToPx(10F), dpToPx(8F))
-//            updateChipStyle(ChipStatus.DEFAULT)
+
 
 
         setOnClickListener {
