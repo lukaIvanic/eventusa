@@ -67,29 +67,16 @@ class LoginActivity : AppCompatActivity() {
             passwordEditText.clearFocus()
         }
 
-//        guestLoginButton.setOnClickListener {
-//            lifecycleScope.launch {
-//
-//                if (rememberMeCheckBox.isChecked) {
-//                    LocalStorageManager.turnOnRememberMe()
-//                } else {
-//                    LocalStorageManager.turnOffRememberMe()
-//                }
-//
-//
-//                hideLoginText()
-//                disableRememberMeCheckBox()
-//                showProgressBar()
-//                disableLoginButton()
-//
-//                gotoEventsScreen()
-//                finish()
-//            }
-//        }
+        val user = LocalStorageManager.readUsername()
+        val pass = LocalStorageManager.readPassword()
 
         val rememberMeEnabled = LocalStorageManager.readRememberMe()
         rememberMeCheckBox.isChecked = rememberMeEnabled
 
+        if (LocalStorageManager.readRememberMe() && !user.isNullOrEmpty() && !pass.isNullOrEmpty()) {
+            gotoEventsScreen()
+            finish()
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
