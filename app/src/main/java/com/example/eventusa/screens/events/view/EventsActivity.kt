@@ -48,7 +48,7 @@ class EventsActivity : AppCompatActivity() {
 
     lateinit var eventsActivityLayout: ConstraintLayout
 
-    lateinit var nameTextView: TextView
+    lateinit var welcomeNameTextView: TextView
     lateinit var logoutButton: ImageView
     lateinit var settingsButton: ImageView
 
@@ -69,9 +69,10 @@ class EventsActivity : AppCompatActivity() {
 
         eventsActivityLayout = findViewById(R.id.eventsActivityLayout)
 
-        nameTextView = findViewById(R.id.welcomeNameTextView)
-        nameTextView.text =
-            if (viewModel.getUsername() != null) "Welcome, ${viewModel.getUsername()}" else "Welcome!"
+        welcomeNameTextView = findViewById(R.id.settingsTitleTextView)
+        LocalStorageManager.readUsername()?.let {
+            welcomeNameTextView.text = "Welcome, $it"
+        }
 
         logoutButton = findViewById(R.id.logoutButton)
         settingsButton = findViewById(R.id.settingsButton)

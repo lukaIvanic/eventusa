@@ -40,7 +40,7 @@ class NotifManager(
 
         return scheduleExactAlarm(
             notifId = eventNotification.notifId,
-            title = event.title ?: "Event",
+            title = event.title,
             desc = event.getPeriod(),
             notifTimeEpochSeconds = calculateNotifEpochTime(event.startDateTime, minsUntilEvent),
             eventId = event.eventId
@@ -62,7 +62,7 @@ class NotifManager(
 
 
         val pendingIntent =
-            createExactAlarmIntent(notifId, title, desc, notifTimeEpochSeconds, eventId)
+            createExactAlarmIntent(notifId, title, desc, eventId)
         val alarmClockInfo =
             AlarmManager.AlarmClockInfo(notifTimeEpochSeconds * 1000L, pendingIntent)
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
@@ -79,7 +79,7 @@ class NotifManager(
     }
 
     private fun deleteExactAlarm(notifId: Int) {
-        val pendingIntent = createExactAlarmIntent(notifId, "", "", 0, -1)
+        val pendingIntent = createExactAlarmIntent(notifId, "", "", -1)
         alarmManager.cancel(pendingIntent)
     }
 
@@ -87,7 +87,6 @@ class NotifManager(
         notifId: Int,
         title: String,
         desc: String,
-        notifTimeEpochSeconds: Long,
         eventId: Int,
     ): PendingIntent {
 

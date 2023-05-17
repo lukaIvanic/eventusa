@@ -12,28 +12,4 @@ data class User(
     val username: String = "",
     val pass: String = ""
 
-    ) {
-
-    companion object {
-
-        private val allUsers = arrayListOf(
-            "Luka Ivanic",
-            "Anja Stefan",
-            "Armando Sćulac",
-            "Branko Kojić",
-            "Branko Zuza",
-            "Danijel Pajalic",
-            "Draško Andrić",
-            "Nevija",
-            "Zvjezdana",
-            "David Pajo",
-            "Marko Andrić",
-            "Ivo Opancar"
-        ).map { User(displayName = it) }
-
-        fun getAllUsers(): List<User> {
-            return allUsers
-        }
-    }
-
-}
+    )

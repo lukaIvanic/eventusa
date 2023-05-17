@@ -33,9 +33,9 @@
                 android:background="@drawable/ripple_round"
                 android:padding="8dp"
                 android:src="@drawable/logout_icon"
-                app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
+                app:layout_constraintBottom_toBottomOf="@+id/settingsTitleTextView"
                 app:layout_constraintEnd_toStartOf="@id/settingsButton"
-                app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView"
+                app:layout_constraintTop_toTopOf="@+id/settingsTitleTextView"
                 app:tint="@color/icon_tint" />
 
 
@@ -47,21 +47,21 @@
                 android:background="@drawable/ripple_round"
                 android:padding="16dp"
                 android:src="@drawable/settings_icon"
-                app:layout_constraintBottom_toBottomOf="@+id/welcomeNameTextView"
+                app:layout_constraintBottom_toBottomOf="@+id/settingsTitleTextView"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/welcomeNameTextView"
+                app:layout_constraintTop_toTopOf="@+id/settingsTitleTextView"
                 app:tint="@color/icon_tint" />
 
 
             <TextView
-                android:id="@+id/welcomeNameTextView"
+                android:id="@+id/settingsTitleTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp"
                 android:layout_marginStart="24dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Welcome, Luka Rinet employee"
+                android:text="Welcome!"
                 android:textColor="@color/black"
                 android:textSize="26dp"
                 android:textStyle="bold"
@@ -79,7 +79,7 @@
                 app:indicatorColor="@color/event_rinet_blue"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/welcomeNameTextView"
+                app:layout_constraintTop_toBottomOf="@id/settingsTitleTextView"
                 tools:visibility="visible" />
 
 

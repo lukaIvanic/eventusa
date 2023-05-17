@@ -12,7 +12,7 @@ import kotlin.random.Random
  */
 @Entity("event_notifications_table")
 data class EventNotification(
-    var eventId: Int,
+    var eventId: Int = -1,
     var minutesBeforeEvent: Int,
 ) {
 

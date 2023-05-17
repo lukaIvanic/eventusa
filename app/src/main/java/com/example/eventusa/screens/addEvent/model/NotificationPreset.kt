@@ -1,5 +1,7 @@
 package com.example.eventusa.screens.addEvent.data
 
+import com.example.eventusa.caching.room.extraentities.EventNotification
+
 enum class NotificationPreset(val notifTimeBeforeEventMins: Int, val notifDesc: String?) {
 
     //TODO STAVIT DA SEMOZE CUSTOM KURAC NAPRAVIT
@@ -11,12 +13,23 @@ enum class NotificationPreset(val notifTimeBeforeEventMins: Int, val notifDesc: 
     SIXTY_MINUTES(60, "60 minutes before");
 
     companion object {
-        fun getPresetsDescs(): Array<String?> {
-            return values().map { it.notifDesc }.toTypedArray()
+        fun getPresetsDescs(existingNotifs: List<EventNotification>): Array<String?> {
+            return values().filter { preset ->
+                !existingNotifs.map { it.minutesBeforeEvent }
+                    .contains(preset.notifTimeBeforeEventMins)
+            }.map {
+                it.notifDesc
+            }.toTypedArray()
         }
 
-        fun getPresetByIndex(index: Int): NotificationPreset {
-            return values()[index]
+        fun getPresetByIndex(
+            index: Int,
+            existingNotifs: List<EventNotification> = ArrayList(),
+        ): NotificationPreset {
+            return values().filter { preset ->
+                !existingNotifs.map { it.minutesBeforeEvent }
+                    .contains(preset.notifTimeBeforeEventMins)
+            }[index]
         }
 
         fun get(notifTimeBeforeEventMins: Int): NotificationPreset? {

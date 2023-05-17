@@ -20,7 +20,6 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 data class AddEventUiState(
-    var eventId: Int,
     var riNetEvent: RINetEvent,
 ) {
 
@@ -62,8 +61,8 @@ class AddEventViewModel(
 
         var s = ""
 
-        currUiState.riNetEvent.usersAttending.dropLast(1).forEach { s+= "${it.userId}, " }
-        currUiState.riNetEvent.usersAttending.lastOrNull()?.let{ s += it.userId }
+        currUiState.riNetEvent.usersAttending.dropLast(1).forEach { s += "${it.userId}, " }
+        currUiState.riNetEvent.usersAttending.lastOrNull()?.let { s += it.userId }
 
         currUiState.riNetEvent = currUiState.riNetEvent.copy(userIdsStringList = s)
 
@@ -71,7 +70,7 @@ class AddEventViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            if (currUiState.eventId > 0) {
+            if (currUiState.riNetEvent.eventId > 0) {
 
                 val resultOfUpdate = eventsRepository.updateEvent(currUiState.riNetEvent)
                 if (resultOfUpdate is ResultOf.Success) {
@@ -84,7 +83,7 @@ class AddEventViewModel(
             } else {
                 val insertEventResult = eventsRepository.addEvent(currUiState.riNetEvent)
                 if (insertEventResult is ResultOf.Success) {
-                    saveNotifications(context)
+                    saveNotifications(context, insertEventResult.data.eventId)
                 }
                 _postEventState.emit(insertEventResult)
 
@@ -101,7 +100,7 @@ class AddEventViewModel(
 
         viewModelScope.launch {
 
-            val deleteEventResult = eventsRepository.deleteEvent(currUiState.eventId)
+            val deleteEventResult = eventsRepository.deleteEvent(currUiState.riNetEvent.eventId)
             _deleteEventState.emit(deleteEventResult)
 
             if (deleteEventResult is ResultOf.Success) {
@@ -133,7 +132,7 @@ class AddEventViewModel(
                 val cachedEventResult = deferred.await()
 
                 if (cachedEventResult != null) {
-                    if(cachedEventResult is ResultOf.Success){
+                    if (cachedEventResult is ResultOf.Success) {
                         originalEvent = cachedEventResult.data
                     }
                     emitFetchEvent(eventId, cachedEventResult)
@@ -143,7 +142,7 @@ class AddEventViewModel(
                 try {
                     val eventFromDb = eventsRepository.getEventWithId(eventId)
 
-                    if(eventFromDb is ResultOf.Success){
+                    if (eventFromDb is ResultOf.Success) {
                         originalEvent = eventFromDb.data
                     }
 
@@ -189,12 +188,12 @@ class AddEventViewModel(
     private fun emitFetchEvent(eventId: Int, result: ResultOf<RINetEvent>) {
 
         _uiState.value = result.map {
-            AddEventUiState(eventId, it.copy())
+            AddEventUiState(it.copy(eventId = eventId))
         }
         currUiState = (_uiState.value as ResultOf.Success).data.copy()
 
-
     }
+
     fun getAttendingUsers(): MutableList<User> {
         return currUiState.riNetEvent.usersAttending
     }
@@ -227,34 +226,47 @@ class AddEventViewModel(
 
     fun removeNotification(eventNotification: EventNotification) {
 
-        deletedNotifications.add(eventNotification)
+        if(addedNotifications.contains(eventNotification)){
+            addedNotifications.remove(eventNotification) // notification wasnt set yet, but added and removed in the activity
+        }else{
+            deletedNotifications.add(eventNotification) // notification already set, so need to remove it
+        }
 
     }
 
-    fun saveNotifications(context: Context) {
+    private fun saveNotifications(context: Context, eventId: Int = currUiState.riNetEvent.eventId) {
         CoroutineScope(NonCancellable).launch {
 
-            deletedNotifications.forEach { eventNotification ->
-                NotifManager(context).deleteEventNotification(
-                    eventNotification.notifId,
-                )
 
-                _notificationsEventState.emit(
-                    ResultOf.Success(
-                        NotificationsAdapterEvents.DELETE_EVENT(
-                            eventNotification
+            deletedNotifications
+                .map {
+                    return@map it.copy(eventId = eventId)
+                }
+                .forEach { eventNotification ->
+                    NotifManager(context).deleteEventNotification(
+                        eventNotification.notifId,
+                    )
+
+                    _notificationsEventState.emit(
+                        ResultOf.Success(
+                            NotificationsAdapterEvents.DELETE_EVENT(
+                                eventNotification
+                            )
                         )
                     )
-                )
-            }
+                }
 
             changedStartDateTime?.let {
                 updateNotifications(context)
             }
 
-            addedNotifications.forEach { eventNotification ->
+            addedNotifications
+                .map {
+                    return@map it.copy(eventId = eventId)
+                }
+                .forEach { eventNotification ->
                 val success = NotifManager(context).createOrUpdateEventNotif(
-                    currUiState.riNetEvent,
+                    currUiState.riNetEvent.copy(eventId = eventId),
                     eventNotification.minutesBeforeEvent
                 )
 
@@ -285,6 +297,11 @@ class AddEventViewModel(
             )
         }
 
+    }
+
+    fun onActivityFinish() {
+        addedNotifications.clear()
+        deletedNotifications.clear()
     }
 
     fun setTitle(title: String) {
@@ -330,7 +347,7 @@ class AddEventViewModel(
     }
 
     fun isAllUserChipsActivated(): Boolean {
-        return currUiState.riNetEvent.usersAttending.containsAll(User.getAllUsers()) ?: false
+        return currUiState.riNetEvent.usersAttending.containsAll(UserRepository.getAllUsers())
     }
 
     /**
@@ -340,11 +357,11 @@ class AddEventViewModel(
      */
     fun selectAllUserChips(isAllSelected: Boolean) {
 
-        currUiState.riNetEvent.usersAttending?.apply {
+        currUiState.riNetEvent.usersAttending.apply {
 
             if (isAllSelected) {
                 clear()
-                addAll(User.getAllUsers())
+                addAll(UserRepository.getAllUsers())
             } else {
                 clear()
             }
@@ -411,7 +428,7 @@ class AddEventViewModel(
 
         }
 
-        adjustDateTime()
+        adjustDateTime(getEventDurationMinutes())
 
         _uiState.value = ResultOf.Success(currUiState.copy())
 
@@ -474,7 +491,6 @@ class AddEventViewModel(
     }
 
     fun defaultUiState() = AddEventUiState(
-        -100,
         RINetEvent(
             -1,
             "",

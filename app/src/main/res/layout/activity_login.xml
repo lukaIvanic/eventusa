@@ -83,15 +83,4 @@
         app:layout_constraintStart_toStartOf="@+id/passwordInputLayout"
         app:layout_constraintTop_toTopOf="@+id/loginButton" />
 
-    <Button
-        android:id="@+id/guestLoginButton"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="-8dp"
-        android:paddingTop="3dp"
-        android:text="GUEST LOGIN"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

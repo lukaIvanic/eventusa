@@ -16,11 +16,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 
-fun AddEventActivity.handleIsFromNotif(){
+fun AddEventActivity.handleIsFromNotif() {
     isActivityFromNotif = getIntentIsFromNotif()
 
-    if(isActivityFromNotif){
-        if(!LocalStorageManager.readRememberMe()){
+    if (isActivityFromNotif) {
+        if (!LocalStorageManager.readRememberMe()) {
             gotoLoginScreen()
             finish()
         }
@@ -32,7 +32,6 @@ fun AddEventActivity.handleIsFromNotif(){
 fun AddEventActivity.getIntentIsFromNotif(): Boolean {
     return intent.getBooleanExtra("is_from_notif", false)
 }
-
 
 
 fun AddEventActivity.setupNotificationSection() {
@@ -86,16 +85,21 @@ fun AddEventActivity.setupNotificationStateObserving() {
 
 
 fun AddEventActivity.showChooseNotificationDialog() {
+    val notifPresetsUnique = NotificationPreset.getPresetsDescs(notifsAdapter.getNotifs())
+
     val notifDialogBuilder =
         MaterialAlertDialogBuilder(this)
             .setCancelable(true)
             .setSingleChoiceItems(
-                NotificationPreset.getPresetsDescs(),
+                notifPresetsUnique,
                 -1
             ) { _, index ->
 
                 val minsBeforeEvent =
-                    NotificationPreset.getPresetByIndex(index).notifTimeBeforeEventMins
+                    NotificationPreset.getPresetByIndex(
+                        index,
+                        notifsAdapter.getNotifs()
+                    ).notifTimeBeforeEventMins
 
 
 
@@ -106,7 +110,6 @@ fun AddEventActivity.showChooseNotificationDialog() {
 
                         notifsAdapter.addNotif(
                             EventNotification(
-                                eventId = 0,
                                 minutesBeforeEvent = minsBeforeEvent
                             )
                         )

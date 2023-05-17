@@ -91,13 +91,41 @@ class AddEventActivity : AppCompatActivity() {
 
     }
 
+    private fun setupStateObserving() {
+
+        setupSaveEventFlowObserving()
+
+        setupNotificationStateObserving()
+
+        setupFetchEventStateObserving()
+
+    }
+
+
     private fun setupUI() {
         setupPeopleChips()
         setupProgressDialog()
         setupTouch()
     }
 
+    private fun setupAddOrEditState() {
+        val eventId = getIntentEventId()
+        isActivityEditEvent = (eventId != null)
+        if (eventId != null) {
+            handleEditEvent(eventId)
+        } else {
+            handleNewEvent()
+        }
+    }
 
+    private fun handleEditEvent(eventId: Int) {
+        viewmodel.fetchEvent(eventId)
+    }
+
+    private fun handleNewEvent() {
+        deleteEventSection.visibility = View.GONE
+        deleteEventSectionDivider.visibility = View.GONE
+    }
     private fun setupProgressDialog() {
         val builder = AlertDialog.Builder(this)
         progressDialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
@@ -121,35 +149,6 @@ class AddEventActivity : AppCompatActivity() {
         progressDialog.dismiss()
     }
 
-
-    private fun setupAddOrEditState() {
-        val eventId = getIntentEventId()
-        isActivityEditEvent = (eventId != null)
-        if (eventId != null) {
-            handleEditEvent(eventId)
-        } else {
-            handleNewEvent()
-        }
-    }
-
-    private fun handleEditEvent(eventId: Int) {
-        viewmodel.fetchEvent(eventId)
-    }
-
-    private fun handleNewEvent() {
-        deleteEventSection.visibility = View.GONE
-        deleteEventSectionDivider.visibility = View.GONE
-    }
-
-    private fun setupStateObserving() {
-
-        setupSaveEventFlowObserving()
-
-        setupNotificationStateObserving()
-
-        setupFetchEventStateObserving()
-
-    }
 
 
     fun gotoEventsScreen() {

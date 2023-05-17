@@ -73,6 +73,7 @@ fun AddEventActivity.showCancelEditDialog() {
 }
 
 fun AddEventActivity.finishAndReturnToEventsScreen() {
+    viewmodel.onActivityFinish()
     if (isActivityFromNotif) {
         gotoEventsScreen()
     }

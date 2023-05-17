@@ -50,9 +50,7 @@ class NotificationsRecyclerAdapter(
             notifCancelButton = itemView.findViewById(R.id.cancelNotifRowButton)
 
             notifCancelButton.setOnClickListener {
-                val wasEmitSuccessful =
-                    _cancelNotifFlow.tryEmit(eventNotifications[adapterPosition])
-                //TODO: try to do something with this emitted value?
+                _cancelNotifFlow.tryEmit(eventNotifications[adapterPosition])
             }
 
         }
@@ -104,6 +102,10 @@ class NotificationsRecyclerAdapter(
         if (index < 0) return
         eventNotifications.removeAt(index)
         notifyItemRemoved(index)
+    }
+
+    fun getNotifs(): List<EventNotification>{
+        return eventNotifications
     }
 
 }

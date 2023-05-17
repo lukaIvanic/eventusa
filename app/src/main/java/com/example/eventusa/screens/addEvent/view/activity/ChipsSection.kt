@@ -20,26 +20,12 @@ fun AddEventActivity.setupPeopleChips() {
     lifecycleScope.launch {
 
         UserRepository.getAllUsers().forEach { user -> addRinetChip(user) }
-        peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
-            val chipTv = indexedChip.value as? TextView ?: return@forEach
-            val user =
-                viewmodel.getAttendingUsers()
-                    .firstOrNull { it.displayName == chipTv.text.toString() }
 
-            if (user != null) {
-                chipTv.setChipHighlighted(user.displayName)
-
-                // Animation eye sugar
-                val delayTime = 100 / (indexedChip.index / 2).plus(1)
-                delay(delayTime.toLong())
-            }
-
-        }
+        highlightAllAttendingUsers()
 
     }
 
 }
-
 
 fun AddEventActivity.addRinetChip(user: User) {
     val textView = TextView(this)
@@ -48,7 +34,7 @@ fun AddEventActivity.addRinetChip(user: User) {
 
     textView.apply {
         text = user.displayName
-        setChipDefault(user.displayName ?: "", animate = false)
+        setChipDefault(user.displayName, animate = false)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 15F)
         setPadding(dpToPx(10F), dpToPx(8F), dpToPx(10F), dpToPx(8F))
 
@@ -93,6 +79,25 @@ fun AddEventActivity.handleChooseAllSwitch() {
             }
 
         }
+
+    }
+}
+
+private suspend fun AddEventActivity.highlightAllAttendingUsers(){
+    peopleChipGroup.children.iterator().withIndex().forEach { indexedChip ->
+        val chipTv = indexedChip.value as? TextView ?: return@forEach
+        val user =
+            viewmodel.getAttendingUsers()
+                .firstOrNull { it.displayName == chipTv.text.toString() }
+
+        if (user == null) return@forEach
+
+        chipTv.setChipHighlighted(user.displayName)
+
+        // Animation eye sugar
+        val delayTime = 100 / (indexedChip.index / 2).plus(1)
+        delay(delayTime.toLong())
+
 
     }
 }
