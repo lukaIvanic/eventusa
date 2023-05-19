@@ -154,7 +154,7 @@ class EventsActivity : AppCompatActivity() {
             backPressedAlready = true
             Timer().schedule(timerTask {
                 backPressedAlready = false
-            }, 100)
+            }, 600)
 
         } else {
             super.onBackPressed()
