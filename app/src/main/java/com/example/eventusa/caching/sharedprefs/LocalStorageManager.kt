@@ -56,6 +56,31 @@ object LocalStorageManager {
         return sharedPreferences.getString("pass", null)
     }
 
+
+    /**
+     * Settings options
+     */
+    fun readAskConfirmDateBefore(): Boolean {
+        return sharedPreferences.getBoolean("askAgainDateBefore", true)
+    }
+
+    fun setCheckedAskConfirmDateBefore() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("askAgainDateBefore", true)
+
+        myEdit.apply()
+    }
+
+    fun setUncheckedAskConfirmDateBefore() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("askAgainDateBefore", false)
+
+        myEdit.apply()
+    }
+
+
     fun readShowMultipleDayEvents(): Boolean {
         return sharedPreferences.getBoolean("showMultipleDayEvents", false)
     }
@@ -77,24 +102,25 @@ object LocalStorageManager {
     }
 
 
-    fun readAskConfirmDateBefore(): Boolean {
-        return sharedPreferences.getBoolean("askAgainDateBefore", true)
+    fun readRandomColorWhenCreatingEvent(): Boolean {
+        return sharedPreferences.getBoolean("generateRandomColorForEventCreation", false)
     }
 
-    fun setCheckedAskConfirmDateBefore() {
+    fun setCheckedRandomColorWhenCreatingEvent() {
         val myEdit = sharedPreferences.edit()
 
-        myEdit.putBoolean("askAgainDateBefore", true)
+        myEdit.putBoolean("generateRandomColorForEventCreation", true)
 
         myEdit.apply()
     }
 
-    fun setUncheckedAskConfirmDateBefore() {
+    fun setUncheckedRandomColorWhenCreatingEvent() {
         val myEdit = sharedPreferences.edit()
 
-        myEdit.putBoolean("askAgainDateBefore", false)
+        myEdit.putBoolean("generateRandomColorForEventCreation", false)
 
         myEdit.apply()
     }
+
 
 }

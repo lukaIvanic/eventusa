@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.example.eventusa.caching.room.Room
 import com.example.eventusa.caching.room.extraentities.EventNotification
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.network.ResultOf
 import com.example.eventusa.notifications.NotifManager
 import com.example.eventusa.repositories.EventsRepository
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.addEvent.view.recycler_utils.NotificationsAdapterEvents
+import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.screens.login.model.User
 import com.example.eventusa.utils.extensions.map
@@ -21,7 +23,7 @@ import java.util.*
 
 data class AddEventUiState(
     var riNetEvent: RINetEvent,
-    var isDefaultEmpty: Boolean = false
+    var isDefaultEmpty: Boolean = false,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -36,8 +38,7 @@ class AddEventViewModel(
     val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private var currUiState =
-        defaultUiState()
+    private var currUiState = defaultUiState()
 
     private var originalEvent: RINetEvent? = null
 
@@ -190,33 +191,31 @@ class AddEventViewModel(
     private val deletedNotifications = mutableListOf<EventNotification>()
     private var changedStartDateTime: LocalDateTime? = null
 
-    suspend fun addNotification(minsUntilEvent: Int): Boolean =
-        withContext(NonCancellable) {
+    suspend fun addNotification(minsUntilEvent: Int): Boolean = withContext(NonCancellable) {
 
-            val eventNotification =
-                EventNotification(currUiState.riNetEvent.eventId, minsUntilEvent)
+        val eventNotification = EventNotification(currUiState.riNetEvent.eventId, minsUntilEvent)
 
 
-            if (eventNotification.minutesBeforeEvent < 0) {
-                _notificationsEventState.emit(ResultOf.Error(Exception("Invalid notification time.")))
-                return@withContext false
-            }
-
-
-            if (LocalDateTime.now() >= currUiState.riNetEvent.startDateTime) {
-                _notificationsEventState.emit(ResultOf.Error(java.lang.Exception("Can't set notifications for an event that already started.")))
-                return@withContext false
-            }
-
-            addedNotifications.add(eventNotification)
-            return@withContext true
+        if (eventNotification.minutesBeforeEvent < 0) {
+            _notificationsEventState.emit(ResultOf.Error(Exception("Invalid notification time.")))
+            return@withContext false
         }
+
+
+        if (LocalDateTime.now() >= currUiState.riNetEvent.startDateTime) {
+            _notificationsEventState.emit(ResultOf.Error(java.lang.Exception("Can't set notifications for an event that already started.")))
+            return@withContext false
+        }
+
+        addedNotifications.add(eventNotification)
+        return@withContext true
+    }
 
     fun removeNotification(eventNotification: EventNotification) {
 
-        if(addedNotifications.firstOrNull{it.minutesBeforeEvent == eventNotification.minutesBeforeEvent} != null){
+        if (addedNotifications.firstOrNull { it.minutesBeforeEvent == eventNotification.minutesBeforeEvent } != null) {
             addedNotifications.remove(eventNotification) // notification wasnt set yet, but added and removed in the activity
-        }else{
+        } else {
             deletedNotifications.add(eventNotification) // notification already set, so need to remove it
         }
 
@@ -226,11 +225,9 @@ class AddEventViewModel(
         CoroutineScope(NonCancellable).launch {
 
 
-            deletedNotifications
-                .map {
+            deletedNotifications.map {
                     return@map it.copy(eventId = eventId)
-                }
-                .forEach { eventNotification ->
+                }.forEach { eventNotification ->
                     NotifManager(context).deleteEventNotification(
                         eventNotification.notifId,
                     )
@@ -248,40 +245,39 @@ class AddEventViewModel(
                 updateNotifications(context, eventId)
             }
 
-            addedNotifications
-                .map {
+            addedNotifications.map {
                     return@map it.copy(eventId = eventId)
-                }
-                .forEach { eventNotification ->
-                val success = NotifManager(context).createOrUpdateEventNotif(
-                    currUiState.riNetEvent.copy(eventId = eventId),
-                    eventNotification.minutesBeforeEvent
-                )
+                }.forEach { eventNotification ->
+                    val success = NotifManager(context).createOrUpdateEventNotif(
+                        currUiState.riNetEvent.copy(eventId = eventId),
+                        eventNotification.minutesBeforeEvent
+                    )
 
-                if (!success) {
-                    _notificationsEventState.emit(ResultOf.Error(Exception("Couldn't create notification")))
-                    return@launch
-                }
+                    if (!success) {
+                        _notificationsEventState.emit(ResultOf.Error(Exception("Couldn't create notification")))
+                        return@launch
+                    }
 
 
-                _notificationsEventState.emit(
-                    ResultOf.Success(
-                        NotificationsAdapterEvents.ADD_EVENT(
-                            eventNotification
+                    _notificationsEventState.emit(
+                        ResultOf.Success(
+                            NotificationsAdapterEvents.ADD_EVENT(
+                                eventNotification
+                            )
                         )
                     )
-                )
-            }
+                }
         }
     }
 
-    suspend fun updateNotifications(context: Context, eventId: Int = currUiState.riNetEvent.eventId) {
+    suspend fun updateNotifications(
+        context: Context,
+        eventId: Int = currUiState.riNetEvent.eventId,
+    ) {
         val eventNotifications = Room.getEventNotifications(eventId)
         eventNotifications.forEach {
             NotifManager(context).createOrUpdateEventNotif(
-                currUiState.riNetEvent,
-                it.minutesBeforeEvent,
-                it.notifId
+                currUiState.riNetEvent, it.minutesBeforeEvent, it.notifId
             )
         }
 
@@ -385,8 +381,8 @@ class AddEventViewModel(
         currUiState.riNetEvent.apply {
             startDateTime = startDateTime.withHour(hour).withMinute(minute)
 
-            if (startDateTime.toLocalDate() == endDateTime.toLocalDate())
-                endDateTime = startDateTime.plusMinutes(duration)
+            if (startDateTime.toLocalDate() == endDateTime.toLocalDate()) endDateTime =
+                startDateTime.plusMinutes(duration)
         }
 
         _uiState.value = ResultOf.Success(currUiState.copy())
@@ -485,8 +481,8 @@ class AddEventViewModel(
             LocalDateTime.now().withMinute(0).plusHours(1),
             LocalDateTime.now().withMinute(0).plusHours(2),
             usersAttending = ArrayList(),
-        ),
-        isDefaultEmpty = true
+            eventColor = if (LocalStorageManager.readRandomColorWhenCreatingEvent()) EventColors.getRandomColor() else EventColors.RINET_BLUE
+        ), isDefaultEmpty = true
     )
 
     fun wasEditMade(): Boolean {
@@ -500,13 +496,14 @@ class AddEventViewModel(
 class AddEventViewModelFactory(
     private val eventsRepository: EventsRepository,
     private val userRepository: UserRepository,
-) :
-    ViewModelProvider.Factory {
+) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AddEventViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AddEventViewModel(eventsRepository, userRepository) as T
+            @Suppress("UNCHECKED_CAST") return AddEventViewModel(
+                eventsRepository,
+                userRepository
+            ) as T
         }
         throw java.lang.IllegalArgumentException("UNKNOWN VIEW MODEL CLASS")
     }

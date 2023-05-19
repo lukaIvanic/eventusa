@@ -8,6 +8,7 @@ import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 /**
  *
@@ -129,6 +130,9 @@ object EventColors {
     const val BROWN = 8
     const val DARK_RED = 9
 
+    fun getRandomColor(): Int{
+        return Random.nextInt(0, 10)
+    }
     fun getPresets(): Array<String> {
         return arrayOf(
             "Yellow",
