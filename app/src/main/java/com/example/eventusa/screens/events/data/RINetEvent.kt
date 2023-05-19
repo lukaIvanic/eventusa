@@ -3,6 +3,7 @@ package com.example.eventusa.screens.events.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.eventusa.R
+import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity.*
 import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
@@ -150,6 +151,8 @@ object EventColors {
 
     fun getColorId(eventColor: Int): Int {
 
+        if(!LocalStorageManager.readShowFullColorsInApp()) return R.color.event_rinet_blue
+
         return when (eventColor) {
             YELLOW -> {
                 R.color.event_yellow
@@ -188,6 +191,10 @@ object EventColors {
     }
 
     fun getDrawableIdEmpty(eventColor: Int): Int {
+
+        if(!LocalStorageManager.readShowFullColorsInApp()) return R.drawable.color_option_empty_rinet_blue
+
+
         return when (eventColor) {
             YELLOW -> {
                 R.drawable.color_option_empty_yellow
@@ -228,6 +235,7 @@ object EventColors {
 
     fun getDrawableIdFull(eventColor: Int): Int {
 
+        if(!LocalStorageManager.readShowFullColorsInApp()) return R.drawable.color_option_full_rinet_blue
 
         return when (eventColor) {
             YELLOW -> {

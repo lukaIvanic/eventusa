@@ -20,6 +20,10 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var randomColorWhenCreatingEventSwitch: SwitchMaterial
 
 
+    lateinit var showFullColorsInAppLayout: LinearLayout
+    lateinit var showFullColorsInAppSwitch: SwitchMaterial
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -27,13 +31,14 @@ class SettingsActivity : AppCompatActivity() {
         dateBeforeTodayLayout = findViewById(R.id.dateBeforeTodayLayout)
         dateBeforeTodaySwitch = findViewById(R.id.dateBeforeTodaySwitch)
 
-
         showMultipleDayEventsLayout = findViewById(R.id.showMultipleDayEventsLayout)
         showMultipleDayEventsSwitch = findViewById(R.id.showMultipleDayEventsSwitch)
 
         randomColorWhenCreatingEventLayout = findViewById(R.id.generateColorWhenCreatingEventLayout)
         randomColorWhenCreatingEventSwitch = findViewById(R.id.generateColorWhenCreatingEventSwitch)
 
+        showFullColorsInAppLayout = findViewById(R.id.showFullColorsInAppLayout)
+        showFullColorsInAppSwitch = findViewById(R.id.showFullColorsInAppSwitch)
 
         loadSettings()
         handleClicks()
@@ -47,6 +52,8 @@ class SettingsActivity : AppCompatActivity() {
         showMultipleDayEventsSwitch.isChecked = LocalStorageManager.readShowMultipleDayEvents()
 
         randomColorWhenCreatingEventSwitch.isChecked = LocalStorageManager.readRandomColorWhenCreatingEvent()
+
+        showFullColorsInAppSwitch.isChecked = LocalStorageManager.readShowFullColorsInApp()
     }
 
     private fun handleClicks() {
@@ -86,7 +93,18 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-    }
+        showFullColorsInAppLayout.setOnClickListener {
+            showFullColorsInAppSwitch.performClick()
+        }
 
+        showFullColorsInAppSwitch.setOnClickListener{
+            if (showFullColorsInAppSwitch.isChecked) {
+                LocalStorageManager.setCheckedShowFullColorsInApp()
+            } else {
+                LocalStorageManager.setUncheckedShowFullColorsInApp()
+            }
+        }
+
+    }
 
 }

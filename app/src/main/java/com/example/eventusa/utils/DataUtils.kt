@@ -1,6 +1,7 @@
 package com.example.eventusa.utils
 
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
+import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.screens.events.data.EventSectionHeader
 import com.example.eventusa.screens.events.data.RINetEvent
@@ -67,13 +68,16 @@ object DataUtils {
         val eventItems: MutableList<EventItem> = ArrayList()
 
 
-
         var currentWeeksItems: MutableList<EventItem> = ArrayList()
         var currWeekMonDate = LocalDate.now().with(DayOfWeek.MONDAY)
 
         for (i in 0 until rawEvents.size) {
 
             val riNetEvent = rawEvents.get(i)
+                .copy(
+                    eventColor = if (!LocalStorageManager.readShowFullColorsInApp()) EventColors.RINET_BLUE
+                    else rawEvents.get(i).eventColor
+                )
 
             // Check for new week
             if (riNetEvent.startDateTime.toLocalDate().with(DayOfWeek.MONDAY) != currWeekMonDate) {
@@ -92,9 +96,9 @@ object DataUtils {
                 currentWeeksItems.add(generateEventsSectionHeader(currWeekMonDate))
             }
 
-            if(i >= 1 && riNetEvent.startDateTime.isSameDate(rawEvents.get(i-1).startDateTime)){
+            if (i >= 1 && riNetEvent.startDateTime.isSameDate(rawEvents.get(i - 1).startDateTime)) {
                 riNetEvent.isFirstInDate = false
-            }else{
+            } else {
                 riNetEvent.isFirstInDate = true
             }
 

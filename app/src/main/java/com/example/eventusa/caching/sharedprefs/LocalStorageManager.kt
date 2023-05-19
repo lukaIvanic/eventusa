@@ -123,4 +123,25 @@ object LocalStorageManager {
     }
 
 
+    fun readShowFullColorsInApp(): Boolean {
+        return sharedPreferences.getBoolean("showFullColorsInApp", true)
+    }
+
+    fun setCheckedShowFullColorsInApp() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("showFullColorsInApp", true)
+
+        myEdit.apply()
+    }
+
+    fun setUncheckedShowFullColorsInApp() {
+        val myEdit = sharedPreferences.edit()
+
+        myEdit.putBoolean("showFullColorsInApp", false)
+
+        myEdit.apply()
+    }
+
+
 }
