@@ -87,14 +87,34 @@ class NotificationsRecyclerAdapter(
     fun initialLoadEvents(eventNotifications: List<EventNotification>) {
         if (this.eventNotifications.isNotEmpty()) return
 
-        this.eventNotifications.addAll(eventNotifications)
+        this.eventNotifications.addAll(eventNotifications.sortedBy { it.minutesBeforeEvent })
         notifyItemRangeInserted(0, this.eventNotifications.size)
 
     }
 
     fun addNotif(eventNotification: EventNotification) {
-        eventNotifications.add(eventNotification)
-        notifyItemInserted(eventNotifications.size - 1)
+
+        if(eventNotifications.isEmpty()){
+            eventNotifications.add(eventNotification)
+            notifyItemInserted(0)
+            return
+        }
+
+        val insertIndex = getInsertPosition(eventNotification)
+        eventNotifications.add(insertIndex, eventNotification)
+        notifyItemInserted(insertIndex)
+
+    }
+
+    private fun getInsertPosition(newEventNotif: EventNotification): Int {
+        eventNotifications.forEachIndexed{ index, eventNotif->
+
+            if(eventNotif.minutesBeforeEvent > newEventNotif.minutesBeforeEvent){
+                return index
+            }
+
+        }
+        return eventNotifications.size
     }
 
     fun deleteNotif(eventNotification: EventNotification) {
@@ -102,6 +122,8 @@ class NotificationsRecyclerAdapter(
         if (index < 0) return
         eventNotifications.removeAt(index)
         notifyItemRemoved(index)
+
+
     }
 
     fun getNotifs(): List<EventNotification>{

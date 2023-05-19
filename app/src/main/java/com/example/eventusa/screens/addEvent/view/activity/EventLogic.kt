@@ -95,19 +95,23 @@ fun AddEventActivity.setupFetchEventStateObserving() {
 
         viewmodel.uiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .collectLatest { result ->
+
                 result.doIfLoading {
-                    Toast.makeText(
-                        this@setupFetchEventStateObserving, "Loading event..", Toast.LENGTH_LONG
-                    ).show()
+                  showProgressDialog("Fetching event..")
                 }
 
                 result.doIfFailure {
+                    hideProgressDialog()
                     Toast.makeText(
                         this@setupFetchEventStateObserving, it.localizedMessage, Toast.LENGTH_LONG
                     ).show()
                 }
 
                 result.doIfSucces { state ->
+
+                    if(!state.isDefaultEmpty){
+                        hideProgressDialog()
+                    }
 
                     state.riNetEvent.apply {
 

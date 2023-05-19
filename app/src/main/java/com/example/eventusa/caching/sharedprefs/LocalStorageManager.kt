@@ -57,7 +57,7 @@ object LocalStorageManager {
     }
 
     fun readShowMultipleDayEvents(): Boolean {
-        return sharedPreferences.getBoolean("showMultipleDayEvents", true)
+        return sharedPreferences.getBoolean("showMultipleDayEvents", false)
     }
 
     fun setCheckedShowMultipleDayEvents() {

@@ -185,20 +185,25 @@ class EventsRepository(
         return Network.updateEvent(rinetEvent)
     }
 
-    fun getEventWithId(eventId: Int): ResultOf<RINetEvent> {
+
+    suspend fun getEventWithId(eventId: Int): ResultOf<RINetEvent> =
+        withContext(externalScope.coroutineContext) {
 
 
         cachedSuccessEvents.replayCache
             .last()
             .doIfSucces { latestCachedEvents ->
                 latestCachedEvents.forEach {
-                    if (it.eventId == eventId) return ResultOf.Success(it)
+                    if (it.eventId == eventId) return@withContext ResultOf.Success(it)
                 }
             }
 
-        return ResultOf.Error(Exception("Couldn't find event, was it deleted recently?"))
 
-    }
+
+
+           return@withContext Network.getEvent(eventId)
+
+        }
 
     fun makeUpdateTick() {
         tickHandler.makeTick()

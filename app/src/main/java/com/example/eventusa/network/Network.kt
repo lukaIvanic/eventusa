@@ -28,6 +28,7 @@ object Network {
     private val READ_USERS = "Users"
     private val CREATE_EVENT = "Events/create"
     private val READ_EVENTS = "Events"
+    private val READ_ONE_EVENT = "Events"
     private val UPDATE_EVENT = "Events/update"
     private val DELETE_EVENT = "Events/delete"
 
@@ -75,7 +76,15 @@ object Network {
             val eventJson = JsonUtils.toJson(rinetEvent.copy(eventId = 0))
             eventReturnJson = NetworkCore.sendRequest(CREATE_EVENT, eventJson)
         } catch (e: Exception) {
-            return NETWORK_EXCEPTION()
+
+
+            try {
+                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(eventReturnJson)
+                return errorResponse.getException()
+            } catch (ignore: Exception) {
+            }
+
+            return NETWORK_EXCEPTION(e.localizedMessage)
         }
 
         try {
@@ -89,15 +98,33 @@ object Network {
             } catch (ignore: Exception) {
             }
 
-            return JSON_PARSE_EXCEPTION()
+            return JSON_PARSE_EXCEPTION(e.localizedMessage)
         }
 
     }
 
-    /**
-     * Returns events or empty body.
-     * Because of the possibility of an empty body a json validity check is neccessary.
-     */
+    fun getEvent(eventId: Int): ResultOf<RINetEvent> {
+
+        var eventJson = ""
+
+        try {
+            eventJson = NetworkCore.sendRequest("$READ_ONE_EVENT/$eventId")
+            if (eventJson.isEmpty()) throw Exception()
+        } catch (e: Exception) {
+            return NETWORK_EXCEPTION(e.localizedMessage)
+        }
+
+        try {
+            val event = JsonUtils.fromJsonToObject<RINetEvent>(eventJson)
+
+            return ResultOf.Success(event)
+        } catch (e: Exception) {
+            return JSON_PARSE_EXCEPTION(e.localizedMessage)
+        }
+
+
+    }
+
     fun getEvents(): ResultOf<MutableList<RINetEvent>> {
 
         var eventsJson = ""
@@ -106,7 +133,7 @@ object Network {
             eventsJson = NetworkCore.sendRequest(READ_EVENTS)
             if (eventsJson.isEmpty()) throw Exception()
         } catch (e: Exception) {
-            return NETWORK_EXCEPTION()
+            return NETWORK_EXCEPTION(e.localizedMessage)
         }
 
         try {
@@ -114,7 +141,7 @@ object Network {
 
             return ResultOf.Success(parseUserIdsStringList(events) as MutableList<RINetEvent>)
         } catch (e: Exception) {
-            return JSON_PARSE_EXCEPTION()
+            return JSON_PARSE_EXCEPTION(e.localizedMessage)
         }
 
 
@@ -181,7 +208,7 @@ object Network {
 
             }
         } catch (e: Exception) {
-            return NETWORK_EXCEPTION()
+            return NETWORK_EXCEPTION(e.localizedMessage)
         }
 
     }
@@ -199,12 +226,12 @@ object Network {
                         JsonUtils.fromJsonToObject<ExceptionResponse>(responseDelete)
                     errorResponse.getException()
                 } catch (e: Exception) {
-                    GENERAL_EXCEPTION()
+                    GENERAL_EXCEPTION(e.localizedMessage)
                 }
 
             }
         } catch (e: Exception) {
-            return NETWORK_EXCEPTION()
+            return NETWORK_EXCEPTION(e.localizedMessage)
         }
 
     }
@@ -249,6 +276,8 @@ object Network {
                 READ_EVENTS, READ_USERS -> return GET
                 CREATE_EVENT, LOGIN_PATH -> return POST
             }
+
+            if(path.contains(READ_ONE_EVENT)) return GET
             return null
         }
     }

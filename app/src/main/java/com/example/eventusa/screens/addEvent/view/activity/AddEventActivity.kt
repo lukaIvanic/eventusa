@@ -119,7 +119,9 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun handleEditEvent(eventId: Int) {
+        showProgressDialog("Fetching event..")
         viewmodel.fetchEvent(eventId)
+
     }
 
     private fun handleNewEvent() {
@@ -131,6 +133,7 @@ class AddEventActivity : AppCompatActivity() {
         progressDialogView = layoutInflater.inflate(R.layout.progress_dialog, null)
         builder.setView(progressDialogView)
         progressDialog = builder.create()
+        progressDialog.setCancelable(false)
     }
 
     fun showProgressDialog(loadingMessage: String) {

@@ -10,7 +10,7 @@ android {
     useLibrary 'android.test.mock'
 
     defaultConfig {
-        applicationId "com.example.eventusa"
+        applicationId "com.rinet.eventusa"
         minSdk 24
         targetSdk 33
         versionCode 1
@@ -22,6 +22,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

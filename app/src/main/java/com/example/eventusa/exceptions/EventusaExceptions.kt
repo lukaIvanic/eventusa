@@ -1,5 +1,6 @@
 package com.example.eventusa.exceptions
 
+import android.util.Log
 import com.example.eventusa.network.ResultOf
 
 enum class EventusaExceptions(val errorMessage: String) {
@@ -12,7 +13,8 @@ enum class EventusaExceptions(val errorMessage: String) {
     UNAUTHORIZED_EXCEPTION("The password is incorrect.");
 
 
-    operator fun invoke(): ResultOf.Error {
+    operator fun invoke(actualException: String? = errorMessage): ResultOf.Error {
+        Log.e("Actual Network.kt error",actualException ?: errorMessage)
         return ResultOf.Error(Exception(errorMessage))
     }
 
