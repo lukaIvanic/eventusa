@@ -99,7 +99,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
 
         val notificationBuilder =
             NotificationCompat.Builder(context, REMINDER_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.settings_icon)
+                .setSmallIcon(R.drawable.event_notification_icon)
                 .setContentTitle(contentTitle)
                 .setContentText(contentDesc)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
