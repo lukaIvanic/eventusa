@@ -40,7 +40,7 @@ class AddEventViewModel(
 
     private var currUiState = defaultUiState()
 
-    private var originalEvent: RINetEvent? = null
+    private var originalEvent: RINetEvent? = currUiState.riNetEvent.copy()
 
     private val _uiState =
         MutableStateFlow<ResultOf<AddEventUiState>>(ResultOf.Success(currUiState))
