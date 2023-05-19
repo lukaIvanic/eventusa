@@ -90,6 +90,7 @@ data class RINetEvent(
 
     }
 
+    @get:JsonIgnore
     override val type: EventItemType
         get() = EventItemType.EVENT
 

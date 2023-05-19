@@ -21,6 +21,7 @@ import java.util.*
 
 data class AddEventUiState(
     var riNetEvent: RINetEvent,
+    var isDefaultEmpty: Boolean = false
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -123,15 +124,12 @@ class AddEventViewModel(
 
                 val deferred = async {
                     val result = eventsRepository.getEventWithId(eventId)
-                    if (result is ResultOf.Error) {
-                        return@async null
-                    }
                     return@async result
                 }
 
                 val cachedEventResult = deferred.await()
 
-                if (cachedEventResult != null) {
+                if (cachedEventResult !is ResultOf.Error) {
                     if (cachedEventResult is ResultOf.Success) {
                         originalEvent = cachedEventResult.data
                     }
@@ -155,21 +153,11 @@ class AddEventViewModel(
                         throw eventFromDb.exception
                     }
                 } catch (e: Exception) {
-                    emitFetchEvent(eventId, ResultOf.Error(Exception("Event was deleted.")))
+                    emitFetchEvent(eventId, cachedEventResult)
                 }
 
 
             }
-
-            /*
-                 _uiState.value = result.map {
-                            AddEventUiState(eventId, it.copy())
-                        }
-
-                        originalEvent = result.data.copy()
-
-                        currUiState = (_uiState.value as ResultOf.Success).data
-             */
 
             _notificationsEventState.emit(
                 ResultOf.Success(
@@ -226,7 +214,7 @@ class AddEventViewModel(
 
     fun removeNotification(eventNotification: EventNotification) {
 
-        if(addedNotifications.contains(eventNotification)){
+        if(addedNotifications.firstOrNull{it.minutesBeforeEvent == eventNotification.minutesBeforeEvent} != null){
             addedNotifications.remove(eventNotification) // notification wasnt set yet, but added and removed in the activity
         }else{
             deletedNotifications.add(eventNotification) // notification already set, so need to remove it
@@ -257,7 +245,7 @@ class AddEventViewModel(
                 }
 
             changedStartDateTime?.let {
-                updateNotifications(context)
+                updateNotifications(context, eventId)
             }
 
             addedNotifications
@@ -287,8 +275,8 @@ class AddEventViewModel(
         }
     }
 
-    suspend fun updateNotifications(context: Context) {
-        val eventNotifications = Room.getEventNotifications(currUiState.riNetEvent.eventId)
+    suspend fun updateNotifications(context: Context, eventId: Int = currUiState.riNetEvent.eventId) {
+        val eventNotifications = Room.getEventNotifications(eventId)
         eventNotifications.forEach {
             NotifManager(context).createOrUpdateEventNotif(
                 currUiState.riNetEvent,
@@ -496,8 +484,9 @@ class AddEventViewModel(
             "",
             LocalDateTime.now().withMinute(0).plusHours(1),
             LocalDateTime.now().withMinute(0).plusHours(2),
-            usersAttending = ArrayList()
-        )
+            usersAttending = ArrayList(),
+        ),
+        isDefaultEmpty = true
     )
 
     fun wasEditMade(): Boolean {

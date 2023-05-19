@@ -15,6 +15,7 @@ import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 private const val REMINDER_NOTIFICATION_CHANNEL_ID = "event_reminder_alarms"
 private const val REMINDER_NOTIFICATION_CHANNEL_NAME = "Reminder alarms"
@@ -63,6 +64,7 @@ class ExactAlarmBroadcastReceiver : BroadcastReceiver() {
         val startAppIntent = Intent(context, AddEventActivity::class.java)
         startAppIntent.putExtra("event_id", eventId)
         startAppIntent.putExtra("is_from_notif", true)
+        startAppIntent.action = Random.nextInt().toString()
         val startAppPendingIntent = PendingIntent.getActivity(
             context,
             0,
