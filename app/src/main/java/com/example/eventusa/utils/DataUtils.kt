@@ -66,55 +66,6 @@ object DataUtils {
 
         val eventItems: MutableList<EventItem> = ArrayList()
 
-//        val eventsBeforeToday =
-//            rawEvents.filter { it.startDateTime.toLocalDate() < LocalDate.now() }
-//        rawEvents.removeAll(eventsBeforeToday)
-//        if (eventsBeforeToday.isNotEmpty()) {
-//            var header =
-//                eventsBeforeToday[0].startDateTime.format(DateTimeFormatter.ofPattern("MMM dd"))
-//            if (eventsBeforeToday[0].startDateTime.toLocalDate() < LocalDate.now().minusDays(1)) {
-//                header += " - Yesterday"
-//            } else {
-//                header = "Yesterday"
-//            }
-//
-//            eventItems.add(
-//                EventSectionHeader(
-//                    header
-//                )
-//            )
-//        }
-//        eventItems.addAll(eventsBeforeToday)
-//
-//        val eventsToday =
-//            rawEvents.filter { isSameDay(it.startDateTime.toLocalDate(), LocalDate.now()) }
-//        rawEvents.removeAll(eventsToday)
-//        if (eventsToday.isNotEmpty()) {
-//            eventItems.add(
-//                EventSectionHeader(
-//                    "Today, " + LocalDate.now().toParsedString(PATTERN_UI_DATE_SHORT)
-//                )
-//
-//            )
-//        }
-//        eventItems.addAll(eventsToday)
-
-//        val eventsTomorrowToEndOfWeek = rawEvents.filter {
-//            it.startDateTime.toLocalDate() >= LocalDate.now()
-//                .plusDays(1) && it.startDateTime.toLocalDate() < LocalDate.now().plusWeeks(1)
-//                .with(DayOfWeek.MONDAY)
-//        }
-//        rawEvents.removeAll(eventsTomorrowToEndOfWeek)
-//        if (eventsTomorrowToEndOfWeek.isNotEmpty()) {
-//            eventItems.add(
-//                EventSectionHeader(
-//                    "Tomorrow - " + LocalDate.now().with(DayOfWeek.SUNDAY).format(
-//                        DateTimeFormatter.ofPattern("dd MMM")
-//                    )
-//                )
-//            )
-//        }
-//        eventItems.addAll(eventsTomorrowToEndOfWeek)
 
 
         var currentWeeksItems: MutableList<EventItem> = ArrayList()
@@ -131,11 +82,7 @@ object DataUtils {
 
                 // Confirm a week section
                 if (currentWeeksItems.isNotEmpty()) {
-                    if (riNetEvent.startDateTime.toLocalDate() > LocalDate.now()) {
-                        eventItems.addAll(currentWeeksItems)
-                    } else {
-                        eventItems.addAll(0, currentWeeksItems)
-                    }
+                    eventItems.addAll(currentWeeksItems)
                     currentWeeksItems.clear()
                 }
             }
