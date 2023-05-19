@@ -1,8 +1,10 @@
 package com.example.eventusa.screens.login.view
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -59,8 +61,7 @@ class LoginActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             handleLogin()
-            usernameEditText.clearFocus()
-            passwordEditText.clearFocus()
+            hideKeyboard()
         }
 
         val user = LocalStorageManager.readUsername()
@@ -143,6 +144,18 @@ class LoginActivity : AppCompatActivity() {
             message,
             Snackbar.LENGTH_LONG
         ).show()
+    }
+
+    private fun hideKeyboard(){
+        this.currentFocus?.let{
+            val manager: InputMethodManager = getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+            manager
+                .hideSoftInputFromWindow(
+                    it.windowToken, 0
+                )
+        }
     }
 
     private fun enableRememberMeCheckBox(){
