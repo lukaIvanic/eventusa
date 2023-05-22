@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
@@ -21,6 +22,7 @@ import com.example.eventusa.screens.events.data.EventColors
 import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.view.LoginActivity
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.launch
 
 
 class AddEventActivity : AppCompatActivity() {
@@ -36,6 +38,7 @@ class AddEventActivity : AppCompatActivity() {
 
     lateinit var progressDialog: AlertDialog
     lateinit var progressDialogView: View
+
     var chooseNotifDialog: androidx.appcompat.app.AlertDialog? = null
     var chooseColorDialog: androidx.appcompat.app.AlertDialog? = null
 
@@ -136,15 +139,16 @@ class AddEventActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
     }
 
-    fun showProgressDialog(loadingMessage: String) {
+    fun showProgressDialog(loadingMessage: String) = lifecycleScope.launch {
         progressDialogView.findViewById<TextView>(R.id.loadingTextView).text = loadingMessage
         progressDialogView.findViewById<ProgressBar>(R.id.loader).indeterminateTintList =
             ColorStateList.valueOf(
                 ContextCompat.getColor(
-                    this,
+                    this@AddEventActivity,
                     EventColors.getColorId(viewmodel.getEventColor())
                 )
             )
+
         progressDialog.show()
     }
 

@@ -9,12 +9,13 @@ import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.events.data.EventItem
 import com.example.eventusa.utils.DataUtils
 import com.example.eventusa.utils.extensions.map
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 data class EventsUiState(
+    val username: String?,
     val eventsItemsList: MutableList<EventItem> = ArrayList(),
 )
 
@@ -30,45 +31,34 @@ class EventsViewModel(
 
 
     init {
-        fetchEvents()
+        setupEventsCollect()
     }
 
-    fun getUsername(): String? {
+    private fun getUsername(): String? {
         return userRepository.loggedInUser?.displayName
     }
 
 
-    private fun fetchEvents() {
-
+    private fun setupEventsCollect() =
         viewModelScope.launch {
+            eventsRepository.eventsResult
+                .collectLatest { resultOf ->
 
-
-            launch {
-                eventsRepository.currentEventsResult
-                    .collect { resultOf ->
-
-                        _eventsUiState.value = resultOf.map { rinetEvents ->
-                            EventsUiState(DataUtils.eventsDisplayItems(
+                    _eventsUiState.value = resultOf.map { rinetEvents ->
+                        EventsUiState(
+                            getUsername(),
+                            DataUtils.eventsDisplayItems(
                                 rinetEvents
-                            ))
-                        }
+                            )
+                        )
                     }
-            }
-
-            delay(100)
-            eventsRepository.makeEventsUpdate()
-
-
+                }
         }
 
+    fun refreshEvents(){
+        eventsRepository.refreshEvents()
     }
 
-
-    fun makeEventsUpdateTick(){
-        viewModelScope.launch {
-            eventsRepository.makeEventsUpdate()
-        }
-    }
 
 }
 

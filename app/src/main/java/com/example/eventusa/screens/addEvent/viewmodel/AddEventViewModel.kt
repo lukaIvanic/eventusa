@@ -1,7 +1,6 @@
 package com.example.eventusa.screens.addEvent.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.eventusa.caching.room.Room
 import com.example.eventusa.caching.room.extraentities.EventNotification
@@ -24,6 +23,7 @@ import java.util.*
 data class AddEventUiState(
     var riNetEvent: RINetEvent,
     var isDefaultEmpty: Boolean = false,
+    var isCache: Boolean = false,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -91,8 +91,6 @@ class AddEventViewModel(
 
             }
 
-            eventsRepository.makeUpdateTick()
-
 
         }
 
@@ -105,10 +103,6 @@ class AddEventViewModel(
             val deleteEventResult = eventsRepository.deleteEvent(currUiState.riNetEvent.eventId)
             _deleteEventState.emit(deleteEventResult)
 
-            if (deleteEventResult is ResultOf.Success) {
-                eventsRepository.makeUpdateTick()
-            }
-
         }
 
         return deleteEventState
@@ -116,50 +110,36 @@ class AddEventViewModel(
 
     fun fetchEvent(eventId: Int) {
 
-        val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-            Log.i("Fetch event - Add Event View model", throwable.localizedMessage)
-        }
+        viewModelScope.launch(Dispatchers.Default) {
 
-        viewModelScope.launch(coroutineExceptionHandler) {
-            withContext(Dispatchers.Default) {
-
-                val deferred = async {
-                    val result = eventsRepository.getEventWithId(eventId)
-                    return@async result
-                }
-
-                val cachedEventResult = deferred.await()
-
-                if (cachedEventResult !is ResultOf.Error) {
-                    if (cachedEventResult is ResultOf.Success) {
-                        originalEvent = cachedEventResult.data
-                    }
-                    emitFetchEvent(eventId, cachedEventResult)
-                    return@withContext
-                }
-
-                try {
-                    val eventFromDb = eventsRepository.getEventWithId(eventId)
-
-                    if (eventFromDb is ResultOf.Success) {
-                        originalEvent = eventFromDb.data
-                    }
-
-                    emitFetchEvent(eventId, eventFromDb)
-
-                    if (eventFromDb is ResultOf.Success) {
-                        originalEvent =
-                            eventFromDb.data.copy(usersAttending = eventFromDb.data.usersAttending.toMutableList())
-                    } else if (eventFromDb is ResultOf.Error) {
-                        throw eventFromDb.exception
-                    }
-                } catch (e: Exception) {
-                    emitFetchEvent(eventId, cachedEventResult)
-                }
-
-
+            eventsRepository.getCachedEventWithId(eventId)?.let { cachedEvent ->
+                emitFetchEvent(eventId, ResultOf.Success(cachedEvent))
             }
 
+
+            val eventResultOfDeferred = async {
+                eventsRepository.getEventWithId(eventId)
+            }
+
+            launch {
+                delay(1000) // Wait time before showing loading bar
+                if (!eventResultOfDeferred.isCompleted) {
+                    _uiState.emit(ResultOf.Loading)
+                }
+            }
+
+            val eventResultOf = eventResultOfDeferred.await()
+
+            if (eventResultOf is ResultOf.Success) {
+                originalEvent =
+                    eventResultOf.data.copy(usersAttending = eventResultOf.data.usersAttending.toMutableList())
+            }
+
+            emitFetchEvent(eventId, eventResultOf)
+        }
+
+
+        viewModelScope.launch {
             _notificationsEventState.emit(
                 ResultOf.Success(
                     NotificationsAdapterEvents.LOAD_EVENTS(
@@ -174,7 +154,14 @@ class AddEventViewModel(
 
     }
 
-    private fun emitFetchEvent(eventId: Int, result: ResultOf<RINetEvent>) {
+    private suspend fun emitFetchEvent(
+        eventId: Int,
+        result: ResultOf<RINetEvent>,
+    ) {
+        if(result is ResultOf.Error){
+            _uiState.emit(result)
+            return
+        }
 
         _uiState.value = result.map {
             AddEventUiState(it.copy(eventId = eventId))
@@ -226,47 +213,47 @@ class AddEventViewModel(
 
 
             deletedNotifications.map {
-                    return@map it.copy(eventId = eventId)
-                }.forEach { eventNotification ->
-                    NotifManager(context).deleteEventNotification(
-                        eventNotification.notifId,
-                    )
+                return@map it.copy(eventId = eventId)
+            }.forEach { eventNotification ->
+                NotifManager(context).deleteEventNotification(
+                    eventNotification.notifId,
+                )
 
-                    _notificationsEventState.emit(
-                        ResultOf.Success(
-                            NotificationsAdapterEvents.DELETE_EVENT(
-                                eventNotification
-                            )
+                _notificationsEventState.emit(
+                    ResultOf.Success(
+                        NotificationsAdapterEvents.DELETE_EVENT(
+                            eventNotification
                         )
                     )
-                }
+                )
+            }
 
             changedStartDateTime?.let {
                 updateNotifications(context, eventId)
             }
 
             addedNotifications.map {
-                    return@map it.copy(eventId = eventId)
-                }.forEach { eventNotification ->
-                    val success = NotifManager(context).createOrUpdateEventNotif(
-                        currUiState.riNetEvent.copy(eventId = eventId),
-                        eventNotification.minutesBeforeEvent
-                    )
+                return@map it.copy(eventId = eventId)
+            }.forEach { eventNotification ->
+                val success = NotifManager(context).createOrUpdateEventNotif(
+                    currUiState.riNetEvent.copy(eventId = eventId),
+                    eventNotification.minutesBeforeEvent
+                )
 
-                    if (!success) {
-                        _notificationsEventState.emit(ResultOf.Error(Exception("Couldn't create notification")))
-                        return@launch
-                    }
+                if (!success) {
+                    _notificationsEventState.emit(ResultOf.Error(Exception("Couldn't create notification")))
+                    return@launch
+                }
 
 
-                    _notificationsEventState.emit(
-                        ResultOf.Success(
-                            NotificationsAdapterEvents.ADD_EVENT(
-                                eventNotification
-                            )
+                _notificationsEventState.emit(
+                    ResultOf.Success(
+                        NotificationsAdapterEvents.ADD_EVENT(
+                            eventNotification
                         )
                     )
-                }
+                )
+            }
         }
     }
 
