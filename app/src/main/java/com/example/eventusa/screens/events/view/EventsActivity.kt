@@ -212,4 +212,9 @@ class EventsActivity : AppCompatActivity() {
             .show()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshEventsLocally()
+    }
+
 }

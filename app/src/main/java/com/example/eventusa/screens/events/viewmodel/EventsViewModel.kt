@@ -7,11 +7,11 @@ import com.example.eventusa.network.ResultOf
 import com.example.eventusa.repositories.EventsRepository
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.events.data.EventItem
+import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.DataUtils
 import com.example.eventusa.utils.extensions.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 data class EventsUiState(
@@ -29,7 +29,7 @@ class EventsViewModel(
         MutableStateFlow(ResultOf.Loading)
     val eventsUiState = _eventsUiState.asStateFlow()
 
-
+    var cachedEvents: MutableList<RINetEvent> = ArrayList()
     init {
         setupEventsCollect()
     }
@@ -42,7 +42,7 @@ class EventsViewModel(
     private fun setupEventsCollect() =
         viewModelScope.launch {
             eventsRepository.eventsResult
-                .collectLatest { resultOf ->
+                .collect { resultOf ->
 
                     _eventsUiState.value = resultOf.map { rinetEvents ->
                         EventsUiState(
@@ -52,11 +52,21 @@ class EventsViewModel(
                             )
                         )
                     }
+
+                    if(resultOf is ResultOf.Success){
+                        cachedEvents = resultOf.data
+                    }
                 }
         }
 
     fun refreshEvents(){
         eventsRepository.refreshEvents()
+    }
+
+    fun refreshEventsLocally(){
+        _eventsUiState.value = ResultOf.Success(
+            EventsUiState(getUsername(), DataUtils.eventsDisplayItems(cachedEvents))
+        )
     }
 
 
