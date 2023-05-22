@@ -8,7 +8,6 @@
     tools:context=".screens.events.view.EventsActivity">
 
 
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -26,7 +25,6 @@
 
             <ImageView
                 android:id="@+id/logoutButton"
-
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="8dp"
@@ -41,7 +39,6 @@
 
             <ImageView
                 android:id="@+id/settingsButton"
-
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/ripple_round"
@@ -82,20 +79,31 @@
                 app:layout_constraintTop_toBottomOf="@id/settingsTitleTextView"
                 tools:visibility="visible" />
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/swipeRefresh"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:background="@color/app_background"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/progressBar"
-                tools:listitem="@layout/row_event" />
+                app:layout_constraintTop_toBottomOf="@id/progressBar">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/app_background"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/row_event" />
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

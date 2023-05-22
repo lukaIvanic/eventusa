@@ -7,14 +7,15 @@ import com.example.eventusa.network.ResultOf
 import com.example.eventusa.repositories.EventsRepository
 import com.example.eventusa.repositories.UserRepository
 import com.example.eventusa.screens.events.data.EventItem
+import com.example.eventusa.screens.events.data.RINetEvent
 import com.example.eventusa.utils.DataUtils
 import com.example.eventusa.utils.extensions.map
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class EventsUiState(
+    val username: String?,
     val eventsItemsList: MutableList<EventItem> = ArrayList(),
 )
 
@@ -28,47 +29,46 @@ class EventsViewModel(
         MutableStateFlow(ResultOf.Loading)
     val eventsUiState = _eventsUiState.asStateFlow()
 
-
+    var cachedEvents: MutableList<RINetEvent> = ArrayList()
     init {
-        fetchEvents()
+        setupEventsCollect()
     }
 
-    fun getUsername(): String? {
+    private fun getUsername(): String? {
         return userRepository.loggedInUser?.displayName
     }
 
 
-    private fun fetchEvents() {
-
+    private fun setupEventsCollect() =
         viewModelScope.launch {
+            eventsRepository.eventsResult
+                .collect { resultOf ->
 
-
-            launch {
-                eventsRepository.currentEventsResult
-                    .collect { resultOf ->
-
-                        _eventsUiState.value = resultOf.map { rinetEvents ->
-                            EventsUiState(DataUtils.eventsDisplayItems(
+                    _eventsUiState.value = resultOf.map { rinetEvents ->
+                        EventsUiState(
+                            getUsername(),
+                            DataUtils.eventsDisplayItems(
                                 rinetEvents
-                            ))
-                        }
+                            )
+                        )
                     }
-            }
 
-            delay(100)
-            eventsRepository.makeEventsUpdate()
-
-
+                    if(resultOf is ResultOf.Success){
+                        cachedEvents = resultOf.data
+                    }
+                }
         }
 
+    fun refreshEvents(){
+        eventsRepository.refreshEvents()
     }
 
-
-    fun makeEventsUpdateTick(){
-        viewModelScope.launch {
-            eventsRepository.makeEventsUpdate()
-        }
+    fun refreshEventsLocally(){
+        _eventsUiState.value = ResultOf.Success(
+            EventsUiState(getUsername(), DataUtils.eventsDisplayItems(cachedEvents))
+        )
     }
+
 
 }
 

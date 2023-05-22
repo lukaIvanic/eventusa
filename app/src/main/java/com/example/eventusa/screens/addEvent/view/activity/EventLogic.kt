@@ -15,7 +15,6 @@ import com.example.eventusa.utils.setChipHighlighted
 import com.example.eventusa.utils.setTextAnimated
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -40,7 +39,7 @@ fun AddEventActivity.handleDeleteEvent() {
 
         showProgressDialog("Deleting event..")
 
-        viewmodel.deleteEvent().stateIn(this).collectLatest { result ->
+        viewmodel.deleteEvent().stateIn(this).collect { result ->
 
             if (result !is ResultOf.Loading) {
                 hideProgressDialog()
@@ -48,7 +47,7 @@ fun AddEventActivity.handleDeleteEvent() {
 
 
             result.doIfFailure {
-                showError(it.localizedMessage)
+                showMessage(it.localizedMessage)
             }
 
             result.doIfSucces {
@@ -80,7 +79,7 @@ fun AddEventActivity.setupSaveEventFlowObserving() {
                 }
 
                 result.doIfFailure {
-                    showError(it.localizedMessage)
+                    showMessage(it.localizedMessage)
                 }
 
                 result.doIfSucces {
@@ -94,10 +93,10 @@ fun AddEventActivity.setupFetchEventStateObserving() {
     lifecycleScope.launch {
 
         viewmodel.uiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-            .collectLatest { result ->
+            .collect { result ->
 
                 result.doIfLoading {
-                  showProgressDialog("Fetching event..")
+                    showProgressDialog("Fetching event..")
                 }
 
                 result.doIfFailure {
@@ -109,13 +108,14 @@ fun AddEventActivity.setupFetchEventStateObserving() {
 
                 result.doIfSucces { state ->
 
-                    if(!state.isDefaultEmpty){
+                    if (!state.isDefaultEmpty) {
                         hideProgressDialog()
                     }
 
+
                     state.riNetEvent.apply {
 
-                        if (titleEditText.text.isEmpty() && !title.isNullOrEmpty()) {
+                        if (isActivityEditEvent) {
                             titleEditText.setText(title)
                             titleEditText.clearFocus()
                         }
@@ -171,11 +171,14 @@ fun AddEventActivity.setupFetchEventStateObserving() {
     }
 }
 
-fun AddEventActivity.showError(message: String?) {
-    val snackbar =
+fun AddEventActivity.showToast(message: String){
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+fun AddEventActivity.showMessage(message: String?) {
+    val messageSnackbar =
         Snackbar.make(addEventActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG)
 
-    if (!snackbar.isShownOrQueued) {
-        snackbar.show()
+    if (messageSnackbar?.isShownOrQueued == false) {
+        messageSnackbar?.show()
     }
 }

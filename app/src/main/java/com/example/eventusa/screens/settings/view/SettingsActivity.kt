@@ -51,7 +51,8 @@ class SettingsActivity : AppCompatActivity() {
 
         showMultipleDayEventsSwitch.isChecked = LocalStorageManager.readShowMultipleDayEvents()
 
-        randomColorWhenCreatingEventSwitch.isChecked = LocalStorageManager.readRandomColorWhenCreatingEvent()
+        randomColorWhenCreatingEventSwitch.isChecked =
+            LocalStorageManager.readRandomColorWhenCreatingEvent()
 
         showFullColorsInAppSwitch.isChecked = LocalStorageManager.readShowFullColorsInApp()
     }
@@ -97,7 +98,7 @@ class SettingsActivity : AppCompatActivity() {
             showFullColorsInAppSwitch.performClick()
         }
 
-        showFullColorsInAppSwitch.setOnClickListener{
+        showFullColorsInAppSwitch.setOnClickListener {
             if (showFullColorsInAppSwitch.isChecked) {
                 LocalStorageManager.setCheckedShowFullColorsInApp()
             } else {
@@ -106,5 +107,6 @@ class SettingsActivity : AppCompatActivity() {
         }
 
     }
+
 
 }

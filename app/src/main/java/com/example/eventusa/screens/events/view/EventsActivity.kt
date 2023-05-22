@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.eventusa.R
 import com.example.eventusa.app.EventusaApplication
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
@@ -31,7 +32,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -54,6 +54,7 @@ class EventsActivity : AppCompatActivity() {
 
     lateinit var progressBar: LinearProgressIndicator
 
+    lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var recyclerView: RecyclerView
     lateinit var recyclerAdapter: EventsAdapter
 
@@ -70,15 +71,14 @@ class EventsActivity : AppCompatActivity() {
         eventsActivityLayout = findViewById(R.id.eventsActivityLayout)
 
         welcomeNameTextView = findViewById(R.id.settingsTitleTextView)
-        LocalStorageManager.readUsername()?.let {
-            welcomeNameTextView.text = "Welcome, $it"
-        }
+        setWelcomeName(LocalStorageManager.readUsername())
 
         logoutButton = findViewById(R.id.logoutButton)
         settingsButton = findViewById(R.id.settingsButton)
 
         progressBar = findViewById(R.id.progressBar)
 
+        swipeRefreshLayout = findViewById(R.id.swipeRefresh)
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerAdapter = EventsAdapter { onEventClick(it) }
@@ -90,12 +90,19 @@ class EventsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsUiState.collectLatest { resultOf ->
+                viewModel.eventsUiState.collect { resultOf ->
 
-                    animateProgressBar(resultOf is ResultOf.Loading)
+
+                    animateProgressBar(resultOf is ResultOf.Loading
+                                && !swipeRefreshLayout.isRefreshing)
+
+                    if (resultOf !is ResultOf.Loading) {
+                        swipeRefreshLayout.isRefreshing = false
+                    }
 
                     resultOf.doIfSucces {
                         recyclerAdapter.updateEvents(it.eventsItemsList)
+                        setWelcomeName(it.username)
                     }
 
                     resultOf.doIfFailure {
@@ -120,6 +127,10 @@ class EventsActivity : AppCompatActivity() {
 
         newEventButton.setOnClickListener {
             onEventClick()
+        }
+
+        swipeRefreshLayout.setOnRefreshListener {
+            viewModel.refreshEvents()
         }
     }
 
@@ -146,6 +157,15 @@ class EventsActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun setWelcomeName(s: String?) {
+        welcomeNameTextView.text = if (s == null) {
+            "Welcome!"
+        } else {
+            "Welcome, $s"
+        }
+
+    }
+
 
     override fun onBackPressed() {
 
@@ -162,7 +182,6 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun doLogout() {
-
 
         MaterialAlertDialogBuilder(this)
             .setTitle("Logout")
@@ -195,7 +214,7 @@ class EventsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.makeEventsUpdateTick()
+        viewModel.refreshEventsLocally()
     }
 
 }

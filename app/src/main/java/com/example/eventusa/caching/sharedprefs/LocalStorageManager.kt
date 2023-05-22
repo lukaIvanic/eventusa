@@ -58,7 +58,13 @@ object LocalStorageManager {
 
 
     /**
+     *
+     *
+     *
      * Settings options
+     *
+     *
+     *
      */
     fun readAskConfirmDateBefore(): Boolean {
         return sharedPreferences.getBoolean("askAgainDateBefore", true)
