@@ -57,7 +57,7 @@ fun AddEventActivity.setupTouch() {
     }
 
     deleteEventSection.setOnClickListener {
-        handleDeleteEvent()
+        showDeleteEventDialog()
     }
 
 
@@ -73,6 +73,14 @@ fun AddEventActivity.showCancelEditDialog() {
             finishAndReturnToEventsScreen()
 
 
+        }.show()
+}
+
+fun AddEventActivity.showDeleteEventDialog() {
+    MaterialAlertDialogBuilder(this).setTitle("Delete")
+        .setMessage("Do you really want to delete this event?\nThis action cannot be reverted.")
+        .setNegativeButton("Cancel") { _, _ -> }.setPositiveButton("DELETE") { _, _ ->
+            handleDeleteEvent()
         }.show()
 }
 
