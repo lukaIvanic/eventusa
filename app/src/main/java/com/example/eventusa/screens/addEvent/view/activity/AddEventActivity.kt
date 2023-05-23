@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -63,11 +64,17 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var chooseAllSwitch: Switch
     lateinit var peopleChipGroup: ChipGroup
 
+    lateinit var locationSectionLayout: ConstraintLayout
+    lateinit var locationEditText: TextView
+
+
     lateinit var addNotificationButton: TextView
     lateinit var notifsRecyclerView: RecyclerView
     lateinit var notifsAdapter: NotificationsRecyclerAdapter
 
-    lateinit var locationEditText: EditText
+
+    var startAutocomplete : ActivityResultLauncher<Intent>? = null
+
     lateinit var summaryEditText: EditText
 
     lateinit var chooseColorSection: LinearLayout
@@ -85,6 +92,8 @@ class AddEventActivity : AppCompatActivity() {
         handleIsFromNotif()
 
         bindViews()
+
+        setupLocationMapsApi()
 
         setupUI()
 

@@ -47,7 +47,23 @@ class EventsRepository(
 
     suspend fun addEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> =
         withContext(ioScope.coroutineContext) {
-            Network.insertEvent(rinetEvent)
+            val insertResultOf = Network.insertEvent(rinetEvent)
+
+            if (insertResultOf is ResultOf.Success) {
+                insertEventLocally(rinetEvent)
+            }
+
+            return@withContext insertResultOf
+        }
+
+    private suspend fun insertEventLocally(rinetEvent: RINetEvent) =
+        ioScope.launch {
+            cachedSuccessEvents?.add(rinetEvent)
+            cachedSuccessEvents?.let {
+                _eventsResult.emit(ResultOf.Loading)
+                delay(500) // The animation looks nicer with a delay
+                _eventsResult.emit(ResultOf.Success(ArrayList(it).copy()).copy())
+            }
         }
 
     suspend fun updateEvent(rinetEvent: RINetEvent): ResultOf<Boolean> =
@@ -117,8 +133,6 @@ class EventsRepository(
         if (eventsResult.value is ResultOf.Loading) return
         fetchEvents()
     }
-
-
 
 
 }
