@@ -16,9 +16,9 @@
 
 
         <LinearLayout
+            android:id="@+id/addEventActivityLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/addEventActivityLayout"
             android:orientation="vertical">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -338,27 +338,21 @@
                 android:background="@color/divider" />
 
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/locationSectionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
                 android:minHeight="@dimen/settings_row_height"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="24dp"
-                    android:src="@drawable/location"
-                    app:tint="@color/icon_tint" />
 
-                <EditText
+                <TextView
                     android:id="@+id/locationEditText"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
                     android:background="@null"
                     android:drawableTint="@color/icon_tint"
                     android:hint="Add location"
@@ -366,14 +360,27 @@
                     android:paddingStart="20dp"
                     android:textColor="@color/text_edit"
                     android:textColorHint="@color/text_hint"
-                    android:textSize="@dimen/settings_text_size" />
+                    android:textSize="@dimen/settings_text_size"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/locationIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_divider_height"
-                    android:background="@color/divider" />
+                <ImageView
+                    android:id="@+id/locationIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="24dp"
+                    android:src="@drawable/location"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/icon_tint" />
 
-            </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
             <View

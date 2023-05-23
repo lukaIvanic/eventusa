@@ -25,6 +25,7 @@ fun AddEventActivity.bindViews(){
     peopleChipGroup = findViewById(R.id.peoplChipGroup)
 
 
+    locationSectionLayout = findViewById(R.id.locationSectionLayout)
     locationEditText = findViewById(R.id.locationEditText)
     summaryEditText = findViewById(R.id.summaryEditText)
 

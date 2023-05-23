@@ -44,6 +44,10 @@ fun AddEventActivity.setupTouch() {
 
     chooseAllSwitch.setOnClickListener { handleChooseAllSwitch() }
 
+    locationSectionLayout.setOnClickListener {
+        openLocationPickDialog()
+    }
+
     addNotificationButton.setOnClickListener {
         showChooseNotificationDialog()
     }
