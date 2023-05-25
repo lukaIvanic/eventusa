@@ -19,7 +19,7 @@ const val PATTERN_UI_DATE_TIME_SHORT = "dd MMM HH:mm"
 const val PATTERN_UI_DATE = "EEE, d MMM yyyy"
 const val PATTERN_UI_DATE_SHORT = "dd MMM"
 const val PATTERN_UI_TIME = "HH:mm"
-const val PATTERN_SERVER = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+const val PATTERN_SERVER = "yyyy-MM-dd'T'HH:mm:ss"
 
 fun RINetEvent.getPeriod(): String {
 

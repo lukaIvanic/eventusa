@@ -42,7 +42,11 @@ object DataUtils {
                     continue
                 }
 
-                val newStartDateTime = rinetevent.startDateTime.plusDays((i).toLong())
+                var newStartDateTime = rinetevent.startDateTime.plusDays((i).toLong()).withHour(23).withMinute(59)
+                if(i== 0){
+                    newStartDateTime = rinetevent.startDateTime.plusDays((i).toLong())
+                }
+
                 val newEndDateTime = newStartDateTime.withHour(rinetevent.endDateTime.hour)
                     .withMinute(rinetevent.endDateTime.minute)
 

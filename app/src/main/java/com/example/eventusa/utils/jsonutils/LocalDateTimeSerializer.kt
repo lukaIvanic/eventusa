@@ -1,10 +1,11 @@
 package com.example.eventusa.utils.jsonutils
 
+import com.example.eventusa.utils.extensions.PATTERN_SERVER
+import com.example.eventusa.utils.extensions.toParsedString
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 class LocalDateTimeSerializer : JsonSerializer<LocalDateTime>() {
     override fun serialize(
@@ -13,8 +14,7 @@ class LocalDateTimeSerializer : JsonSerializer<LocalDateTime>() {
         serializers: SerializerProvider?,
     ) {
         value?.let {
-            gen?.writeString((it.atZone(ZoneOffset.ofHours(1)).toEpochSecond()).toString())
-//            gen?.writeString(it.toParsedString(PATTERN_SERVER))
+            gen?.writeString(it.toParsedString(PATTERN_SERVER))
         }
     }
 

@@ -70,7 +70,8 @@ class LoginActivity : AppCompatActivity() {
         val rememberMeEnabled = LocalStorageManager.readRememberMe()
         rememberMeCheckBox.isChecked = rememberMeEnabled
 
-        if (LocalStorageManager.readRememberMe() && !user.isNullOrEmpty() && !pass.isNullOrEmpty()) {
+        if (true) {
+//        if (LocalStorageManager.readRememberMe() && !user.isNullOrEmpty() && !pass.isNullOrEmpty()) {
             gotoEventsScreen()
             finish()
         }

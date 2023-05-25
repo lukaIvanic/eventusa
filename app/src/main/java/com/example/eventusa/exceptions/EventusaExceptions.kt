@@ -10,7 +10,8 @@ enum class EventusaExceptions(val errorMessage: String) {
     NOT_FOUND_EXCEPTION("Could not find event."),
     INVALID_EVENT_EXCEPTION("The event you submited was invalid."),
     GENERAL_EXCEPTION("An exception occured."),
-    UNAUTHORIZED_EXCEPTION("The password is incorrect.");
+    UNAUTHORIZED_EXCEPTION("The password is incorrect."),
+    SERVER_DOWN("The server is currently down.");
 
 
     operator fun invoke(actualException: String? = errorMessage): ResultOf.Error {

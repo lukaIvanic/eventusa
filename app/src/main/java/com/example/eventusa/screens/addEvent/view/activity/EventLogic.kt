@@ -13,7 +13,6 @@ import com.example.eventusa.utils.extensions.doIfSucces
 import com.example.eventusa.utils.extensions.toParsedString
 import com.example.eventusa.utils.setChipHighlighted
 import com.example.eventusa.utils.setTextAnimated
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -47,7 +46,7 @@ fun AddEventActivity.handleDeleteEvent() {
 
 
             result.doIfFailure {
-                showMessage(it.localizedMessage)
+                showToast(it.localizedMessage)
             }
 
             result.doIfSucces {
@@ -79,7 +78,7 @@ fun AddEventActivity.setupSaveEventFlowObserving() {
                 }
 
                 result.doIfFailure {
-                    showMessage(it.localizedMessage)
+                    showToast(it.localizedMessage)
                 }
 
                 result.doIfSucces {
@@ -170,15 +169,8 @@ fun AddEventActivity.setupFetchEventStateObserving() {
             }
     }
 }
+fun AddEventActivity.showToast(message: String?) {
 
-fun AddEventActivity.showToast(message: String){
-    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-}
-fun AddEventActivity.showMessage(message: String?) {
-    val messageSnackbar =
-        Snackbar.make(addEventActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG)
+    Toast.makeText(this, message ?: "An error occured.", Toast.LENGTH_SHORT).show()
 
-    if (messageSnackbar?.isShownOrQueued == false) {
-        messageSnackbar?.show()
-    }
 }

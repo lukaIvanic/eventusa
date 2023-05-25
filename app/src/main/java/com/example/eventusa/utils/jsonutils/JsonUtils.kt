@@ -14,9 +14,7 @@ object JsonUtils {
         .registerModule(JavaTimeModule())
         .registerModule(SimpleModule()
             .addSerializer(LocalDateTime::class.java, LocalDateTimeSerializer())
-            .addSerializer(Boolean::class.java, BooleanSerializer())
             .addDeserializer(LocalDateTime::class.java, LocalDateTimeDeserializer())
-            .addDeserializer(Boolean::class.java, BooleanDeserializer())
 
         )
 
