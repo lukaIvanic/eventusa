@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.example.eventusa.R
 import com.example.eventusa.screens.events.data.*
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter
 class EventsAdapter(
     private var eventItemList: MutableList<EventItem> = ArrayList(),
     val onEventClick: (riNetEvent: RINetEvent) -> Unit,
+    val onScrollNeeded: (itemIndex: Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
@@ -118,12 +120,6 @@ class EventsAdapter(
 
     }
 
-    private fun isEventFirstInDate(
-        position: Int,
-        rinetEvent: RINetEvent,
-    ) =
-        position > 0 && (eventItemList[position - 1] as? RINetEvent)?.startDateTime?.dayOfWeek != rinetEvent.startDateTime.dayOfWeek
-
     override fun getItemViewType(position: Int): Int {
         return eventItemList.get(position).type.ordinal
     }
@@ -139,9 +135,29 @@ class EventsAdapter(
 
         this.eventItemList.clear()
         this.eventItemList.addAll(eventItems)
-        diffResult.dispatchUpdatesTo(this@EventsAdapter)
+        diffResult.dispatchUpdatesTo(object: ListUpdateCallback{
+            override fun onInserted(position: Int, count: Int) {
+                notifyItemRangeInserted(position, count)
+                onScrollNeeded(position)
+            }
+
+            override fun onRemoved(position: Int, count: Int) {
+                notifyItemRangeRemoved(position, count)
+            }
+
+            override fun onMoved(fromPosition: Int, toPosition: Int) {
+                notifyItemMoved(fromPosition, toPosition)
+                onScrollNeeded(toPosition)
+            }
+
+            override fun onChanged(position: Int, count: Int, payload: Any?) {
+                notifyItemRangeChanged(position, count, payload)
+                onScrollNeeded(position)
+            }
+        })
 
     }
+
 
 }
 

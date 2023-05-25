@@ -23,6 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+
+
             <ImageView
                 android:id="@+id/logoutButton"
                 android:layout_width="40dp"
@@ -49,13 +51,31 @@
                 app:layout_constraintTop_toTopOf="@+id/settingsTitleTextView"
                 app:tint="@color/icon_tint" />
 
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                android:layout_marginStart="20dp"
+
+                android:id="@+id/eventusaSmallIconCardView"
+                app:layout_constraintBottom_toBottomOf="@+id/settingsTitleTextView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/settingsTitleTextView">
+                <ImageView
+                    android:id="@+id/eventusaSmallIcon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/eventusa_logo"
+                    />
+            </androidx.cardview.widget.CardView>
+
 
             <TextView
                 android:id="@+id/settingsTitleTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="16dp"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="12dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Welcome!"
@@ -63,7 +83,7 @@
                 android:textSize="26dp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@+id/logoutButton"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/eventusaSmallIconCardView"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator

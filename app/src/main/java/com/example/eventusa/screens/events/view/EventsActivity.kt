@@ -81,7 +81,11 @@ class EventsActivity : AppCompatActivity() {
         swipeRefreshLayout = findViewById(R.id.swipeRefresh)
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerAdapter = EventsAdapter { onEventClick(it) }
+        recyclerAdapter = EventsAdapter(onEventClick = {
+            onEventClick(it)
+        }, onScrollNeeded = { position ->
+            scrollToPosition(position)
+       })
         recyclerView.adapter = recyclerAdapter
 
         newEventButton = findViewById(R.id.newEventFab)
@@ -92,9 +96,10 @@ class EventsActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsUiState.collect { resultOf ->
 
-
-                    animateProgressBar(resultOf is ResultOf.Loading
-                                && !swipeRefreshLayout.isRefreshing)
+                    animateProgressBar(
+                        resultOf is ResultOf.Loading
+                                && !swipeRefreshLayout.isRefreshing
+                    )
 
                     if (resultOf !is ResultOf.Loading) {
                         swipeRefreshLayout.isRefreshing = false
@@ -155,6 +160,24 @@ class EventsActivity : AppCompatActivity() {
         }
 
         startActivity(intent)
+    }
+
+    private fun scrollToPosition(position: Int){
+
+        val myLayoutManager = (recyclerView.layoutManager as LinearLayoutManager)
+
+
+        // Check if event is visible
+        if(myLayoutManager.findFirstVisibleItemPosition() <= position && myLayoutManager.findLastVisibleItemPosition() >= position){
+            return
+        }
+
+        if(myLayoutManager.findFirstVisibleItemPosition() > position){
+            recyclerView.smoothScrollToPosition(position - 1)
+        }else{
+            recyclerView.smoothScrollToPosition(position + 1)
+        }
+
     }
 
     private fun setWelcomeName(s: String?) {

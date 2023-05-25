@@ -2,17 +2,42 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:id="@+id/loginActivityLayout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".screens.login.view.LoginActivity">
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/event_rinet_blue"
+        app:cardCornerRadius="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/usernameInputLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/event_rinet_blue"
+            android:padding="32dp"
+            android:text="EVENTUSA"
+            android:textColor="@color/white"
+            android:textSize="40sp" />
+
+
+    </androidx.cardview.widget.CardView>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+app:helperTextTextColor="@color/event_rinet_blue"
+        app:boxStrokeColor="@color/event_rinet_blue"
         app:layout_constraintBottom_toTopOf="@+id/passwordInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -21,18 +46,19 @@
             android:id="@+id/usernameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
-            />
+            android:hint="Username" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:counterOverflowTextColor="@color/event_rinet_blue"
+        app:boxStrokeColor="@color/event_rinet_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,11 +68,9 @@
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
-            />
+            android:hint="Password" />
 
     </com.google.android.material.textfield.TextInputLayout>
-
 
 
     <Button
@@ -54,6 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:backgroundTint="@color/event_rinet_blue"
         android:text="LOGIN"
         app:layout_constraintEnd_toEndOf="@+id/passwordInputLayout"
         app:layout_constraintTop_toBottomOf="@+id/passwordInputLayout" />

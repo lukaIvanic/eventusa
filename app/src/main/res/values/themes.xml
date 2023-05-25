@@ -16,6 +16,8 @@
 
         <item name="colorControlActivated">@color/event_rinet_blue</item>
 
+        <item name="colorAccent">@color/event_rinet_blue</item>
+
 
         <!--        <item name="android:datePickerDialogTheme">@style/MyDatePickerDialogTheme</item>-->
     </style>
