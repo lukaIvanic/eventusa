@@ -8,6 +8,7 @@ import com.example.eventusa.screens.addEvent.view.activity.AddEventActivity.*
 import com.example.eventusa.screens.addEvent.view.activity.Item
 import com.example.eventusa.screens.login.model.User
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 import kotlin.random.Random
 
@@ -22,29 +23,33 @@ import kotlin.random.Random
 @Entity("rinetevents_table")
 data class RINetEvent(
 
-    @PrimaryKey(autoGenerate = true) var eventId: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    @JsonProperty("idEventa")
+    var eventId: Int = 0,
 
-
+    @JsonProperty("naslov")
     var title: String = "",
 
-
+    @JsonProperty("datumVrijemeOd")
     var startDateTime: LocalDateTime = LocalDateTime.now(),
 
-
+    @JsonProperty("datumVrijemeDo")
     var endDateTime: LocalDateTime = LocalDateTime.now(),
 
-
+    @JsonProperty("lokacija")
     var location: String? = "",
 
+    @JsonProperty("opis")
     var summary: String? = "",
 
+    @JsonProperty("kalendar")
     var isInCalendar: Boolean = false,
 
     @JsonIgnore
     var usersAttending: MutableList<User> = ArrayList(),
 
+    @JsonProperty("userIdsList")
     var userIdsStringList: String? = "",
-
 
     var eventColor: Int = EventColors.RINET_BLUE,
 
@@ -120,10 +125,10 @@ data class RINetEvent(
 }
 
 object EventColors {
-    const val YELLOW = 0
+    const val RINET_BLUE = 0
     const val RED = 1
     const val DARK_BLUE = 2
-    const val RINET_BLUE = 3
+    const val YELLOW = 3
     const val LIGHT_PURPLE = 4
     const val GREEN = 5
     const val GRAY = 6
@@ -136,10 +141,10 @@ object EventColors {
     }
     fun getPresets(): Array<String> {
         return arrayOf(
-            "Yellow",
+            "Rinet Blue",
             "Red",
             "Dark Blue",
-            "Rinet Blue",
+            "Yellow",
             "Light Purple",
             "Green",
             "Gray",

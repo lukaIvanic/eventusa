@@ -24,6 +24,8 @@ import com.example.eventusa.screens.events.view.EventsActivity
 import com.example.eventusa.screens.login.view.LoginActivity
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 
 class AddEventActivity : AppCompatActivity() {
@@ -72,7 +74,6 @@ class AddEventActivity : AppCompatActivity() {
     lateinit var notifsRecyclerView: RecyclerView
     lateinit var notifsAdapter: NotificationsRecyclerAdapter
 
-
     var startAutocomplete : ActivityResultLauncher<Intent>? = null
 
     lateinit var summaryEditText: EditText
@@ -83,6 +84,8 @@ class AddEventActivity : AppCompatActivity() {
 
     lateinit var deleteEventSection: LinearLayout
     lateinit var deleteEventSectionDivider: View
+
+    var timestampLastMessage = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,7 +135,8 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun handleEditEvent(eventId: Int) {
         showProgressDialog("Fetching event..")
-        viewmodel.fetchEvent(eventId)
+        if(eventId != -1)
+            viewmodel.fetchEvent(eventId)
 
     }
 

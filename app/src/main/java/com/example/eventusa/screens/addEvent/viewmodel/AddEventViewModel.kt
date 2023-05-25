@@ -113,6 +113,9 @@ class AddEventViewModel(
         viewModelScope.launch(Dispatchers.Default) {
 
             eventsRepository.getCachedEventWithId(eventId)?.let { cachedEvent ->
+                originalEvent =
+                    cachedEvent.copy(usersAttending = cachedEvent.usersAttending.toMutableList())
+
                 emitFetchEvent(eventId, ResultOf.Success(cachedEvent))
             }
 
@@ -158,7 +161,7 @@ class AddEventViewModel(
         eventId: Int,
         result: ResultOf<RINetEvent>,
     ) {
-        if(result is ResultOf.Error){
+        if (result is ResultOf.Error) {
             _uiState.emit(result)
             return
         }

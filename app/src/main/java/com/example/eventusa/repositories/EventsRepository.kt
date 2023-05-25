@@ -50,7 +50,7 @@ class EventsRepository(
             val insertResultOf = Network.insertEvent(rinetEvent)
 
             if (insertResultOf is ResultOf.Success) {
-                insertEventLocally(rinetEvent)
+                insertEventLocally(insertResultOf.data)
             }
 
             return@withContext insertResultOf

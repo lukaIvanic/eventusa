@@ -22,7 +22,7 @@ import okhttp3.RequestBody
  */
 object Network {
 
-    private val baseUrl = "https://eventusabackendapptestservice.azurewebsites.net/api/"
+    private val baseUrl = "https://eventusamobile-production-api.azurewebsites.net/api/"
 
     private val LOGIN_PATH = "Users/login"
     private val READ_USERS = "Users"
@@ -94,7 +94,7 @@ object Network {
 
             try {
                 val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(eventReturnJson)
-                return errorResponse.getException()
+                return ResultOf.Error(Exception("Can't create an event that already ended"))
             } catch (ignore: Exception) {
             }
 
@@ -137,6 +137,11 @@ object Network {
         }
 
         try {
+
+            if(eventsJson.first() == '<'){
+                return SERVER_DOWN()
+            }
+
             val events = JsonUtils.fromJsonToList<RINetEvent>(eventsJson)
 
             return ResultOf.Success(parseUserIdsStringList(events) as MutableList<RINetEvent>)
@@ -191,8 +196,9 @@ object Network {
 
         try {
             val eventJson = JsonUtils.toJson(rinetEvent)
+            val path = "$UPDATE_EVENT/${rinetEvent.eventId}"
             val responseJson =
-                NetworkCore.sendRequest("$UPDATE_EVENT/${rinetEvent.eventId}", eventJson)
+                NetworkCore.sendRequest(path, eventJson)
             if (responseJson.isEmpty()) {
                 return ResultOf.Success(true)
             } else {
