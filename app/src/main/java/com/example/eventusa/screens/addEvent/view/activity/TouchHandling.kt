@@ -66,7 +66,7 @@ fun AddEventActivity.setupTouch() {
 fun AddEventActivity.showCancelEditDialog() {
     MaterialAlertDialogBuilder(this).setTitle("Cancel")
         .setMessage("Do you want to cancel your draft?\nThe information will be lost.")
-        .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("OK") { _, _ ->
+        .setNegativeButton("Keep editing") { _, _ -> }.setPositiveButton("YES") { _, _ ->
 
             viewmodel.resetDefaultUiState()
 

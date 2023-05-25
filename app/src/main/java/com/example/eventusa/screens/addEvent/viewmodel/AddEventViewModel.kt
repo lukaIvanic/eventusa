@@ -136,12 +136,19 @@ class AddEventViewModel(
             if (eventResultOf is ResultOf.Success) {
                 originalEvent =
                     eventResultOf.data.copy(usersAttending = eventResultOf.data.usersAttending.toMutableList())
+                fetchNotifications()
             }
 
             emitFetchEvent(eventId, eventResultOf)
         }
 
 
+
+
+
+    }
+
+    private fun fetchNotifications(){
         viewModelScope.launch {
             _notificationsEventState.emit(
                 ResultOf.Success(
@@ -153,8 +160,6 @@ class AddEventViewModel(
                 )
             )
         }
-
-
     }
 
     private suspend fun emitFetchEvent(
@@ -216,7 +221,9 @@ class AddEventViewModel(
 
 
             deletedNotifications.map {
-                return@map it.copy(eventId = eventId)
+                var eventNotif = it.copy(eventId = eventId)
+                eventNotif.notifId = it.notifId
+                return@map eventNotif
             }.forEach { eventNotification ->
                 NotifManager(context).deleteEventNotification(
                     eventNotification.notifId,

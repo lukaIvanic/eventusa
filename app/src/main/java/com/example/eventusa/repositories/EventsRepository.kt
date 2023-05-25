@@ -22,8 +22,10 @@ class EventsRepository(
     /**
      * Events source
      */
-    private var _eventsResult: MutableStateFlow<ResultOf<MutableList<RINetEvent>>> =
+    private val _eventsResult: MutableStateFlow<ResultOf<MutableList<RINetEvent>>> by lazy {
         MutableStateFlow(ResultOf.Loading)
+    }
+
     val eventsResult = _eventsResult.asStateFlow()
 
     /**
