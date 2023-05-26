@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class UserRepository {
 
-    private val _loginStateFlow: MutableSharedFlow<ResultOf<User>> =
+    private val _loginStateFlow: MutableSharedFlow<ResultOf<Unit>> =
         MutableSharedFlow()
     val loginStateFlow = _loginStateFlow.asSharedFlow()
     var loggedInUser: User? = null

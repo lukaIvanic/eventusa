@@ -60,9 +60,6 @@ class LoginActivity : AppCompatActivity() {
         progressIndicator = findViewById(R.id.progressIndicator)
 
         loginButton.setOnClickListener {
-            gotoEventsScreen()
-            finish()
-            return@setOnClickListener
             handleLogin()
             hideKeyboard()
         }
@@ -73,11 +70,10 @@ class LoginActivity : AppCompatActivity() {
         val rememberMeEnabled = LocalStorageManager.readRememberMe()
         rememberMeCheckBox.isChecked = rememberMeEnabled
 
-//        if (true) {
-//        if (LocalStorageManager.readRememberMe() && !user.isNullOrEmpty() && !pass.isNullOrEmpty()) {
-//            gotoEventsScreen()
-//            finish()
-//        }
+        if (LocalStorageManager.readRememberMe() && !user.isNullOrEmpty() && !pass.isNullOrEmpty()) {
+            gotoEventsScreen()
+            finish()
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

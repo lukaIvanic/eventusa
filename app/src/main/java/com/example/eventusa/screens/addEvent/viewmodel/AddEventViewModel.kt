@@ -103,6 +103,7 @@ class AddEventViewModel(
             val deleteEventResult = eventsRepository.deleteEvent(currUiState.riNetEvent.eventId)
             _deleteEventState.emit(deleteEventResult)
 
+
         }
 
         return deleteEventState
@@ -214,6 +215,11 @@ class AddEventViewModel(
             deletedNotifications.add(eventNotification) // notification already set, so need to remove it
         }
 
+    }
+
+    fun deleteEventNotifications(context: Context, notifs: List<EventNotification>){
+        deletedNotifications.addAll(notifs)
+        saveNotifications(context)
     }
 
     private fun saveNotifications(context: Context, eventId: Int = currUiState.riNetEvent.eventId) {

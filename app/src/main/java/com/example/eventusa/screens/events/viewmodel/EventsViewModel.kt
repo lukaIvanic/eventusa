@@ -35,7 +35,7 @@ class EventsViewModel(
     }
 
     private fun getUsername(): String? {
-        return userRepository.loggedInUser?.displayName
+        return userRepository.loggedInUser?.username
     }
 
 

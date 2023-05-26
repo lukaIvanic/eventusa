@@ -50,6 +50,9 @@ fun AddEventActivity.handleDeleteEvent() {
             }
 
             result.doIfSucces {
+
+                viewmodel.deleteEventNotifications(this@handleDeleteEvent, notifsAdapter.getNotifs())
+
                 finish()
             }
 
@@ -116,6 +119,10 @@ fun AddEventActivity.setupFetchEventStateObserving() {
 
                         if (isActivityEditEvent) {
                             titleEditText.setText(title)
+                            titleEditText.clearFocus()
+                        }
+
+                        if(titleEditText.text.isNotEmpty()){
                             titleEditText.clearFocus()
                         }
 

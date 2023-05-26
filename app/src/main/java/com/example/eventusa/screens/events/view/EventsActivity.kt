@@ -107,7 +107,6 @@ class EventsActivity : AppCompatActivity() {
 
                     resultOf.doIfSucces {
                         recyclerAdapter.updateEvents(it.eventsItemsList)
-                        setWelcomeName(it.username)
                     }
 
                     resultOf.doIfFailure {
@@ -184,7 +183,7 @@ class EventsActivity : AppCompatActivity() {
         welcomeNameTextView.text = if (s == null) {
             "Welcome!"
         } else {
-            "Welcome, $s"
+            "Welcome $s"
         }
 
     }

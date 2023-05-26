@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(val userRepository: UserRepository) : ViewModel() {
 
-    private val _loginStateFlow = MutableSharedFlow<ResultOf<User>>()
+    private val _loginStateFlow = MutableSharedFlow<ResultOf<Unit>>()
     val loginState = _loginStateFlow.asSharedFlow()
 
     init {

@@ -36,7 +36,7 @@ object Network {
      * Successful return marks successful login. Only indication of a failed authorization is an exception in the catch block.
      * LoginResponse contains a lot of meaningless data that should be removed from server.
      */
-    fun attemptLogin(inputUser: User): ResultOf<User> {
+    fun attemptLogin(inputUser: User): ResultOf<Unit> {
 
         var responseJson = ""
         try {
@@ -47,28 +47,22 @@ object Network {
             return NETWORK_EXCEPTION()
         }
 
-
         try {
-            val loginResponseUser: User = JsonUtils.fromJsonToObject(responseJson)
-            return ResultOf.Success(loginResponseUser)
-
-        } catch (e: Exception) {
-
-
-            try {
-                val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseJson)
-                if (errorResponse.status == EventusaExceptions.getStatusCode(NOT_FOUND_EXCEPTION)) {
-                    return ResultOf.Error(Exception("User not found."))
-                }
-                return errorResponse.getException()
-            } catch (ignore: Exception) {
-
+            val errorResponse = JsonUtils.fromJsonToObject<ExceptionResponse>(responseJson)
+            if (errorResponse.status == EventusaExceptions.getStatusCode(NOT_FOUND_EXCEPTION)) {
+                return ResultOf.Error(Exception("User not found."))
             }
+            return errorResponse.getException()
+        } catch (ignore: Exception) {
 
         }
 
-        return GENERAL_EXCEPTION()
+
+        return ResultOf.Success(Unit)
+
+
     }
+
 
     fun insertEvent(rinetEvent: RINetEvent): ResultOf<RINetEvent> {
         var eventReturnJson = ""
@@ -138,7 +132,7 @@ object Network {
 
         try {
 
-            if(eventsJson.first() == '<'){
+            if (eventsJson.first() == '<') {
                 return SERVER_DOWN()
             }
 
@@ -164,10 +158,10 @@ object Network {
 
             var userIdsList: List<Int>?
 
-            try{
+            try {
                 userIdsList =
                     event.userIdsStringList?.split(",")?.map { stringId -> stringId.trim().toInt() }
-            }catch(e: NumberFormatException){
+            } catch (e: NumberFormatException) {
                 return@mapIndexed event
             }
 
@@ -182,10 +176,6 @@ object Network {
                 usersAttending = attendingUsers
             )
         }
-
-
-
-
 
 
     }
@@ -283,7 +273,7 @@ object Network {
                 CREATE_EVENT, LOGIN_PATH -> return POST
             }
 
-            if(path.contains(READ_ONE_EVENT)) return GET
+            if (path.contains(READ_ONE_EVENT)) return GET
             return null
         }
     }
