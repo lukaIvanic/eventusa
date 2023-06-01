@@ -1,6 +1,7 @@
 package com.example.eventusa.app
 
 import android.app.Application
+import com.example.eventusa.ApiKeyHolder
 import com.example.eventusa.caching.room.EventusaDatabase
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import com.example.eventusa.repositories.EventsRepository
@@ -19,9 +20,8 @@ class EventusaApplication : Application() {
         LocalStorageManager.setupSharedPreferences(this)
 
 
-        val key = "AIzaSyDdewH__Dw3UjqvX75-awW3voVVEeXbH5I"
-        Places.initialize(applicationContext, key)
-        val placesClient = Places.createClient(this)
+        Places.initialize(applicationContext, ApiKeyHolder.GOOGLE_PLACES_API_KEY)
+        Places.createClient(this)
 
         super.onCreate()
     }

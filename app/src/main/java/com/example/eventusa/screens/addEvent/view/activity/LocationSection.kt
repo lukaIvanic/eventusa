@@ -16,6 +16,11 @@ fun AddEventActivity.setupLocationMapsApi(){
             return@registerForActivityResult
         }
 
+        if(result.resultCode != Activity.RESULT_OK){
+            showToast("Can't reach Google Maps API.")
+            return@registerForActivityResult
+        }
+
         if (result.resultCode == Activity.RESULT_OK) {
 
             val intent = result.data ?: return@registerForActivityResult
