@@ -111,7 +111,7 @@ object Network {
         try {
             val event = JsonUtils.fromJsonToObject<RINetEvent>(eventJson)
 
-            return ResultOf.Success(event)
+            return ResultOf.Success(parseEventForAttendingUsers(event))
         } catch (e: Exception) {
             return JSON_PARSE_EXCEPTION(e.localizedMessage)
         }
@@ -150,34 +150,38 @@ object Network {
 
         return events.mapIndexed { index, event ->
 
-            val users = UserRepository.getAllUsers()
-
-            var attendingUsers: MutableList<User> = ArrayList()
-
-            if (event.userIdsStringList.isNullOrEmpty() || event.userIdsStringList == "null") return@mapIndexed event
-
-            var userIdsList: List<Int>?
-
-            try {
-                userIdsList =
-                    event.userIdsStringList?.split(",")?.map { stringId -> stringId.trim().toInt() }
-            } catch (e: NumberFormatException) {
-                return@mapIndexed event
-            }
-
-
-            users.forEach { user ->
-                if (userIdsList?.contains(user.userId) == true) {
-                    attendingUsers.add(user)
-                }
-            }
-
-            return@mapIndexed event.copy(
-                usersAttending = attendingUsers
-            )
+            return@mapIndexed parseEventForAttendingUsers(event)
         }
 
 
+    }
+
+    private fun parseEventForAttendingUsers(event: RINetEvent): RINetEvent {
+        val users = UserRepository.getAllUsers()
+
+        var attendingUsers: MutableList<User> = ArrayList()
+
+        if (event.userIdsStringList.isNullOrEmpty() || event.userIdsStringList == "null") return event
+
+        var userIdsList: List<Int>?
+
+        try {
+            userIdsList =
+                event.userIdsStringList?.split(",")?.map { stringId -> stringId.trim().toInt() }
+        } catch (e: NumberFormatException) {
+            return event
+        }
+
+
+        users.forEach { user ->
+            if (userIdsList?.contains(user.userId) == true) {
+                attendingUsers.add(user)
+            }
+        }
+
+        return event.copy(
+            usersAttending = attendingUsers
+        )
     }
 
 
@@ -242,6 +246,9 @@ object Network {
             val requestType: RequestType =
                 getRequestMethodForUrlPath(urlPath)
                     ?: throw Exception("Request method not set.")
+
+
+
 
 
             val client: OkHttpClient = OkHttpClient().newBuilder().build()

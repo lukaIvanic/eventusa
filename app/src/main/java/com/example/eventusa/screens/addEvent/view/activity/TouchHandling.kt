@@ -28,6 +28,7 @@ fun AddEventActivity.setupTouch() {
 
     addToCalendarSection.setOnClickListener {
         addToCalendarCheckBox.isChecked = !addToCalendarCheckBox.isChecked
+        viewmodel.setCalendarEnabled(addToCalendarCheckBox.isChecked)
     }
 
     startDateTextView.setOnClickListener { setupStartDatePicker() }
