@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.CheckBox
@@ -75,6 +76,8 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
+        setupEditTextUserInteraction();
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewmodel.loginState.collect { loginResult ->
@@ -137,6 +140,27 @@ class LoginActivity : AppCompatActivity() {
         viewmodel.login(username, password)
     }
 
+    private fun setupEditTextUserInteraction(){
+        usernameEditText.setOnEditorActionListener { p0, actionId, p2 ->
+
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                passwordEditText.requestFocus()
+                return@setOnEditorActionListener true
+            }
+
+            return@setOnEditorActionListener false
+        }
+
+        passwordEditText.setOnEditorActionListener { p0, actionId, p2 ->
+
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                return@setOnEditorActionListener true
+            }
+
+            return@setOnEditorActionListener false
+        }
+    }
 
     private fun showError(message: String) {
         Snackbar.make(
