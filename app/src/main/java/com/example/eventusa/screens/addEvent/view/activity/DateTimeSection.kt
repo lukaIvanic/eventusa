@@ -7,6 +7,7 @@ import android.widget.DatePicker
 import android.widget.TimePicker
 import com.example.eventusa.caching.sharedprefs.LocalStorageManager
 import java.time.LocalDate
+import java.util.*
 
 //Start Date
 
@@ -36,6 +37,8 @@ fun AddEventActivity.setupStartDatePicker() {
 
     }
 
+
+
     val startDate = viewmodel.getCurrStartDateTime()
     startDate.month
 
@@ -46,6 +49,7 @@ fun AddEventActivity.setupStartDatePicker() {
         startDate.monthValue - 1,
         startDate.dayOfMonth
     ).apply {
+        datePicker.firstDayOfWeek = Calendar.MONDAY
         setCanceledOnTouchOutside(false)
         show()
     }
@@ -74,6 +78,7 @@ fun AddEventActivity.setupEndDatePicker() {
         endDate.monthValue - 1,
         endDate.dayOfMonth
     ).apply {
+        datePicker.firstDayOfWeek = Calendar.MONDAY
         setCanceledOnTouchOutside(false)
         show()
     }
@@ -96,6 +101,7 @@ fun AddEventActivity.setupStartTimePicker() {
     TimePickerDialog(
         this@setupStartTimePicker, onTimeSetListener, startTime.hour, startTime.minute, true
     ).apply {
+
         setCanceledOnTouchOutside(false)
         show()
     }

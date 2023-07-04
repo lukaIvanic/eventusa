@@ -37,7 +37,8 @@ class AddEventActivity : AppCompatActivity() {
         )
     }
 
-    lateinit var addEventActivityLayout: LinearLayout
+    lateinit var
+            addEventActivityLayout: LinearLayout
 
     lateinit var progressDialog: AlertDialog
     lateinit var progressDialogView: View

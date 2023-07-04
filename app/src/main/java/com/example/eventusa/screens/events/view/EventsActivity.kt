@@ -3,7 +3,10 @@ package com.example.eventusa.screens.events.view
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -57,6 +60,7 @@ class EventsActivity : AppCompatActivity() {
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var recyclerView: RecyclerView
     lateinit var recyclerAdapter: EventsAdapter
+    lateinit var hintPullToRefreshLayout: LinearLayout
 
     lateinit var newEventButton: FloatingActionButton
 
@@ -85,8 +89,10 @@ class EventsActivity : AppCompatActivity() {
             onEventClick(it)
         }, onScrollNeeded = { position ->
             scrollToPosition(position)
-       })
+        })
         recyclerView.adapter = recyclerAdapter
+
+        hintPullToRefreshLayout = findViewById(R.id.hintPullToRefreshLayout)
 
         newEventButton = findViewById(R.id.newEventFab)
 
@@ -95,6 +101,8 @@ class EventsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsUiState.collect { resultOf ->
+
+                    Log.i("EVENTS ACTIVITY LUKA", resultOf.toString())
 
                     animateProgressBar(
                         resultOf is ResultOf.Loading
@@ -107,7 +115,15 @@ class EventsActivity : AppCompatActivity() {
 
                     resultOf.doIfSucces {
                         recyclerAdapter.updateEvents(it.eventsItemsList)
+
+                        if(it.eventsItemsList.isEmpty()){
+                            showSwipeHint()
+                        }else{
+                            hideSwipeHint()
+                        }
+
                     }
+
 
                     resultOf.doIfFailure {
                         showError(it.localizedMessage)
@@ -161,19 +177,19 @@ class EventsActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun scrollToPosition(position: Int){
+    private fun scrollToPosition(position: Int) {
 
         val myLayoutManager = (recyclerView.layoutManager as LinearLayoutManager)
 
 
         // Check if event is visible
-        if(myLayoutManager.findFirstVisibleItemPosition() <= position && myLayoutManager.findLastVisibleItemPosition() >= position){
+        if (myLayoutManager.findFirstVisibleItemPosition() <= position && myLayoutManager.findLastVisibleItemPosition() >= position) {
             return
         }
 
-        if(myLayoutManager.findFirstVisibleItemPosition() > position){
+        if (myLayoutManager.findFirstVisibleItemPosition() > position) {
             recyclerView.smoothScrollToPosition(position - 1)
-        }else{
+        } else {
             recyclerView.smoothScrollToPosition(position + 1)
         }
 
@@ -232,6 +248,14 @@ class EventsActivity : AppCompatActivity() {
     private fun showError(message: String?) {
         Snackbar.make(eventsActivityLayout, message ?: "An error occured.", Snackbar.LENGTH_LONG)
             .show()
+    }
+
+    private fun hideSwipeHint() {
+        hintPullToRefreshLayout.visibility = View.GONE
+    }
+
+    private fun showSwipeHint() {
+        hintPullToRefreshLayout.visibility = View.VISIBLE
     }
 
     override fun onResume() {

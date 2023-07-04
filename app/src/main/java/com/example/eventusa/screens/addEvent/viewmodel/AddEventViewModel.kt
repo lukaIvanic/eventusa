@@ -180,6 +180,28 @@ class AddEventViewModel(
     }
 
     fun getAttendingUsers(): MutableList<User> {
+
+        val exHandler = CoroutineExceptionHandler(handler = {context, throwable ->
+            print(throwable.message)
+        })
+
+        viewModelScope.launch{
+            launch{
+
+                try{
+                    throw RuntimeException()
+                }catch(e: Exception){
+
+                }
+
+
+            }
+
+
+        }
+
+
+
         return currUiState.riNetEvent.usersAttending
     }
 
