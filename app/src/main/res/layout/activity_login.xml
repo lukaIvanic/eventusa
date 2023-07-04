@@ -15,7 +15,8 @@
         app:layout_constraintBottom_toTopOf="@+id/usernameInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65">
 
 
         <TextView
@@ -36,17 +37,22 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-app:helperTextTextColor="@color/event_rinet_blue"
+
         app:boxStrokeColor="@color/event_rinet_blue"
-        app:layout_constraintBottom_toTopOf="@+id/passwordInputLayout"
+        app:helperTextTextColor="@color/event_rinet_blue"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/usernameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username" />
+            android:hint="Username"
+            android:imeOptions="actionDone"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,18 +63,20 @@ app:helperTextTextColor="@color/event_rinet_blue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:counterOverflowTextColor="@color/event_rinet_blue"
         app:boxStrokeColor="@color/event_rinet_blue"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:counterOverflowTextColor="@color/event_rinet_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/usernameInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password" />
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:imeOptions="actionDone"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

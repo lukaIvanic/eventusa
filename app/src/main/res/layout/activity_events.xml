@@ -24,7 +24,6 @@
             android:layout_height="match_parent">
 
 
-
             <ImageView
                 android:id="@+id/logoutButton"
                 android:layout_width="40dp"
@@ -52,21 +51,21 @@
                 app:tint="@color/icon_tint" />
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/eventusaSmallIconCardView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
                 android:layout_marginStart="20dp"
 
-                android:id="@+id/eventusaSmallIconCardView"
+                app:cardCornerRadius="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/settingsTitleTextView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/settingsTitleTextView">
+
                 <ImageView
                     android:id="@+id/eventusaSmallIcon"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/eventusa_logo"
-                    />
+                    android:src="@drawable/eventusa_logo" />
             </androidx.cardview.widget.CardView>
 
 
@@ -99,6 +98,7 @@
                 app:layout_constraintTop_toBottomOf="@id/settingsTitleTextView"
                 tools:visibility="visible" />
 
+
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/swipeRefresh"
                 android:layout_width="0dp"
@@ -111,6 +111,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
+                    tools:visibility="gone"
                     android:layout_height="match_parent"
                     android:background="@color/app_background"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -120,6 +121,36 @@
                     tools:listitem="@layout/row_event" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <LinearLayout
+                android:id="@+id/hintPullToRefreshLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="48dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/progressBar"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/arrow_down"
+                    android:layout_marginBottom="8dp"
+                    app:tint="@color/text_hint"
+                    android:layout_gravity="center"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pull to refresh"
+                    android:textColor="@color/text_hint"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
